@@ -1,0 +1,47 @@
+<assembly>
+  <id>distribution</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+
+  <!-- include all runtime libraries in the /lib folder of the output file -->
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory>/lib</outputDirectory>
+      <scope>runtime</scope>
+    </dependencySet>
+  </dependencySets>
+
+  <fileSets>
+    <fileSet>
+      <directory>target</directory>
+      <outputDirectory></outputDirectory>
+      <excludes>
+        <exclude>jongo.jar</exclude>
+      </excludes>
+      <includes>
+        <include>*.jar</include>
+        <include>*.xml</include>
+      </includes>
+    </fileSet>
+
+    <fileSet>
+      <directory>src/main/resources/</directory>
+      <outputDirectory></outputDirectory>
+      <includes>
+        <include>jongo</include>
+        <include>*.properties</include>
+      </includes>
+    </fileSet>
+    <!--
+    <fileSet>
+      <directory>src/main/resources/</directory>
+      <outputDirectory>/lib</outputDirectory>
+      <includes>
+        <include>*.xml</include>
+      </includes>
+    </fileSet>
+    -->
+  </fileSets>
+
+</assembly>
