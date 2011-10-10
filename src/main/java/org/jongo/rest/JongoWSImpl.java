@@ -14,6 +14,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
+import org.jongo.JongoUtils;
 import org.jongo.enums.Operator;
 import org.jongo.jdbc.JDBCExecutor;
 import org.jongo.rest.xstream.JongoError;
@@ -40,8 +41,8 @@ public class JongoWSImpl implements JongoWS {
             @DefaultValue("json") @QueryParam("format") String format,
             @PathParam("id") String id ) {
         
-        String q = "SELECT * FROM " + table + " WHERE id = " + id;
-        List<RowResponse> results = JDBCExecutor.query(q);
+        String q = "SELECT * FROM " + table + " WHERE id = ?";
+        List<RowResponse> results = JDBCExecutor.queryWithDBUtils(q, id);
         
         if(results == null || results.isEmpty()){
             JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "No results for " + q);
@@ -52,8 +53,6 @@ public class JongoWSImpl implements JongoWS {
         return r.getResponse(format);
         
     }
-
-    
 
     @POST
     @Path("{table}")
@@ -66,13 +65,14 @@ public class JongoWSImpl implements JongoWS {
         query.append("(");
         query.append(StringUtils.join(cols, ","));
         query.append(") VALUES (");
-        query.append(StringUtils.join(vals, ","));
+        query.append(StringUtils.removeEnd(StringUtils.repeat("?,", cols.size()), ","));
         query.append(")");
         
-        String result = JDBCExecutor.update(query.toString());
+        List<Object> values = JongoUtils.parseValues(vals);
+        int result = JDBCExecutor.updateWithDBUtils(query.toString(), values.toArray());
         
-        if(result != null){
-            JongoError error = new JongoError(null, Response.Status.BAD_REQUEST, result);
+        if(result == 0){
+            JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
             return error.getResponse(format);
         }
 
@@ -101,13 +101,8 @@ public class JongoWSImpl implements JongoWS {
                         @PathParam("column") final String col,
                         @PathParam("value") final String val) {
 
-        String q = "SELECT * FROM " + table + " WHERE " + col + " = " + val;
-        if(!StringUtils.isNumeric(val)){
-            q = "SELECT * FROM " + table + " WHERE " + col + " = '" + val + "'";
-        }
-        
-        
-        List<RowResponse> results = JDBCExecutor.query(q);
+        String q = "SELECT * FROM " + table + " WHERE " + col + " = ?";
+        List<RowResponse> results = JDBCExecutor.queryWithDBUtils(q, JongoUtils.parseValue(val));
         
         if(results == null || results.isEmpty()){
             JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "No results for " + q);
@@ -125,9 +120,9 @@ public class JongoWSImpl implements JongoWS {
     public Response findBy(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @QueryParam("query") String query, @QueryParam("value") String value) {
         String columnAndOperator = null;
         if(StringUtils.startsWith(query, "findBy")){
-            columnAndOperator = splitCamelCase(StringUtils.substring(query, 6));
+            columnAndOperator = JongoUtils.splitCamelCase(StringUtils.substring(query, 6));
         }else if(StringUtils.startsWith(query, "findAllBy")){
-            columnAndOperator = splitCamelCase(StringUtils.substring(query, 9));
+            columnAndOperator = JongoUtils.splitCamelCase(StringUtils.substring(query, 9));
         }else{
             JongoError error = new JongoError(null, Response.Status.BAD_REQUEST, "Unknown query. Use findBy or findAllBy.");
             return error.getResponse(format);
@@ -147,22 +142,27 @@ public class JongoWSImpl implements JongoWS {
             return error.getResponse(format);
         }
         
+        String sql = null;
+        List<RowResponse> results = null;
         if(value == null){
-            l.debug("SELECT * FROM " + table + " WHERE " + col + " " + op.sql());
+            sql = "SELECT * FROM " + table + " WHERE " + col + " " + op.sql();
+            results = JDBCExecutor.queryWithDBUtils(sql);
         }else{
-            l.debug("SELECT * FROM " + table + " WHERE " + col + " " + op.sql() + " " + value);
+            sql = "SELECT * FROM " + table + " WHERE " + col + " " + op.sql() + " ? ";
+            results = JDBCExecutor.queryWithDBUtils(sql, JongoUtils.parseValue(value));
         }
         
-        return null;
+        if(results == null || results.isEmpty()){
+            JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "No results for " + sql);
+            return error.getResponse(format);
+        }
+        
+        JongoResponse r = new JongoResponse(null, results);
+        return r.getResponse(format);
     }
 
     @Override
     public Response findBy(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @QueryParam("query") String query, @QueryParam("values")  List<String> values) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
-    public static String splitCamelCase(String s) {
-        return s.replaceAll(String.format("%s|%s|%s", "(?<=[A-Z])(?=[A-Z][a-z])", "(?<=[^A-Z])(?=[A-Z])", "(?<=[A-Za-z])(?=[^A-Za-z])"), " ");
-    }
-    
 }
