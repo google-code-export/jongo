@@ -2,7 +2,8 @@ package org.jongo.rest.xstream;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
-import org.jongo.enums.ErrorCode;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  *
@@ -11,16 +12,16 @@ import org.jongo.enums.ErrorCode;
 public class JongoError {
     private final String sessionId;
     private final boolean success = false;
-    private final ErrorCode errorCode;
+    private final Response.Status errorCode;
     private final String message;
 
-    public JongoError(String sessionId, ErrorCode errorCode) {
+    public JongoError(String sessionId, Response.Status errorCode) {
         this.sessionId = sessionId;
         this.errorCode = errorCode;
-        this.message = errorCode.getMessage();
+        this.message = errorCode.getReasonPhrase();
     }
 
-    public JongoError(String sessionId, ErrorCode errorCode, String message) {
+    public JongoError(String sessionId, Response.Status errorCode, String message) {
         this.sessionId = sessionId;
         this.errorCode = errorCode;
         this.message = message;
@@ -46,4 +47,9 @@ public class JongoError {
         return xStream.toXML(this);
     }
     
+    public Response getResponse(final String format){
+        String response = (format.equalsIgnoreCase("json")) ? this.toJSON() : this.toXML();
+        String media = (format.equalsIgnoreCase("json")) ? MediaType.APPLICATION_JSON : MediaType.APPLICATION_XML;
+        return Response.status(this.errorCode).entity(response).type(media).build();
+    }
 }
