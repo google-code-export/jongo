@@ -38,7 +38,7 @@ public enum Operator {
             case ILIKE:
                 return "LIKE";
             case ISNOTNULL:
-                return "NOT NULL";
+                return "IS NOT NULL";
             case ISNULL:
                 return "IS NULL";
             case NOT:
@@ -50,6 +50,20 @@ public enum Operator {
             default:
                 throw new UnsupportedOperationException();
         }
+    }
+    
+    public boolean isUnary(){
+        switch(this){
+            case ISNULL:
+            case ISNOTNULL:
+                return true;
+            default:
+                return false;
+        }
+    }
+    
+    public boolean isBinary(){
+        return !this.isUnary();
     }
     
 }

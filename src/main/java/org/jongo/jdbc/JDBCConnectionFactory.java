@@ -22,25 +22,32 @@ import org.slf4j.LoggerFactory;
 public class JDBCConnectionFactory {
     
     private static final Logger l = LoggerFactory.getLogger(JDBCConnectionFactory.class);
+    private static JongoJDBCConnection connection = null;
     private static DataSource datasource = null;
+    
+    public static JongoJDBCConnection getJongoJDBCConnection(){
+        if(connection == null){
+            JongoConfiguration configuration = JongoConfiguration.instanceOf();
+            switch(configuration.getDriver()){
+                case MySQL:
+                    connection = new MySQLConnection(configuration.getJdbcUrl(), configuration.getJdbcUsername(), configuration.getJdbcPassword());
+                    break;
+                case HSQLDB:
+                    connection = new HSQLConnection(configuration.getJdbcUrl(), configuration.getJdbcUsername(), configuration.getJdbcPassword());
+                    break;
+                default:
+                    throw new IllegalArgumentException("Not implemented yet");
+            }
+        }
+        
+        return connection;
+    }
     
     public static Connection getConnection() throws SQLException{
         l.debug("Obtaining a connection from the datasource");
         if(datasource == null){
             JongoConfiguration configuration = JongoConfiguration.instanceOf();
-            JongoJDBCConnection conn = null;
-
-            switch(configuration.getDriver()){
-                case MySQL:
-                    conn = new MySQLConnection(configuration.getJdbcUrl(), configuration.getJdbcUsername(), configuration.getJdbcPassword());
-                    break;
-                case HSQLDB:
-                    conn = new HSQLConnection(configuration.getJdbcUrl(), configuration.getJdbcUsername(), configuration.getJdbcPassword());
-                    break;
-                default:
-                    throw new IllegalArgumentException("Not implemented yet");
-            }
-
+            JongoJDBCConnection conn = getJongoJDBCConnection();
             conn.loadDriver();
             setupDataSource(configuration.getJdbcUrl(), configuration.getJdbcUsername(), configuration.getJdbcPassword());
         }

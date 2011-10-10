@@ -1,7 +1,8 @@
 package org.jongo.enums;
 
 /**
- *
+ * Deprecated. Use instead the Response.Status enum
+ * @deprecated 
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public enum ErrorCode {
