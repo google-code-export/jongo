@@ -45,14 +45,18 @@ public class JDBCConnectionFactory {
     
     public static Connection getConnection() throws SQLException{
         l.debug("Obtaining a connection from the datasource");
+        DataSource ds = getDataSource();
+        return ds.getConnection();
+    }
+    
+    public static DataSource getDataSource(){
         if(datasource == null){
             JongoConfiguration configuration = JongoConfiguration.instanceOf();
             JongoJDBCConnection conn = getJongoJDBCConnection();
             conn.loadDriver();
             setupDataSource(configuration.getJdbcUrl(), configuration.getJdbcUsername(), configuration.getJdbcPassword());
         }
-        
-        return datasource.getConnection();
+        return datasource;
     }
     
     public static void setupDataSource(final String url, final String username, final String password){

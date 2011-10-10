@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.jongo.rest.xstream.RowResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +70,28 @@ public class JDBCExecutor {
         l.debug("Got " + results.size() + " results");
 		return results;
 	}
+    
+    public static List<RowResponse> queryWithDBUtils(final String query, Object... params){
+        QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
+        ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler();
+        try {
+            List<RowResponse> results = run.query(query, res, params);
+            return results;
+        } catch (SQLException ex) {
+            l.error(ex.getMessage());
+        }
+        return null;
+    }
+    
+    public static int updateWithDBUtils(final String query, Object... params){
+        QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
+        try {
+            return run.update(query, params);
+        } catch (SQLException ex) {
+            l.error(ex.getMessage());
+            return 0;
+        }
+    }
 	
 	public static String update(final String sql) {
         Connection conn = null;
