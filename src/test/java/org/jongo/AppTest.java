@@ -13,13 +13,14 @@ import javax.ws.rs.core.Response;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.jongo.enums.Operator;
+import org.jongo.jdbc.DynamicFinder;
 
 /**
  * Unit test for simple App.
@@ -39,25 +40,54 @@ public class AppTest extends TestCase {
         return new TestSuite( AppTest.class );
     }
     
-    public void testCreate(){
+    public void testDynamicFinders(){
+        String [] tests = new String [] {
+            "findBy.Name",
+            "findBy.Name.Equals",
+            "findBy.Name.IsNull",
+            "findBy.Name.IsNotNull",
+            "findBy.Name.And.Age",
+            "findBy.Name.And.Age.Equals",
+            "findBy.Name.Equals.And.Age",
+            "findBy.Name.Equals.And.Age.Equals",
+            "findBy.Name.And.Age.GreaterThan",
+            "findBy.Name.And.Age.GreaterThanEquals",
+            "findBy.Name.LessThan.And.Age.GreaterThanEquals",
+            "findBy.Name.LessThanEquals.And.Age.GreaterThanEquals",
+            "findBy.Name.And.Age.IsNull",
+            "findBy.Name.And.Age.IsNotNull",
+            "findBy.Name.GreaterThan.And.Age.IsNull",
+            "findBy.Name.GreaterThanEquals.And.Age.IsNotNull",
+        };
+        
+        for(String str : tests){
+            System.out.println(str);
+            DynamicFinder f = DynamicFinder.valueOf(str);
+            assertNotNull(f);
+            System.out.println(f);
+        }
+    }
+    
+    public void XtestCreate(){
         List<List<NameValuePair>> users = getTestValues();
         for(List<NameValuePair> al : users){
             assertTrue(jongoPOSTRequest(jongoUrl + "user", al));
         }
     }
 
-    public void testRetrieve(){
+    public void XtestRetrieve(){
         assertTrue(request(jongoUrl + "user/3", "GET"));
         assertTrue(request(jongoUrl + "user/name/foo", "GET"));
         assertTrue(request(jongoUrl + "user/age/30", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findByName&value=foo", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findByNameAndAge&values=foo&values=30", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findByAge&value=30", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findByAgeBetween&values=20&values=40", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findByAgeLessThan&value=30", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findByNameLike&value='foo'", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findByNameIsNotNull", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findByNameIsNull", "GET"));
+        assertTrue(request(jongoUrl + "user?query=findBy.Name&value=foo", "GET"));
+        assertTrue(request(jongoUrl + "user?query=findBy.Name.And.Age&values=foo&values=30", "GET"));
+        assertTrue(request(jongoUrl + "user?query=findBy.Age&value=30", "GET"));
+        assertTrue(request(jongoUrl + "user?query=findBy.Age.Between&values=20&values=40", "GET"));
+        assertTrue(request(jongoUrl + "user?query=findBy.Age.LessThan&value=30", "GET"));
+        assertTrue(request(jongoUrl + "user?query=findBy.Name.Like&value='foo'", "GET"));
+        assertTrue(request(jongoUrl + "user?query=findBy.Name.IsNotNull", "GET"));
+        assertTrue(request(jongoUrl + "user?query=findBy.Name.IsNull", "GET"));
+        assertTrue(request(jongoUrl + "user?query=findBy.Age.GreaterThanEquals.And.Credit.IsNotNull", "GET"));
     }
     
     public void testUpdate(){

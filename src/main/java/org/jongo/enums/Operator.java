@@ -63,7 +63,16 @@ public enum Operator {
     }
     
     public boolean isBinary(){
-        return !this.isUnary();
+        return !this.isUnary() && !this.isBoolean();
     }
     
+    public boolean isBoolean(){
+        switch(this){
+            case AND:
+            case OR:
+                return true;
+            default:
+                return false;
+        }
+    }
 }
