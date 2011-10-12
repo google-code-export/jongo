@@ -1,21 +1,27 @@
 package org.jongo.rest;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.JongoUtils;
-import org.jongo.enums.Operator;
+import org.jongo.jdbc.DynamicFinder;
 import org.jongo.jdbc.JDBCExecutor;
 import org.jongo.rest.xstream.JongoError;
 import org.jongo.rest.xstream.JongoResponse;
@@ -42,7 +48,7 @@ public class JongoWSImpl implements JongoWS {
             @PathParam("id") String id ) {
         
         String q = "SELECT * FROM " + table + " WHERE id = ?";
-        List<RowResponse> results = JDBCExecutor.queryWithDBUtils(q, id);
+        List<RowResponse> results = JDBCExecutor.find(q, id);
         
         if(results == null || results.isEmpty()){
             JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "No results for " + q);
@@ -68,8 +74,7 @@ public class JongoWSImpl implements JongoWS {
         query.append(StringUtils.removeEnd(StringUtils.repeat("?,", cols.size()), ","));
         query.append(")");
         
-        List<Object> values = JongoUtils.parseValues(vals);
-        int result = JDBCExecutor.updateWithDBUtils(query.toString(), values.toArray());
+        int result = JDBCExecutor.update(query.toString(), JongoUtils.parseValues(vals));
         
         if(result == 0){
             JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
@@ -82,11 +87,44 @@ public class JongoWSImpl implements JongoWS {
         return r.getResponse(format);
     }
 
+    @PUT
+    @Path("{table}/{id}")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
-    public Response update(String table, String format, String id, List<String> cols, List<String> vals) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Response update(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") final String id, @Context final UriInfo ui) {
+        MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
+
+        List<String> params = new ArrayList<String>(queryParams.size());
+        final StringBuilder query = new StringBuilder("UPDATE ");
+        query.append(table);
+        query.append(" SET ");
+        
+        for(String k : queryParams.keySet()){
+            query.append(k); query.append(" = ?,");
+            params.add(queryParams.getFirst(k));
+        }
+        
+        query.deleteCharAt(query.length() - 1);
+        query.append(" WHERE id = ?");
+        params.add(id);
+        
+        int result = JDBCExecutor.update(query.toString(), JongoUtils.parseValues(params));
+        
+        if(result == 0){
+            JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
+            return error.getResponse(format);
+        }
+        l.debug(query.toString() + " " + params);
+
+        List<RowResponse> results = new ArrayList<RowResponse>();
+        results.add(new RowResponse(0,null));
+        JongoResponse r = new JongoResponse(null, results, Response.Status.CREATED);
+        return r.getResponse(format);
     }
 
+    @DELETE
+    @Path("{table}/{id}")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
     public Response delete(String table, String format, String id) {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -102,7 +140,7 @@ public class JongoWSImpl implements JongoWS {
                         @PathParam("value") final String val) {
 
         String q = "SELECT * FROM " + table + " WHERE " + col + " = ?";
-        List<RowResponse> results = JDBCExecutor.queryWithDBUtils(q, JongoUtils.parseValue(val));
+        List<RowResponse> results = JDBCExecutor.find(q, JongoUtils.parseValue(val));
         
         if(results == null || results.isEmpty()){
             JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "No results for " + q);
@@ -117,52 +155,40 @@ public class JongoWSImpl implements JongoWS {
     @Path("{table}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
-    public Response findBy(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @QueryParam("query") String query, @QueryParam("value") String value) {
-        String columnAndOperator = null;
-        if(StringUtils.startsWith(query, "findBy")){
-            columnAndOperator = JongoUtils.splitCamelCase(StringUtils.substring(query, 6));
-        }else if(StringUtils.startsWith(query, "findAllBy")){
-            columnAndOperator = JongoUtils.splitCamelCase(StringUtils.substring(query, 9));
-        }else{
-            JongoError error = new JongoError(null, Response.Status.BAD_REQUEST, "Unknown query. Use findBy or findAllBy.");
-            return error.getResponse(format);
-        }
-        
-        final String [] splitted = columnAndOperator.split(" ");
-        final String col = splitted[0];
-        final StringBuilder b = new StringBuilder();
-        for(int i = 1; i < splitted.length; i++){
-            b.append(splitted[i]);
-        }
-        Operator op = null;
-        try{
-            op = Operator.valueOf(b.toString().toUpperCase());
-        }catch(IllegalArgumentException e){
-            JongoError error = new JongoError(null, Response.Status.BAD_REQUEST, e.getMessage());
-            return error.getResponse(format);
-        }
-        
-        String sql = null;
+    public Response findBy(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @QueryParam("query") String query, @QueryParam("value") String value, @QueryParam("values")  List<String> values) {
         List<RowResponse> results = null;
-        if(value == null){
-            sql = "SELECT * FROM " + table + " WHERE " + col + " " + op.sql();
-            results = JDBCExecutor.queryWithDBUtils(sql);
+        if(query == null){
+            results = JDBCExecutor.getTableMetaData(table);
+            if(results == null || results.isEmpty()){
+                JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "Invalid table " + table);
+                return error.getResponse(format);
+            }
         }else{
-            sql = "SELECT * FROM " + table + " WHERE " + col + " " + op.sql() + " ? ";
-            results = JDBCExecutor.queryWithDBUtils(sql, JongoUtils.parseValue(value));
-        }
-        
-        if(results == null || results.isEmpty()){
-            JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "No results for " + sql);
-            return error.getResponse(format);
+            String sql = null;
+            if(values.isEmpty()){
+                if(value == null){
+                    DynamicFinder df = DynamicFinder.valueOf(table, query);
+                    sql = "SELECT * FROM " + table + df.getSql() ;
+                    results = JDBCExecutor.find(df);
+                }else{
+                    DynamicFinder df = DynamicFinder.valueOf(table, query, value);
+                    sql = "SELECT * FROM " + table + df.getSql() ;
+                    results = JDBCExecutor.find(df, JongoUtils.parseValue(value));
+                }
+
+            }else{
+                DynamicFinder df = DynamicFinder.valueOf(table, query, values.toArray(new String []{}));
+                sql = "SELECT * FROM " + table + df.getSql();
+                results = JDBCExecutor.find(df, JongoUtils.parseValues(values));
+            }
+            
+            if(results == null || results.isEmpty()){
+                JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "No results for " + sql);
+                return error.getResponse(format);
+            }
         }
         
         JongoResponse r = new JongoResponse(null, results);
         return r.getResponse(format);
-    }
-
-    @Override
-    public Response findBy(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @QueryParam("query") String query, @QueryParam("values")  List<String> values) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

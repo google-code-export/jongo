@@ -32,14 +32,14 @@ public class JongoUtils {
         return s.replaceAll(String.format("%s|%s|%s", "(?<=[A-Z])(?=[A-Z][a-z])", "(?<=[^A-Z])(?=[A-Z])", "(?<=[A-Za-z])(?=[^A-Za-z])"), " ");
     }
     
-    public static List<Object> parseValues(List<String> values){
+    public static Object[] parseValues(List<String> values){
         List<Object> res = new ArrayList<Object>();
         
         for(String val : values){
             res.add(parseValue(val));
         }
         
-        return res;
+        return res.toArray();
     }
     
     public static Object parseValue(String val){
@@ -63,5 +63,13 @@ public class JongoUtils {
             }
         }
         return val;
+    }
+    
+    public static String varargToString(Object... params){
+        StringBuilder b = new StringBuilder("[");
+        b.append(StringUtils.join(params, ","));
+        b.append("]");
+        return b.toString();
+        
     }
 }

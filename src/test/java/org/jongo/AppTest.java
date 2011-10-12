@@ -48,7 +48,6 @@ public class AppTest extends TestCase {
             "findBy.Name.IsNotNull",
             "findBy.Name.And.Age",
             "findBy.Name.And.Age.Equals",
-            "findBy.Name.Equals.And.Age",
             "findBy.Name.Equals.And.Age.Equals",
             "findBy.Name.And.Age.GreaterThan",
             "findBy.Name.And.Age.GreaterThanEquals",
@@ -61,21 +60,20 @@ public class AppTest extends TestCase {
         };
         
         for(String str : tests){
-            System.out.println(str);
-            DynamicFinder f = DynamicFinder.valueOf(str);
+            DynamicFinder f = DynamicFinder.valueOf("foo", str);
             assertNotNull(f);
-            System.out.println(f);
+            System.out.println(f.getSql());
         }
     }
     
-    public void XtestCreate(){
+    public void testCreate(){
         List<List<NameValuePair>> users = getTestValues();
         for(List<NameValuePair> al : users){
             assertTrue(jongoPOSTRequest(jongoUrl + "user", al));
         }
     }
 
-    public void XtestRetrieve(){
+    public void testRetrieve(){
         assertTrue(request(jongoUrl + "user/3", "GET"));
         assertTrue(request(jongoUrl + "user/name/foo", "GET"));
         assertTrue(request(jongoUrl + "user/age/30", "GET"));
@@ -83,11 +81,11 @@ public class AppTest extends TestCase {
         assertTrue(request(jongoUrl + "user?query=findBy.Name.And.Age&values=foo&values=30", "GET"));
         assertTrue(request(jongoUrl + "user?query=findBy.Age&value=30", "GET"));
         assertTrue(request(jongoUrl + "user?query=findBy.Age.Between&values=20&values=40", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findBy.Age.LessThan&value=30", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findBy.Name.Like&value='foo'", "GET"));
+        assertTrue(request(jongoUrl + "user?query=findBy.Age.LessThan&value=50", "GET"));
+        assertTrue(request(jongoUrl + "user?query=findBy.Name.Like&value=foo", "GET"));
         assertTrue(request(jongoUrl + "user?query=findBy.Name.IsNotNull", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findBy.Name.IsNull", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findBy.Age.GreaterThanEquals.And.Credit.IsNotNull", "GET"));
+        assertTrue(request(jongoUrl + "user?query=findBy.Credit.IsNull", "GET"));
+        assertTrue(request(jongoUrl + "user?query=findBy.Age.GreaterThanEquals.And.Credit.IsNotNull&value=10", "GET"));
     }
     
     public void testUpdate(){

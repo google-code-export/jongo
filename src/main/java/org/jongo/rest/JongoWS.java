@@ -2,6 +2,7 @@ package org.jongo.rest;
 
 import java.util.List;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 /**
  * Public RESTful webservice which allows CRUD operations on a given resource.
@@ -11,9 +12,7 @@ public interface JongoWS {
     
     public Response get(final String table, final String format, final String id);
     public Response find(final String table, final String format, final String col, final String val);
-    
-    public Response findBy(final String table, final String format, final String query, final String value);
-    public Response findBy(final String table, final String format, final String query, final List<String> values);
+    public Response findBy(final String table, final String format, final String query, final String value, final List<String> values);
     
     /**
      * Inserts a new entity in the given table.
@@ -25,7 +24,7 @@ public interface JongoWS {
      * for success, 400 if the given arguments are incorrect or any other corresponding. 
      */
     public Response insert(final String table, final String format, final List<String> cols, final List<String> vals);
-    public Response update(final String table, final String format, final String id, final List<String> cols, final List<String> vals);
+    public Response update(final String table, final String format, final String id, final UriInfo ui);
     public Response delete(final String table, final String format, final String id);
     
 }

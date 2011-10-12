@@ -22,13 +22,26 @@ import org.slf4j.LoggerFactory;
  */
 public class JongoResultSetHandler implements ResultSetHandler<List<RowResponse>> {
     
+    private final boolean all;
+    
     private static final Logger l = LoggerFactory.getLogger(JongoResultSetHandler.class);
+    
+    public JongoResultSetHandler(final boolean all){
+        super();
+        this.all = all;
+    }
 
     @Override
     public List<RowResponse> handle(ResultSet rs) throws SQLException {
         List<RowResponse> results = new ArrayList<RowResponse>();
         int rowId = 0;
-        while (rs.next()) {
+        if(all){
+            while (rs.next()) {
+                Map<String, String> map = resultSetToMap(rs);
+                if(map != null) results.add(new RowResponse(rowId++, map));
+            }
+        }else{
+            rs.next();
             Map<String, String> map = resultSetToMap(rs);
             if(map != null) results.add(new RowResponse(rowId++, map));
         }

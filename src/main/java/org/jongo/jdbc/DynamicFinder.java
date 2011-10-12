@@ -2,8 +2,6 @@ package org.jongo.jdbc;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang.StringUtils;
-import org.jongo.JongoUtils;
 import org.jongo.enums.Operator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +17,7 @@ public class DynamicFinder {
     public static final String FINDBY = "findBy";
     public static final String FINDALLBY = "findAllBy";
     
+    private String table;
     private String command;
     private String firstColumn;
     private Operator firstOperator;
@@ -27,7 +26,8 @@ public class DynamicFinder {
     private Operator secondOperator;
     private final String sql;
     
-    public static DynamicFinder valueOf(final String query, final String... values){
+    public static DynamicFinder valueOf(String table, final String query, final String... values){
+        l.debug("Generating dynamic finder for " + query + " with values " + values);
         final String [] splitted = validateAndSplitQuery(query);
         final String command = parseCommand(splitted[0]);
         
@@ -41,21 +41,19 @@ public class DynamicFinder {
                 columns.add(splitted[i]);
             }
         }
-        l.debug(operators.toString());
-        l.debug(columns.toString());
         
         if(operators.isEmpty()){
-            return new DynamicFinder(command, columns.get(0));
+            return new DynamicFinder(table, command, columns.get(0));
         }else{
             if(columns.size() == 1){
-                return new DynamicFinder(command, columns.get(0), operators.get(0));
+                return new DynamicFinder(table, command, columns.get(0), operators.get(0));
             }else if(columns.size() == 2){
                 if(operators.size() == 1){
-                    return new DynamicFinder(command, columns.get(0), operators.get(0), columns.get(1));
+                    return new DynamicFinder(table, command, columns.get(0), operators.get(0), columns.get(1));
                 }else if(operators.size() == 2){
-                    return new DynamicFinder(command, columns.get(0), operators.get(0), columns.get(1), operators.get(1));
+                    return new DynamicFinder(table, command, columns.get(0), operators.get(0), columns.get(1), operators.get(1));
                 }else if(operators.size() == 3){
-                    return new DynamicFinder(command, columns.get(0), operators.get(0), operators.get(1), columns.get(1), operators.get(2));
+                    return new DynamicFinder(table, command, columns.get(0), operators.get(0), operators.get(1), columns.get(1), operators.get(2));
                 }else{
                     throw new IllegalArgumentException("Too many operators: " + operators.size());
                 }
@@ -64,47 +62,6 @@ public class DynamicFinder {
                 throw new IllegalArgumentException("Too many columns: " + columns.size());
             }
         }
-        
-//        if(values == null){
-//            if(operators.isEmpty()){
-//                return new DynamicFinder(command, columns.get(0));
-//            }else{
-//                if(columns.size() == 1){
-//                    return new DynamicFinder(command, columns.get(0), operators.get(0));
-//                }else if(columns.size() == 2){
-//                    return new DynamicFinder(command, columns.get(0), operators.get(0), columns.get(1));
-//                }else{
-//                    throw new IllegalArgumentException("Too many columns: " + columns.size());
-//                }
-//            }
-//        }else if(values.length == 1){
-//            if(operators.isEmpty()){
-//                return new DynamicFinder(command, columns.get(0));
-//            }else{
-//                if(columns.size() == 1){
-//                    return new DynamicFinder(command, columns.get(0), operators.get(0));
-//                }else if(columns.size() == 2){
-//                    return new DynamicFinder(command, columns.get(0), operators.get(0), columns.get(1));
-//                }else{
-//                    throw new IllegalArgumentException("Too many columns: " + columns.size());
-//                }
-//            }
-//        }else if(values.length == 2){
-//            if(operators.isEmpty()){
-//                return new DynamicFinder(command, columns.get(0));
-//            }else{
-//                if(columns.size() == 1){
-//                    return new DynamicFinder(command, columns.get(0), operators.get(0));
-//                }else if(columns.size() == 2){
-//                    return new DynamicFinder(command, columns.get(0), operators.get(0), columns.get(1));
-//                }else{
-//                    throw new IllegalArgumentException("Too many columns: " + columns.size());
-//                }
-//            }
-//        }else{
-//            throw new IllegalArgumentException("Too many values " + values.length);
-//        }
-        
     }
     
     private static String [] validateAndSplitQuery(final String query){
@@ -112,7 +69,6 @@ public class DynamicFinder {
             throw new IllegalArgumentException("Empty query");
         }
         
-        l.debug("Splitting " + query);
         String [] splitted = query.toUpperCase().split("\\.");
         if(splitted.length < 2 || splitted.length > 6){
             throw new IllegalArgumentException("Invalid query length " + splitted.length);
@@ -136,11 +92,12 @@ public class DynamicFinder {
      * @param command either findBy or findAllBy
      * @param firstColumn the name of an existing column
      */
-    public DynamicFinder(String command, String firstColumn) {
+    public DynamicFinder(String table, String command, String firstColumn) {
+        this.table = table;
         this.command = command;
         this.firstColumn = firstColumn;
         this.firstOperator = Operator.EQUALS;
-        this.sql = generateOneColumnQuery(this.firstColumn, this.firstOperator);
+        this.sql = generateOneColumnQuery(this.table, this.firstColumn, this.firstOperator);
     }
 
     /**
@@ -149,15 +106,17 @@ public class DynamicFinder {
      * @param firstColumn  the name of an existing column
      * @param firstOperator only unary operators IsNull or IsNotNull
      */
-    public DynamicFinder(String command, String firstColumn, Operator firstOperator) {
-//        if(!firstOperator.isUnary()) throw new IllegalArgumentException("Invalid Operator");
+    public DynamicFinder(String table, String command, String firstColumn, Operator firstOperator) {
+        this.table = table;
         this.command = command;
         this.firstColumn = firstColumn;
         this.firstOperator = firstOperator;
         if(this.firstOperator.isUnary()){
-            this.sql = generateNullColumnQuery(this.firstColumn, this.firstOperator);
+            this.sql = generateNullColumnQuery(this.table, this.firstColumn, this.firstOperator);
+        }else if (this.firstOperator == Operator.BETWEEN){
+            this.sql = generateBetweenQuery(this.table, this.firstColumn);
         }else{
-            this.sql = generateOneColumnQuery(this.firstColumn, this.firstOperator);
+            this.sql = generateOneColumnQuery(this.table, this.firstColumn, this.firstOperator);
         }
     }
 
@@ -168,15 +127,16 @@ public class DynamicFinder {
      * @param booleanOperator an operator AND or OR
      * @param secondColumn  command either findBy or findAllBy
      */
-    public DynamicFinder(String command, String firstColumn, Operator booleanOperator, String secondColumn) {
+    public DynamicFinder(String table, String command, String firstColumn, Operator booleanOperator, String secondColumn) {
         if(!booleanOperator.isBoolean()) throw new IllegalArgumentException("Invalid Operator " + booleanOperator);
+        this.table = table;
         this.command = command;
         this.firstColumn = firstColumn;
         this.firstOperator = Operator.EQUALS;
         this.booleanOperator = booleanOperator;
         this.secondColumn = secondColumn;
         this.secondOperator = Operator.EQUALS;
-        this.sql = generateTwoColumnQuery(this.firstColumn, this.firstOperator, this.booleanOperator, this.secondColumn, this.secondOperator);
+        this.sql = generateTwoColumnQuery(this.table, this.firstColumn, this.firstOperator, this.booleanOperator, this.secondColumn, this.secondOperator);
     }
     
     /**
@@ -187,15 +147,16 @@ public class DynamicFinder {
      * @param secondColumn the name of an existing column
      * @param secondOperator a binary operator for the second column
      */
-    public DynamicFinder(String command, String firstColumn, Operator booleanOperator, String secondColumn, Operator secondOperator) {
+    public DynamicFinder(String table, String command, String firstColumn, Operator booleanOperator, String secondColumn, Operator secondOperator) {
         if(!booleanOperator.isBoolean()) throw new IllegalArgumentException("Invalid Operator");
+        this.table = table;
         this.command = command;
         this.firstColumn = firstColumn;
         this.firstOperator = Operator.EQUALS;
         this.booleanOperator = booleanOperator;
         this.secondColumn = secondColumn;
         this.secondOperator = secondOperator;
-        this.sql = generateTwoColumnQuery(this.firstColumn, this.firstOperator, this.booleanOperator, this.secondColumn, this.secondOperator);
+        this.sql = generateTwoColumnQuery(this.table, this.firstColumn, this.firstOperator, this.booleanOperator, this.secondColumn, this.secondOperator);
     }
     
     /**
@@ -207,17 +168,72 @@ public class DynamicFinder {
      * @param secondColumn the name of an existing column
      * @param secondOperator a binary operator for the second column
      */
-    public DynamicFinder(String command, String firstColumn, Operator firstOperator, Operator booleanOperator, String secondColumn, Operator secondOperator) {
+    public DynamicFinder(String table, String command, String firstColumn, Operator firstOperator, Operator booleanOperator, String secondColumn, Operator secondOperator) {
         if(!booleanOperator.isBoolean()) throw new IllegalArgumentException("Invalid Operator");
+        this.table = table;
         this.command = command;
         this.firstColumn = firstColumn;
         this.firstOperator = firstOperator;
         this.booleanOperator = booleanOperator;
         this.secondColumn = secondColumn;
         this.secondOperator = secondOperator;
-        this.sql = generateTwoColumnQuery(this.firstColumn, this.firstOperator, this.booleanOperator, this.secondColumn, this.secondOperator);
+        this.sql = generateTwoColumnQuery(this.table, this.firstColumn, this.firstOperator, this.booleanOperator, this.secondColumn, this.secondOperator);
     }
 
+    private static String generateNullColumnQuery(String table, String firstColumn, Operator firstOperator){
+        StringBuilder sb = new StringBuilder("SELECT * FROM ");
+        sb.append(table);
+        sb.append(" WHERE ");
+        sb.append(firstColumn);
+        sb.append(" ");
+        sb.append(firstOperator.sql());
+        return sb.toString();
+    }
+    
+    private static String generateOneColumnQuery(String table, String firstColumn, Operator firstOperator){
+        StringBuilder sb = new StringBuilder("SELECT * FROM ");
+        sb.append(table);
+        sb.append(" WHERE ");
+        sb.append(firstColumn.toLowerCase());
+        sb.append(" ");
+        sb.append(firstOperator.sql());
+        if(!firstOperator.isUnary()){
+            sb.append(" ?");
+        }
+        return sb.toString();
+    }
+    
+    private static String generateTwoColumnQuery(String table, String firstColumn, Operator firstOperator, Operator booleanOperator, String secondColumn, Operator secondOperator){
+        StringBuilder sb = new StringBuilder("SELECT * FROM ");
+        sb.append(table);
+        sb.append(" WHERE ");
+        sb.append(firstColumn);
+        sb.append(" ");
+        sb.append(firstOperator.sql());
+        if(!firstOperator.isUnary()){
+            sb.append(" ? ");
+        }
+        sb.append(" ");
+        sb.append(booleanOperator.sql());
+        sb.append(" ");
+        sb.append(secondColumn);
+        sb.append(" ");
+        sb.append(secondOperator.sql());
+        if(!secondOperator.isUnary()){
+            sb.append(" ? ");
+        }
+        return sb.toString();
+    }
+    
+    private static String generateBetweenQuery(String table, String firstColumn){
+        StringBuilder sb = new StringBuilder("SELECT * FROM ");
+        sb.append(table);
+        sb.append(" WHERE ");
+        sb.append(firstColumn.toLowerCase());
+        sb.append(" BETWEEN ? AND ?");
+        return sb.toString();
+    }
+    
     public String getCommand() {
         return command;
     }
@@ -226,44 +242,15 @@ public class DynamicFinder {
         return sql;
     }
     
-    private static String generateNullColumnQuery(String firstColumn, Operator firstOperator){
-        StringBuilder sb = new StringBuilder();
-        sb.append("WHERE ");
-        sb.append(firstColumn);
-        sb.append(" ");
-        sb.append(firstOperator.sql());
-        return sb.toString();
+    public boolean findAll(){
+        return this.command.equalsIgnoreCase(FINDALLBY);
     }
-    
-    private static String generateOneColumnQuery(String firstColumn, Operator firstOperator){
-        StringBuilder sb = new StringBuilder();
-        sb.append("WHERE ");
-        sb.append(firstColumn);
-        sb.append(" ");
-        sb.append(firstOperator.sql());
-        sb.append(" ?");
-        return sb.toString();
-    }
-    
-    private static String generateTwoColumnQuery(String firstColumn, Operator firstOperator, Operator booleanOperator, String secondColumn, Operator secondOperator){
-        StringBuilder sb = new StringBuilder();
-        sb.append("WHERE ");
-        sb.append(firstColumn);
-        sb.append(" ");
-        sb.append(firstOperator.sql());
-        sb.append(" ?");
-        sb.append(booleanOperator.sql());
-        sb.append(secondColumn);
-        sb.append(" ");
-        sb.append(secondOperator.sql());
-        sb.append(" ?");
-        return sb.toString();
-    }
-    
     
     @Override
     public String toString(){
         StringBuilder b = new StringBuilder("DynamicFinder ");
+        b.append("{ table : ");
+        b.append(table);
         b.append("{ command : ");
         b.append(command);
         b.append("}");
