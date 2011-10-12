@@ -47,6 +47,8 @@ public enum Operator {
                 return "=";
             case NOTEQUALS:
                 return "<>";
+            case BETWEEN:
+                return "BETWEEN";
             default:
                 throw new UnsupportedOperationException();
         }
