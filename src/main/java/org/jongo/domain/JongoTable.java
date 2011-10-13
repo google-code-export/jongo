@@ -1,5 +1,7 @@
 package org.jongo.domain;
 
+import org.jongo.enums.Permission;
+
 /**
  *
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
@@ -8,19 +10,32 @@ public class JongoTable {
     private int id;
     private String name;
     private String customId;
-    private int permits;
+    private Permission permits;
 
-    public JongoTable(int id, String name, String customId, int permits) {
+    public JongoTable(int id, String name, String customId, Permission permits) {
         this.id = id;
         this.name = name;
         this.customId = customId;
         this.permits = permits;
     }
+
+    public JongoTable(String name, String customId, Permission permits) {
+        this.name = name;
+        this.customId = customId;
+        this.permits = permits;
+    }
+    
+    public JongoTable(int id, String name, String customId, int permits) {
+        this.id = id;
+        this.name = name;
+        this.customId = customId;
+        this.permits = Permission.valueOf(permits);
+    }
     
     public JongoTable(String name, String customId, int permits) {
         this.name = name;
         this.customId = customId;
-        this.permits = permits;
+        this.permits = Permission.valueOf(permits);
     }
     
     public static final String CREATE = "INSERT INTO JongoTable ( name, customId, permits ) VALUES ( ?, ?, ? )";
@@ -50,13 +65,15 @@ public class JongoTable {
         this.name = name;
     }
 
-    public int getPermits() {
+    public Permission getPermits() {
         return permits;
     }
 
     public void setPermits(int permits) {
-        this.permits = permits;
+        this.permits = Permission.valueOf(permits);
     }
     
-    
+    public void setPermits(Permission permits) {
+        this.permits = permits;
+    }
 }
