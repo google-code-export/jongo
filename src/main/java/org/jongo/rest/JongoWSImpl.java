@@ -3,11 +3,9 @@ package org.jongo.rest;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -20,7 +18,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import org.apache.commons.lang.StringUtils;
 import org.jongo.JongoUtils;
 import org.jongo.jdbc.DynamicFinder;
 import org.jongo.jdbc.JDBCExecutor;
@@ -48,10 +45,9 @@ public class JongoWSImpl implements JongoWS {
             @DefaultValue("json") @QueryParam("format") String format,
             @PathParam("id") String id ) {
         
-        String q = "SELECT * FROM " + table + " WHERE id = ?";
         List<RowResponse> results;
         try {
-            results = JDBCExecutor.find(q, id);
+            results = JDBCExecutor.get(table, id);
         } catch (SQLException ex) {
             l.info(ex.getMessage());
             JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
@@ -63,7 +59,7 @@ public class JongoWSImpl implements JongoWS {
         }
         
         if(results == null || results.isEmpty()){
-            JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "No results for " + q);
+            JongoError error = new JongoError(null, Response.Status.NOT_FOUND);
             return error.getResponse(format);
         }
         
@@ -78,23 +74,9 @@ public class JongoWSImpl implements JongoWS {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Override
     public Response insert(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, final MultivaluedMap<String, String> formParams) {
-        List<String> params = new ArrayList<String>(formParams.size());
-        
-        for(String k : formParams.keySet()){
-            params.add(formParams.getFirst(k));
-        }
-        
-        final StringBuilder query = new StringBuilder("INSERT INTO ");
-        query.append(table);
-        query.append("(");
-        query.append(StringUtils.join(formParams.keySet(), ","));
-        query.append(") VALUES (");
-        query.append(StringUtils.removeEnd(StringUtils.repeat("?,", params.size()), ","));
-        query.append(")");
-        
         int result;
         try {
-            result = JDBCExecutor.update(query.toString(), JongoUtils.parseValues(params));
+            result = JDBCExecutor.insert(table, formParams);
         } catch (SQLException ex) {
             l.info(ex.getMessage());
             JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
@@ -123,23 +105,9 @@ public class JongoWSImpl implements JongoWS {
     public Response update(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") final String id, @Context final UriInfo ui) {
         MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
 
-        List<String> params = new ArrayList<String>(queryParams.size());
-        final StringBuilder query = new StringBuilder("UPDATE ");
-        query.append(table);
-        query.append(" SET ");
-        
-        for(String k : queryParams.keySet()){
-            query.append(k); query.append(" = ?,");
-            params.add(queryParams.getFirst(k));
-        }
-        
-        query.deleteCharAt(query.length() - 1);
-        query.append(" WHERE id = ?");
-        params.add(id);
-        
         int result;
         try {
-            result = JDBCExecutor.update(query.toString(), JongoUtils.parseValues(params));
+            result = JDBCExecutor.update(table, id, queryParams);
         } catch (SQLException ex) {
             l.info(ex.getMessage());
             JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
@@ -154,7 +122,6 @@ public class JongoWSImpl implements JongoWS {
             JongoError error = new JongoError(null, Response.Status.NO_CONTENT);
             return error.getResponse(format);
         }
-        l.debug(query.toString() + " " + params);
 
         List<RowResponse> results = new ArrayList<RowResponse>();
         results.add(new RowResponse(0,null));
