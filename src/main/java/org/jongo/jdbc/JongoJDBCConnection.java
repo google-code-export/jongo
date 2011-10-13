@@ -1,6 +1,6 @@
 package org.jongo.jdbc;
 
-import java.util.Map;
+import javax.ws.rs.core.MultivaluedMap;
 
 /**
  *
@@ -10,9 +10,9 @@ public interface JongoJDBCConnection {
     
     public void loadDriver();
     
-    public String getInsertQuery(final String table, final Map<String,String> params);
+    public String getInsertQuery(final String table, final MultivaluedMap<String,String> params);
     
-    public String getUpdateQuery(final String table, final String key, final Map<String,String> params);
+    public String getUpdateQuery(final String table, final String key, final MultivaluedMap<String,String> params);
     
     public String getDeleteQuery(final String table, final String key);
     
