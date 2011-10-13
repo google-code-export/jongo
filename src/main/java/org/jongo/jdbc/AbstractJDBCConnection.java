@@ -1,6 +1,7 @@
 package org.jongo.jdbc;
 
 import java.util.Map;
+import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.enums.JDBCDriver;
 
@@ -15,7 +16,7 @@ public class AbstractJDBCConnection {
     protected String password;
     protected JDBCDriver driver;
     
-    public String getInsertQuery(final String table, final Map<String,String> params){
+    public String getInsertQuery(final String table, final MultivaluedMap<String,String> params){
         final StringBuilder query = new StringBuilder("INSERT INTO ");
         query.append(table);
         query.append("(");
@@ -26,17 +27,16 @@ public class AbstractJDBCConnection {
         return query.toString();
     }
     
-    public String getUpdateQuery(final String table, final String key, final Map<String,String> params){
+    public String getUpdateQuery(final String table, final String key, final MultivaluedMap<String,String> params){
         final StringBuilder query = new StringBuilder("UPDATE ");
         query.append(table);
         query.append(" SET ");
-        query.append(StringUtils.removeEnd(StringUtils.repeat(" = ?,", params.size()), ","));
+
+        for(String k : params.keySet()){
+            query.append(k); query.append(" = ?,");
+        }
         
-//        for(String k : params.keySet()){
-//            query.append(k); query.append(" = ?,");
-//        }
-//        
-//        query.deleteCharAt(query.length() - 1);
+        query.deleteCharAt(query.length() - 1);
         
         query.append(" WHERE ");
         query.append(key);
