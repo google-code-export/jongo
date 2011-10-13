@@ -1,5 +1,7 @@
 package org.jongo.jdbc;
 
+import java.util.Map;
+import org.apache.commons.lang.StringUtils;
 import org.jongo.enums.JDBCDriver;
 
 /**
@@ -12,5 +14,59 @@ public class AbstractJDBCConnection {
     protected String username;
     protected String password;
     protected JDBCDriver driver;
+    
+    public String getInsertQuery(final String table, final Map<String,String> params){
+        final StringBuilder query = new StringBuilder("INSERT INTO ");
+        query.append(table);
+        query.append("(");
+        query.append(StringUtils.join(params.keySet(), ","));
+        query.append(") VALUES (");
+        query.append(StringUtils.removeEnd(StringUtils.repeat("?,", params.size()), ","));
+        query.append(")");
+        return query.toString();
+    }
+    
+    public String getUpdateQuery(final String table, final String key, final Map<String,String> params){
+        final StringBuilder query = new StringBuilder("UPDATE ");
+        query.append(table);
+        query.append(" SET ");
+        query.append(StringUtils.removeEnd(StringUtils.repeat(" = ?,", params.size()), ","));
+        
+//        for(String k : params.keySet()){
+//            query.append(k); query.append(" = ?,");
+//        }
+//        
+//        query.deleteCharAt(query.length() - 1);
+        
+        query.append(" WHERE ");
+        query.append(key);
+        query.append(" = ?");
+        return query.toString();
+    }
+    
+    public String getDeleteQuery(final String table, final String key){
+         final StringBuilder query = new StringBuilder("DELETE FROM ");
+         query.append(table);
+         query.append(" WHERE ");
+         query.append(key);
+         query.append(" = ?");
+         return query.toString();
+    }
+    
+    public String getCreateJongoQuerySequence() {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    public String getCreateJongoQueryTrigger() {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    public String getCreateJongoTableSequence() {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    public String getCreateJongoTableTrigger() {
+        throw new UnsupportedOperationException("Not supported.");
+    }
     
 }
