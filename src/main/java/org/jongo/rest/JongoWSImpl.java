@@ -167,20 +167,19 @@ public class JongoWSImpl implements JongoWS {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
     public Response delete(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") final String id) {
-        final StringBuilder query = new StringBuilder("DELETE FROM ");
-        query.append(table);
-        query.append(" WHERE ");
-        query.append("id = ?");
-        
         int result = 0;
         try {
-            result = JDBCExecutor.update(query.toString(), JongoUtils.parseValue(id));
+            result = JDBCExecutor.delete(table, id);
         } catch (SQLException ex) {
             l.info(ex.getMessage());
             JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
             return error.getResponse(format);
-        } catch (Exception ex){
+        } catch (IllegalAccessException ex){
             l.info(ex.getMessage());
+            JongoError error = new JongoError(null, Response.Status.FORBIDDEN);
+            return error.getResponse(format);
+        } catch (Exception ex){
+            l.error(ex.getMessage());
             JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
             return error.getResponse(format);
         }
@@ -241,26 +240,22 @@ public class JongoWSImpl implements JongoWS {
                 return error.getResponse(format);
             }
         }else{
-            String sql = null;
             if(values.isEmpty()){
                 if(value == null){
                     DynamicFinder df = DynamicFinder.valueOf(table, query);
-                    sql = "SELECT * FROM " + table + df.getSql() ;
                     results = JDBCExecutor.find(df);
                 }else{
                     DynamicFinder df = DynamicFinder.valueOf(table, query, value);
-                    sql = "SELECT * FROM " + table + df.getSql() ;
                     results = JDBCExecutor.find(df, JongoUtils.parseValue(value));
                 }
 
             }else{
                 DynamicFinder df = DynamicFinder.valueOf(table, query, values.toArray(new String []{}));
-                sql = "SELECT * FROM " + table + df.getSql();
                 results = JDBCExecutor.find(df, JongoUtils.parseValues(values));
             }
             
             if(results == null || results.isEmpty()){
-                JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "No results for " + sql);
+                JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "No results for " + query);
                 return error.getResponse(format);
             }
         }
@@ -268,4 +263,14 @@ public class JongoWSImpl implements JongoWS {
         JongoResponse r = new JongoResponse(null, results);
         return r.getResponse(format);
     }
+
+    @GET
+    @Path("query/{query}")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Override
+    public Response query(@PathParam("query") String query, @QueryParam("format") String format, @QueryParam("args") List<String> arguments) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    
 }
