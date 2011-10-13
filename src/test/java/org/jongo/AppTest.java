@@ -19,7 +19,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.jongo.enums.Operator;
 import org.jongo.jdbc.DynamicFinder;
 
 /**
@@ -62,7 +61,7 @@ public class AppTest extends TestCase {
         for(String str : tests){
             DynamicFinder f = DynamicFinder.valueOf("foo", str);
             assertNotNull(f);
-            System.out.println(f.getSql());
+//            System.out.println(f.getSql());
         }
     }
     
@@ -89,11 +88,14 @@ public class AppTest extends TestCase {
     }
     
     public void testUpdate(){
-        
+        assertTrue(request(jongoUrl + "user/3?name=bar", "PUT"));
+        assertTrue(request(jongoUrl + "user/name/bar", "GET"));
+        assertFalse(request(jongoUrl + "user?query=findBy.Name&value=foo", "GET"));
     }
     
     public void testDelete(){
-        
+        assertTrue(request(jongoUrl + "user/3", "DELETE"));
+        assertFalse(request(jongoUrl + "user/3", "GET"));
     }
     
     public boolean request(final String url, final String method){
@@ -173,27 +175,18 @@ public class AppTest extends TestCase {
             String name = "'" + new BigInteger(100, random).toString(32) + "'";
             String age = String.valueOf(Min + (int)(Math.random() * ((Max - Min) + 1)));
             
-            al.add(new BasicNameValuePair("cols", "name"));
-            al.add(new BasicNameValuePair("vals", name));
-            al.add(new BasicNameValuePair("cols", "age"));
-            al.add(new BasicNameValuePair("vals", age));
-            al.add(new BasicNameValuePair("cols", "birthday"));
-            al.add(new BasicNameValuePair("vals", birth));
-            al.add(new BasicNameValuePair("cols", "lastupdate"));
-            al.add(new BasicNameValuePair("vals", birth));
-            al.add(new BasicNameValuePair("cols", "credit"));
-            al.add(new BasicNameValuePair("vals", "900.15"));
+            al.add(new BasicNameValuePair("name", name));
+            al.add(new BasicNameValuePair("age", age));
+            al.add(new BasicNameValuePair("birthday", birth));
+            al.add(new BasicNameValuePair("lastupdate", birth));
+            al.add(new BasicNameValuePair("credit", "900.15"));
         }
         
         List<NameValuePair> u4 = new ArrayList<NameValuePair>();
-        u4.add(new BasicNameValuePair("cols", "name"));
-        u4.add(new BasicNameValuePair("vals", "foo"));
-        u4.add(new BasicNameValuePair("cols", "age"));
-        u4.add(new BasicNameValuePair("vals", "30"));
-        u4.add(new BasicNameValuePair("cols", "birthday"));
-        u4.add(new BasicNameValuePair("vals", birth));
-        u4.add(new BasicNameValuePair("cols", "lastupdate"));
-        u4.add(new BasicNameValuePair("vals", birth));
+        u4.add(new BasicNameValuePair("name", "foo"));
+        u4.add(new BasicNameValuePair("age", "30"));
+        u4.add(new BasicNameValuePair("birthday", birth));
+        u4.add(new BasicNameValuePair("lastupdate", birth));
         r.add(u4);
         return r;
         
