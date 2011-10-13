@@ -1,8 +1,9 @@
 package org.jongo.rest;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -48,7 +49,18 @@ public class JongoWSImpl implements JongoWS {
             @PathParam("id") String id ) {
         
         String q = "SELECT * FROM " + table + " WHERE id = ?";
-        List<RowResponse> results = JDBCExecutor.find(q, id);
+        List<RowResponse> results;
+        try {
+            results = JDBCExecutor.find(q, id);
+        } catch (SQLException ex) {
+            l.info(ex.getMessage());
+            JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
+            return error.getResponse(format);
+        } catch (Exception ex){
+            l.info(ex.getMessage());
+            JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+            return error.getResponse(format);
+        }
         
         if(results == null || results.isEmpty()){
             JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "No results for " + q);
@@ -74,10 +86,21 @@ public class JongoWSImpl implements JongoWS {
         query.append(StringUtils.removeEnd(StringUtils.repeat("?,", cols.size()), ","));
         query.append(")");
         
-        int result = JDBCExecutor.update(query.toString(), JongoUtils.parseValues(vals));
+        int result;
+        try {
+            result = JDBCExecutor.update(query.toString(), JongoUtils.parseValues(vals));
+        } catch (SQLException ex) {
+            l.info(ex.getMessage());
+            JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
+            return error.getResponse(format);
+        } catch (Exception ex){
+            l.info(ex.getMessage());
+            JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+            return error.getResponse(format);
+        }
         
         if(result == 0){
-            JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
+            JongoError error = new JongoError(null, Response.Status.NO_CONTENT);
             return error.getResponse(format);
         }
 
@@ -108,17 +131,28 @@ public class JongoWSImpl implements JongoWS {
         query.append(" WHERE id = ?");
         params.add(id);
         
-        int result = JDBCExecutor.update(query.toString(), JongoUtils.parseValues(params));
+        int result;
+        try {
+            result = JDBCExecutor.update(query.toString(), JongoUtils.parseValues(params));
+        } catch (SQLException ex) {
+            l.info(ex.getMessage());
+            JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
+            return error.getResponse(format);
+        } catch (Exception ex){
+            l.info(ex.getMessage());
+            JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+            return error.getResponse(format);
+        }
         
         if(result == 0){
-            JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
+            JongoError error = new JongoError(null, Response.Status.NO_CONTENT);
             return error.getResponse(format);
         }
         l.debug(query.toString() + " " + params);
 
         List<RowResponse> results = new ArrayList<RowResponse>();
         results.add(new RowResponse(0,null));
-        JongoResponse r = new JongoResponse(null, results, Response.Status.CREATED);
+        JongoResponse r = new JongoResponse(null, results, Response.Status.OK);
         return r.getResponse(format);
     }
 
@@ -126,8 +160,34 @@ public class JongoWSImpl implements JongoWS {
     @Path("{table}/{id}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
-    public Response delete(String table, String format, String id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Response delete(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") final String id) {
+        final StringBuilder query = new StringBuilder("DELETE FROM ");
+        query.append(table);
+        query.append(" WHERE ");
+        query.append("id = ?");
+        
+        int result = 0;
+        try {
+            result = JDBCExecutor.update(query.toString(), JongoUtils.parseValue(id));
+        } catch (SQLException ex) {
+            l.info(ex.getMessage());
+            JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
+            return error.getResponse(format);
+        } catch (Exception ex){
+            l.info(ex.getMessage());
+            JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+            return error.getResponse(format);
+        }
+        
+        if(result == 0){
+            JongoError error = new JongoError(null, Response.Status.NO_CONTENT);
+            return error.getResponse(format);
+        }
+
+        List<RowResponse> results = new ArrayList<RowResponse>();
+        results.add(new RowResponse(0,null));
+        JongoResponse r = new JongoResponse(null, results, Response.Status.OK);
+        return r.getResponse(format);
     }
     
     @GET
@@ -140,7 +200,18 @@ public class JongoWSImpl implements JongoWS {
                         @PathParam("value") final String val) {
 
         String q = "SELECT * FROM " + table + " WHERE " + col + " = ?";
-        List<RowResponse> results = JDBCExecutor.find(q, JongoUtils.parseValue(val));
+        List<RowResponse> results;
+        try {
+            results = JDBCExecutor.find(q, JongoUtils.parseValue(val));
+        } catch (SQLException ex) {
+            l.info(ex.getMessage());
+            JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
+            return error.getResponse(format);
+        } catch (Exception ex){
+            l.info(ex.getMessage());
+            JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+            return error.getResponse(format);
+        }
         
         if(results == null || results.isEmpty()){
             JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "No results for " + q);
