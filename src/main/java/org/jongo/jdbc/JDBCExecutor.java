@@ -91,17 +91,12 @@ public class JDBCExecutor {
         return results;
     }
     
-    public static List<RowResponse> find(final String query, Object... params) {
+    public static List<RowResponse> find(final String query, Object... params) throws SQLException {
         l.debug(query + " params: " + JongoUtils.varargToString(params));
         QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
         ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(false);
-        try {
-            List<RowResponse> results = run.query(query, res, params);
-            return results;
-        } catch (SQLException ex) {
-            l.error(ex.getMessage());
-        }
-        return null;
+        List<RowResponse> results = run.query(query, res, params);
+        return results;
     }
 
     public static List<RowResponse> find(final DynamicFinder query, Object... params) {
@@ -117,15 +112,10 @@ public class JDBCExecutor {
         return null;
     }
     
-    public static int update(final String query, Object... params) {
+    public static int update(final String query, Object... params) throws SQLException {
         l.debug(query + " params: " + JongoUtils.varargToString(params));
         QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
-        try {
-            return run.update(query, params);
-        } catch (SQLException ex) {
-            l.error(ex.getMessage());
-            return 0;
-        }
+        return run.update(query, params);
     }
 
     public static List<RowResponse> getTableMetaData(final String table) {
