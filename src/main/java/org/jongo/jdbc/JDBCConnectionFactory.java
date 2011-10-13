@@ -12,6 +12,7 @@ import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.jongo.JongoConfiguration;
 import org.jongo.jdbc.connections.HSQLConnection;
+import org.jongo.jdbc.connections.OracleConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +36,8 @@ public class JDBCConnectionFactory {
                 case HSQLDB:
                     connection = new HSQLConnection(configuration.getJdbcUrl(), configuration.getJdbcUsername(), configuration.getJdbcPassword());
                     break;
+                case ORACLE:
+                    connection = new OracleConnection(configuration.getJdbcUrl(), configuration.getJdbcUsername(), configuration.getJdbcPassword());
                 default:
                     throw new IllegalArgumentException("Not implemented yet");
             }
