@@ -77,18 +77,24 @@ public class JongoWSImpl implements JongoWS {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Override
-    public Response insert(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @FormParam("cols") final List<String> cols, @FormParam("vals") final List<String> vals) {
+    public Response insert(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, final MultivaluedMap<String, String> formParams) {
+        List<String> params = new ArrayList<String>(formParams.size());
+        
+        for(String k : formParams.keySet()){
+            params.add(formParams.getFirst(k));
+        }
+        
         final StringBuilder query = new StringBuilder("INSERT INTO ");
         query.append(table);
         query.append("(");
-        query.append(StringUtils.join(cols, ","));
+        query.append(StringUtils.join(formParams.keySet(), ","));
         query.append(") VALUES (");
-        query.append(StringUtils.removeEnd(StringUtils.repeat("?,", cols.size()), ","));
+        query.append(StringUtils.removeEnd(StringUtils.repeat("?,", params.size()), ","));
         query.append(")");
         
         int result;
         try {
-            result = JDBCExecutor.update(query.toString(), JongoUtils.parseValues(vals));
+            result = JDBCExecutor.update(query.toString(), JongoUtils.parseValues(params));
         } catch (SQLException ex) {
             l.info(ex.getMessage());
             JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
