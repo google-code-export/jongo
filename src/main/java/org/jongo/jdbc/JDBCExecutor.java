@@ -39,7 +39,7 @@ public class JDBCExecutor {
             throw new IllegalAccessException("Access Denied to table " + table);
         }
         
-        if(result.getPermits() == NONE || result.getPermits() == 1){
+        if(!result.getPermits().isWritable()){
             l.debug("Cant write to table " + table + ". Access Denied");
             throw new IllegalAccessException("Access Denied to table " + table);
         }
