@@ -48,22 +48,27 @@ public class JongoResultSetHandler implements ResultSetHandler<List<RowResponse>
         return results;
     }
     
-    public static Map<String, String> resultSetToMap(ResultSet resultSet) throws SQLException {
+    public static Map<String, String> resultSetToMap(ResultSet resultSet) {
         Map<String, String> map = new HashMap<String, String>();
-        int columnCount = resultSet.getMetaData().getColumnCount();
-        
-        l.debug("Mapping a result set with " + columnCount + " columns to a Map");
-        
-        if (columnCount < 2) {
-            throw new SQLException("resultSetToMap: At least two columns needed for conversion.");
-        }
-        
-        ResultSetMetaData meta = resultSet.getMetaData();
-        for(int i = 1; i < columnCount + 1; i++){
-            String k = meta.getColumnName(i).toUpperCase();
-            String v = resultSet.getString(i);
-            l.debug("Mapping column " + k + " with value : " + v);
-            map.put(k, v);
+        try{
+            int columnCount = resultSet.getMetaData().getColumnCount();
+
+            l.debug("Mapping a result set with " + columnCount + " columns to a Map");
+
+    //        if (columnCount < 2) {
+    //            throw new SQLException("resultSetToMap: At least two columns needed for conversion.");
+    //        }
+
+            ResultSetMetaData meta = resultSet.getMetaData();
+            for(int i = 1; i < columnCount + 1; i++){
+                String k = meta.getColumnName(i).toUpperCase();
+                String v = resultSet.getString(i);
+                l.debug("Mapping column " + k + " with value : " + v);
+                map.put(k, v);
+            }
+        }catch(SQLException e){
+            l.error("Failed to map ResultSet");
+            return null;
         }
         
         return map;
