@@ -17,5 +17,6 @@ public interface JongoWS {
     public Response insert(final String table, final String format, final MultivaluedMap<String, String> formParams);
     public Response update(final String table, final String format, final String id, final UriInfo ui);
     public Response delete(final String table, final String format, final String id);
+    public Response query(final String query, final String format, final List<String> arguments);
     
 }
