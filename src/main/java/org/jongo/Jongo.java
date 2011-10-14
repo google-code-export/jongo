@@ -18,8 +18,33 @@ public class Jongo {
     private static final Logger l = LoggerFactory.getLogger(Jongo.class);
     
     public static void main(String[] args){
-        l.debug("Starting Jongo");
+        l.info("Starting Jongo in Test Mode");
         
+        JongoConfiguration configuration = loadConfiguration();
+        
+        StringBuilder url = new StringBuilder("http://");
+        url.append(configuration.getIp());
+        url.append(":");
+        url.append(configuration.getPort());
+        url.append("/");
+        
+        
+        l.info("Starting Jongo in " + url);
+        try {
+            HttpServer server = HttpServerFactory.create(url.toString());
+            server.start();
+        } catch (IOException ex) {
+            l.error("Failed to open socket. Quitting");
+            l.error(ex.getMessage());
+            System.exit(1);
+        } catch (IllegalArgumentException ex) {
+            l.error("Invalid URL. Fix your configuration. Quitting");
+            l.error(ex.getMessage());
+            System.exit(1);
+        }
+    }
+    
+    public static JongoConfiguration loadConfiguration(){
         JongoConfiguration configuration = null;
         try{
             configuration = JongoConfiguration.instanceOf();
@@ -48,26 +73,6 @@ public class Jongo {
             System.exit(1);
         }
         
-        
-        StringBuilder url = new StringBuilder("http://");
-        url.append(configuration.getIp());
-        url.append(":");
-        url.append(configuration.getPort());
-        url.append("/");
-        
-        
-        l.info("Starting Jongo in " + url);
-        try {
-            HttpServer server = HttpServerFactory.create(url.toString());
-            server.start();
-        } catch (IOException ex) {
-            l.error("Failed to open socket. Quitting");
-            l.error(ex.getMessage());
-            System.exit(1);
-        } catch (IllegalArgumentException ex) {
-            l.error("Invalid URL. Fix your configuration. Quitting");
-            l.error(ex.getMessage());
-            System.exit(1);
-        }
+        return configuration;
     }
 }

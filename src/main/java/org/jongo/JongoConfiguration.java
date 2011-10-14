@@ -25,6 +25,7 @@ public class JongoConfiguration {
     private String jdbcUrl;
     private String jdbcUsername;
     private String jdbcPassword;
+    private String adminIp;
     
     private JongoConfiguration(){}
     
@@ -38,6 +39,7 @@ public class JongoConfiguration {
             instance.jdbcUrl = prop.getProperty("jongo.jdbc.url");
             instance.jdbcUsername = prop.getProperty("jongo.jdbc.username");
             instance.jdbcPassword = prop.getProperty("jongo.jdbc.password");
+            instance.adminIp = prop.getProperty("jongo.admin.ip");
         }
         return instance;
     }
@@ -94,5 +96,9 @@ public class JongoConfiguration {
 
     public String getJdbcUsername() {
         return jdbcUsername;
+    }
+
+    public String getAdminIp() {
+        return adminIp;
     }
 }

@@ -42,7 +42,7 @@
     </rollingPolicy>
   </appender>
   
-  <logger name="org.w3c.tidy" level="OFF"/>
+  <logger name="org.mortbay" level="INFO"/>
   <logger name="com.sun.jersey" level="OFF"/>
   <logger name="org.slf4j" level="OFF"/>
 
