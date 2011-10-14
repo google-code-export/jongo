@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
-@Path("jongo/")
+@Path("/")
 public class JongoWSImpl implements JongoWS {
     
     private static final Logger l = LoggerFactory.getLogger(JongoWSImpl.class);
