@@ -4,11 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.InputStreamReader;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
 import org.jongo.JongoConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +26,7 @@ public class JongoAdminServlet extends HttpServlet{
         l.debug("Admin console connection from " + request.getRemoteAddr());
         l.debug(request.getPathInfo());
         
-        response.setContentType("text/html");
+        
         
         JongoConfiguration conf = JongoConfiguration.instanceOf();
         
@@ -34,16 +34,33 @@ public class JongoAdminServlet extends HttpServlet{
             l.debug("Admin console connection from " + request.getRemoteAddr() + " forbidden. Only localhost is allowed");
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         }else{
-            InputStream is = JongoAdminServlet.class.getClass().getResourceAsStream("/org/jongo/admin/index.html");
-            BufferedReader r = new BufferedReader(new InputStreamReader(is));
-
-            response.setStatus(HttpServletResponse.SC_OK);
-            String str = null;
+            if(request.getPathInfo().equalsIgnoreCase("/jongo.js")){
+                readFileAndWriteToResponse(response, request.getPathInfo(), "text/javascript");
+            }else if(request.getPathInfo().equalsIgnoreCase("/jongo.css")){
+                readFileAndWriteToResponse(response, request.getPathInfo(), "text/css");
+            }else{
+                readFileAndWriteToResponse(response, "/index.html", MediaType.TEXT_HTML.toString());
+            }
+        }
+    }
+    
+    private void readFileAndWriteToResponse(HttpServletResponse response, final String filePath, final String media){
+        InputStream is = JongoAdminServlet.class.getClass().getResourceAsStream("/org/jongo/admin" + filePath);
+        BufferedReader r = null;
+        response.setContentType(media);
+        
+        String str = null;
+        try{
+            r = new BufferedReader(new InputStreamReader(is));
             while((str = r.readLine()) != null){
                 response.getWriter().println(str);
             }
-            r.close();
-            is.close();
+            response.setStatus(HttpServletResponse.SC_OK);
+        }catch(IOException e){
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }finally{
+            if(r != null){ try { r.close(); } catch(Exception e){}}
+            if(is != null){ try { is.close(); } catch(Exception e){}}
         }
     }
 }
