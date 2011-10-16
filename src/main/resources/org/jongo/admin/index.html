@@ -8,8 +8,92 @@
         <script type="text/javascript" src="jongo.js"></script>
         <link type="text/css" rel="stylesheet" href="jongo.css"/>
         <link type="text/css" rel="stylesheet" href="http://code.jquery.com/ui/1.8.16/themes/blitzer/jquery-ui.css"/>
+
+        <script>
+            $(function() {
+                $( "#tabs" ).tabs();
+                $( "#addJongoTable" ).button();
+//                $( "#addJongoTable" ).click(addTable(this));
+            });
+            
+            $(document).ready(function(){
+                $.getJSON('http://localhost:8080/jongo/JongoTable?query=findAllBy.Id.GreaterThanEquals&values=0', function(data) {
+                    var items = new Array();
+                    items[0] = '<tr><th>Id</th><th>Table Name</th><th>Custom Id</th><th>Permissions</th><th></th></tr>';
+                    if(data.response.success){
+                        var rows = data.response.rows[0].row;
+                        $.each(rows, function(){
+                            var cols = this.columns;
+                            $.each(cols, function(){
+                                items.push('<form id="fieldForm')
+                                items.push(this.ID);
+                                items.push('">');
+                                items.push('<tr><td>');
+                                items.push('<input type="hidden" id="tableId" value="')
+                                items.push(this.ID);
+                                items.push('"/>');
+                                items.push(this.ID);
+                                items.push('</td><td><input id="tableName" type="text" value="');
+                                items.push(this.NAME);
+                                items.push('"/></td><td><input id="tableCustomId" type="text" value="');
+                                items.push(this.CUSTOMID);
+                                items.push('"/></td><td>');
+                                items.push(this.PERMITS);
+                                items.push('</td><td>');
+                                items.push('<input type="submit" value="Edit" onclick="return editTable(');
+                                items.push(this.ID);
+                                items.push(');"/>');
+                                items.push('</td></tr>');
+                                items.push('</form>');
+                            })
+                        })
+                    }
+                    $('#jtables').html(items.join(''));
+                });
+            });
+        </script>
+
     </head>
     <body>
-        <h1>TODO write content</h1>
+        <h1>Jongo Administration Console</h1>
+
+        <div class="jongoTabs">
+            <div id="tabs">
+                <ul>
+                    <li><a href="#tabs-1">Jongo Tables</a></li>
+                    <li><a href="#tabs-2">Jongo Complex Queries</a></li>
+                    <li><a href="#tabs-3">Jongo Configuration</a></li>
+                </ul>
+                <div id="tabs-1">
+                    <div class="tableContainer">
+                        <table id="jtables" class="jongo"></table>
+                    </div>
+                    <div class="tableFormContainer">
+                        <h2>Add a table to Jongo:</h2>
+                        <form>
+                            <input id="tableName" value="" type="text"/>
+                            <input id="tableCustomId" value="id" type="text"/>
+                            <select id="jongoPermissions">
+                                <option value="0">None</option>
+                                <option value="1">Read</option>
+                                <option value="2">Write</option>
+                                <option value="3">Read & Write</option>
+                            </select>
+                            <input type="submit" value="Add" id="addJongoTable" name="addJongoTable" onclick="return addTable(this);"/>
+                        </form>
+                    </div>
+                    
+                </div>
+                <div id="tabs-2">
+                    <table id="jqueries"></table>
+                </div>
+                <div id="tabs-3">
+                    <table id="jconfig"></table>
+                </div>
+            </div>
+        </div>
+        <div id="errorDialog">
+            <span id="errorDialogMessage"></span>
+        </div>
     </body>
 </html>

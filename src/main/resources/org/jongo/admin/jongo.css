@@ -2,7 +2,32 @@ root {
     display: block;
 }
 
-h1{
-    color: red;
+body{
+    
 }
 
+h1{
+    color: blue;
+}
+
+table.jongo{
+    width: 100%;
+    border-style: dashed;
+    border-width: 1px;
+}
+
+table.jongo th{
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    text-align: left;
+}
+
+table.jongo td{
+    text-align: left;
+}
+
+.tableFormContainer{
+}
+
+.tableContainer{
+}
