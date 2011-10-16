@@ -3,8 +3,6 @@ package org.jongo;
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 import org.jongo.admin.JongoAdminServlet;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.handler.ResourceHandler;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
