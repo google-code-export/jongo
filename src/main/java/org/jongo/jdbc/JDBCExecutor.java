@@ -173,6 +173,7 @@ public class JDBCExecutor {
             JDBCExecutor.update(conn.getCreateJongoTableTrigger());
         }
         update("INSERT INTO JongoTable (name, customId, permits) VALUES (?,?,?)", "JongoTable", "id", Permission.READWRITE.getValue());
+        update("INSERT INTO JongoTable (name, customId, permits) VALUES (?,?,?)", "JongoQuery", "id", Permission.READWRITE.getValue());
         
         String env = System.getProperty("environment");
         if(env != null && env.equalsIgnoreCase("test")){
