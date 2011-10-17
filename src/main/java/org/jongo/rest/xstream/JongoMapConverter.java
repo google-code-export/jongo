@@ -24,7 +24,7 @@ public class JongoMapConverter implements Converter {
         
         for(String key: map.keySet()){
             String val = map.get(key);
-            writer.startNode(key);
+            writer.startNode(key.toLowerCase());
             writer.setValue(val);
             writer.endNode();
         }
