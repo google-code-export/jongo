@@ -35,11 +35,13 @@ public class JongoResponse {
         
         // uncomment when using annotations (thread-unsafe)
         xStream.alias("response", JongoResponse.class);
-        xStream.alias("row", RowResponse.class);
+        xStream.alias("rows", RowResponse.class);
+        xStream.addImplicitCollection(JongoResponse.class, "rows");
         xStream.registerConverter(new JongoMapConverter());
-        xStream.useAttributeFor(RowResponse.class, "roi");
-        xStream.useAttributeFor(JongoResponse.class, "sessionId");
+//        xStream.omitField(RowResponse.class, "roi");
+        xStream.omitField(JongoResponse.class, "sessionId");
         xStream.omitField(JongoResponse.class, "status");
+        xStream.omitField(JongoResponse.class, "success");
         return xStream;
     }
     
