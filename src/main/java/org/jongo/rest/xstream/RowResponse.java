@@ -1,6 +1,5 @@
 package org.jongo.rest.xstream;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -9,7 +8,7 @@ import java.util.Map;
  */
 public class RowResponse {
     private final int roi;
-    public Map<String, String> columns = new HashMap<String, String>();
+    private final Map<String, String> columns;// = new HashMap<String, String>();
 
     public RowResponse(int roi, Map<String, String> columns) {
         this.roi = roi;
@@ -18,5 +17,9 @@ public class RowResponse {
 
     public int getRoi() {
         return roi;
+    }
+
+    public Map<String, String> getColumns() {
+        return columns;
     }
 }
