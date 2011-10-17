@@ -12,44 +12,18 @@
         <script>
             $(function() {
                 $( "#tabs" ).tabs();
-                $( "#addJongoTable" ).button();
+                $( "#jqueries" ).accordion({
+                    autoHeight: false,
+                    navigation: true,
+                    collapsible: true
+                });
+//                $( "#addJongoTable" ).button();
 //                $( "#addJongoTable" ).click(addTable(this));
             });
             
             $(document).ready(function(){
-                $.getJSON('http://localhost:8080/jongo/JongoTable?query=findAllBy.Id.GreaterThanEquals&values=0', function(data) {
-                    var items = new Array();
-                    items[0] = '<tr><th>Id</th><th>Table Name</th><th>Custom Id</th><th>Permissions</th><th></th></tr>';
-                    if(data.response.success){
-                        var rows = data.response.rows[0].row;
-                        $.each(rows, function(){
-                            var cols = this.columns;
-                            $.each(cols, function(){
-                                items.push('<form id="fieldForm')
-                                items.push(this.ID);
-                                items.push('">');
-                                items.push('<tr><td>');
-                                items.push('<input type="hidden" id="tableId" value="')
-                                items.push(this.ID);
-                                items.push('"/>');
-                                items.push(this.ID);
-                                items.push('</td><td><input id="tableName" type="text" value="');
-                                items.push(this.NAME);
-                                items.push('"/></td><td><input id="tableCustomId" type="text" value="');
-                                items.push(this.CUSTOMID);
-                                items.push('"/></td><td>');
-                                items.push(this.PERMITS);
-                                items.push('</td><td>');
-                                items.push('<input type="submit" value="Edit" onclick="return editTable(');
-                                items.push(this.ID);
-                                items.push(');"/>');
-                                items.push('</td></tr>');
-                                items.push('</form>');
-                            })
-                        })
-                    }
-                    $('#jtables').html(items.join(''));
-                });
+                drawJongoTables('#jtables');
+//                drawJongoQueries('#jqueries');
             });
         </script>
 
@@ -66,7 +40,7 @@
                 </ul>
                 <div id="tabs-1">
                     <div class="tableContainer">
-                        <table id="jtables" class="jongo"></table>
+                        <div id="jtables" class="jongo"></div>
                     </div>
                     <div class="tableFormContainer">
                         <h2>Add a table to Jongo:</h2>
@@ -79,13 +53,42 @@
                                 <option value="2">Write</option>
                                 <option value="3">Read & Write</option>
                             </select>
-                            <input type="submit" value="Add" id="addJongoTable" name="addJongoTable" onclick="return addTable(this);"/>
+                            <input type="submit" value="Add" id="addJongoTable" name="addJongoTable" onclick="addTable(); return false;"/>
                         </form>
                     </div>
-                    
                 </div>
                 <div id="tabs-2">
-                    <table id="jqueries"></table>
+                    <h2>New Complex Query</h2>
+                    <div>
+                        <form>
+                            <p>
+                                <label for="queryName">Name</label>
+                            </p><p>
+                                <input type="text" style="width: 60%;" id="queryName" />
+                            </p><p>
+                                <label for="queryDescription">Description</label>
+                            </p><p>
+                                <input type="text" style="width: 60%;" id="queryDescription" />
+                            </p><p>
+                                <label for="queryText">Query</label>
+                            </p><p>
+                                <textarea style="width: 60%;" rows="6" id="queryText"></textarea>
+                            </p><p>
+                                <input type="submit" value="Save" onclick="addQuery(); return false;"/>
+                            </p>
+                        </form>
+                    </div>
+                    <div id="jqueries">
+                        <h3><a href="#">New Jongo Complex Query</a></h3>
+                            <div>
+                                <p><b>Name</b>Description</p>
+                                <p>SELEC</p>
+                            </div>
+                        <h3><a href="#">Section 2</a></h3>
+                        <div>
+                            <p>kkkkk</p>
+                        </div>
+                    </div>
                 </div>
                 <div id="tabs-3">
                     <table id="jconfig"></table>
