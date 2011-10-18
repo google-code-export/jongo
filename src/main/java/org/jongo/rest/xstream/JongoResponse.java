@@ -1,7 +1,6 @@
 package org.jongo.rest.xstream;
 
 import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -29,32 +28,31 @@ public class JongoResponse {
         this.status = Response.Status.OK;
     }
     
-    private static XStream initializeXStream(XStream xStream){
+    public String toXML(){
+        XStream xStream = new XStream();
         xStream.setMode(XStream.NO_REFERENCES);
         xStream.autodetectAnnotations(false);
-        
-        // uncomment when using annotations (thread-unsafe)
         xStream.alias("response", JongoResponse.class);
-        xStream.alias("rows", RowResponse.class);
-        xStream.addImplicitCollection(JongoResponse.class, "rows");
+        xStream.alias("row", RowResponse.class);
         xStream.registerConverter(new JongoMapConverter());
-//        xStream.omitField(RowResponse.class, "roi");
+        xStream.aliasAttribute(RowResponse.class, "roi", "roi");
         xStream.omitField(JongoResponse.class, "sessionId");
         xStream.omitField(JongoResponse.class, "status");
         xStream.omitField(JongoResponse.class, "success");
-        return xStream;
-    }
-    
-    public String toXML(){
-        XStream xStream = new XStream();
-        xStream = initializeXStream(xStream);
         return xStream.toXML(this);
     }
     
     public String toJSON(){
-        XStream xStream = new XStream(new JettisonMappedXmlDriver());
-        xStream = initializeXStream(xStream);
-        return xStream.toXML(this);
+        // I really tried to use XStream to generate the JSON, but it simply didn't do what I wanted.
+        StringBuilder b = new StringBuilder("{\"response\":[");
+        for(RowResponse row : rows){
+            b.append("\"row\":");
+            b.append(row.toJSON());
+            b.append(",");
+        }
+        b.deleteCharAt(b.length() - 1);
+        b.append("]}");
+        return b.toString();
     }
     
     public Response getResponse(final String format){
