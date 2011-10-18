@@ -7,8 +7,6 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -16,16 +14,13 @@ import org.slf4j.LoggerFactory;
  */
 public class JongoMapConverter implements Converter {
     
-    private static final Logger l = LoggerFactory.getLogger(JongoMapConverter.class);
-
     @Override
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext mc) {
-        Map<String, String> map = (Map<String, String>)o;
-        
+        Map<String, Object> map = (Map<String, Object>)o;
         for(String key: map.keySet()){
-            String val = map.get(key);
+            Object val = map.get(key);
             writer.startNode(key.toLowerCase());
-            writer.setValue(val);
+            writer.setValue(val.toString());
             writer.endNode();
         }
     }
