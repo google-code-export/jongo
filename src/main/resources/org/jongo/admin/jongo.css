@@ -26,8 +26,28 @@ table.jongo td{
     text-align: left;
 }
 
-.tableFormContainer{
+.tableFormContainer input{
+    
 }
 
-.tableContainer{
+.tableContainer input{
+    font: 11px Verdana, Geneva, Arial, Helvetica, sans-serif;
+    background-image:url('http://code.jquery.com/ui/1.8.16/themes/trontastic/images/ui-bg_gloss-wave_85_9fda58_500x100.png');
+/*    background-color: #D7E5F2;      */
+    color: #102132;      
+    border: 1px solid #56AC6E;
 }
+
+.tableContainer input[readonly]{
+    font: 11px Verdana, Geneva, Arial, Helvetica, sans-serif;      
+    background-color: #000000;      
+    color: #102132;      
+    border: 1px solid #56AC6E;
+}
+
+.tableContainer select {      
+    font: 11px Verdana, Geneva, Arial, Helvetica, sans-serif;      
+    background-color: #D7E5F2;
+    color: #102132;
+    border: 1px solid #56AC6E;
+}  

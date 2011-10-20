@@ -11,28 +11,27 @@ debug = function (log) {
 function drawJongoTables(componentName) {
     $.getJSON('http://localhost:8080/jongo/JongoTable?query=findAllBy.Id.GreaterThanEquals&values=0', function(data) {
         var items = new Array();
-            $.each(data.response.rows, function(){
-                var aMap = this.columns[0];
+            $.each(data.response, function(){
                 items.push('<form id="fieldForm')
-                items.push(aMap.id);
+                items.push(this.id);
                 items.push('">');
                 items.push('<input type="text" readonly="readonly" id="tableId')
-                items.push(aMap.id);
+                items.push(this.id);
                 items.push('" value="');
-                items.push(aMap.id);
+                items.push(this.id);
                 items.push('"/>');
                 items.push('<input type="text" id="tableName');
-                items.push(aMap.id);
+                items.push(this.id);
                 items.push('" value="');
-                items.push(aMap.name);
+                items.push(this.name);
                 items.push('"/><input type="text" id="tableCustomId');
-                items.push(aMap.id);
+                items.push(this.id);
                 items.push('" value="');
-                items.push(aMap.customid);
+                items.push(this.customid);
                 items.push('"/>');
-                items.push(getSelectComponent(aMap.id, aMap.permits));
+                items.push(getSelectComponent(this.id, this.permits));
                 items.push('<input type="submit" value="Edit" onclick="editTable(');
-                items.push(aMap.id);
+                items.push(this.id);
                 items.push('); return false;"/>');
                 items.push('</form>');
             })
