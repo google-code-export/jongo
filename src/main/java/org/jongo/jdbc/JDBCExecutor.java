@@ -1,5 +1,6 @@
 package org.jongo.jdbc;
 
+import java.util.logging.Level;
 import org.jongo.handler.ResultSetMetaDataHandler;
 import org.jongo.handler.JongoResultSetHandler;
 import java.sql.SQLException;
@@ -14,6 +15,7 @@ import org.jongo.domain.JongoTable;
 import org.jongo.enums.Permission;
 import org.jongo.handler.JongoTableResultSetHandler;
 import org.jongo.jdbc.connections.OracleConnection;
+import org.jongo.jdbc.exceptions.JongoJDBCException;
 import org.jongo.rest.xstream.RowResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,23 +28,26 @@ public class JDBCExecutor {
 
     private static final Logger l = LoggerFactory.getLogger(JDBCExecutor.class);
     
-    public static int delete(final String table, final String id) throws SQLException, IllegalAccessException {
+    public static int delete(final String table, final String id) throws JongoJDBCException {
         l.debug("Deleting from " + table);
         QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
         
-        JongoTable result = getJongoTable(table, run);
+        JongoTable result = isWritable(table, run);
         JongoJDBCConnection conn = JDBCConnectionFactory.getJongoJDBCConnection();
         String query = conn.getDeleteQuery(table, result.getCustomId());
         l.debug(query);
-        
-        return run.update(query, JongoUtils.parseValue(id));
+        try {
+            return run.update(query, JongoUtils.parseValue(id));
+        } catch (SQLException ex) {
+            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+        }
     }
     
-    public static int insert(final String table, MultivaluedMap<String, String> formParams) throws SQLException, IllegalAccessException {
+    public static int insert(final String table, MultivaluedMap<String, String> formParams) throws JongoJDBCException {
         l.debug("Inserting in " + table);
         QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
         
-        JongoTable result = getJongoTable(table, run);
+        JongoTable result = isWritable(table, run);
         JongoJDBCConnection conn = JDBCConnectionFactory.getJongoJDBCConnection();
         
         List<String> params = new ArrayList<String>(formParams.size());
@@ -54,14 +59,18 @@ public class JDBCExecutor {
         String query = conn.getInsertQuery(table, formParams);
         l.debug(query);
         
-        return run.update(query, JongoUtils.parseValues(params));
+        try {
+            return run.update(query, JongoUtils.parseValues(params));
+        } catch (SQLException ex) {
+            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+        }
     }
     
-    public static int update(final String table, final String id, MultivaluedMap<String, String> formParams) throws SQLException, IllegalAccessException {
+    public static int update(final String table, final String id, MultivaluedMap<String, String> formParams) throws JongoJDBCException {
         l.debug("Updating table " + table);
         QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
         
-        JongoTable result = getJongoTable(table, run);
+        JongoTable result = isWritable(table, run);
         JongoJDBCConnection conn = JDBCConnectionFactory.getJongoJDBCConnection();
         
         List<String> params = new ArrayList<String>(formParams.size());
@@ -73,35 +82,71 @@ public class JDBCExecutor {
         
         String query = conn.getUpdateQuery(table, result.getCustomId(), formParams);
         l.debug(query);
-        
-        return run.update(query, JongoUtils.parseValues(params));
+        try {
+            return run.update(query, JongoUtils.parseValues(params));
+        } catch (SQLException ex) {
+            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+        }
     }
     
-    public static List<RowResponse> get(final String table, final String id) throws SQLException, IllegalAccessException {
-        l.debug("Updating table " + table);
+    public static List<RowResponse> get(final String table, final String id) throws JongoJDBCException {
+        l.debug("Getting table " + table);
         QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
         
-        JongoTable result = getJongoTable(table, run);
+        JongoTable result = isReadable(table, run);
         
         String query = "SELECT * FROM " + table + " WHERE " + result.getCustomId() + " = ?";
         l.debug(query);
         
         ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(false);
-        return run.query(query, res, JongoUtils.parseValue(id));
+        try {
+            return run.query(query, res, JongoUtils.parseValue(id));
+        } catch (SQLException ex) {
+            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+        }
     }
     
-    private static JongoTable getJongoTable(final String table, final QueryRunner run) throws SQLException, IllegalAccessException{
+    private static JongoTable isWritable(final String table, final QueryRunner run) throws JongoJDBCException{
         ResultSetHandler<JongoTable> rh = new JongoTableResultSetHandler();
         
-        JongoTable result = run.query(JongoTable.GET, rh, table);
+        JongoTable result = null;
+        try {
+            result = run.query(JongoTable.GET, rh, table);
+        } catch (SQLException ex) {
+            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+        }
+
         if(result == null){
-            l.debug("Table " + table + " is not in JongoTables. Access Denied");
-            throw new IllegalAccessException("Access Denied to table " + table);
+            throw JDBCConnectionFactory.getException("Table " + table + " is not in JongoTables. Access Denied", JongoJDBCException.ILLEGAL_ACCESS_CODE);
         }
         
         if(!result.getPermits().isWritable()){
-            l.debug("Cant write to table " + table + ". Access Denied");
-            throw new IllegalAccessException("Access Denied to table " + table);
+            throw JDBCConnectionFactory.getException("Cant write to table " + table + ". Access Denied", JongoJDBCException.ILLEGAL_WRITE_CODE);
+        }
+        
+        if(StringUtils.isEmpty(result.getCustomId())){
+            l.debug("Table " + table + " has no customId. Using default (id)");
+            result.setCustomId("id");
+        }
+        return result;
+    }
+    
+    private static JongoTable isReadable(final String table, final QueryRunner run) throws JongoJDBCException{
+        ResultSetHandler<JongoTable> rh = new JongoTableResultSetHandler();
+        
+        JongoTable result = null;
+        try {
+            result = run.query(JongoTable.GET, rh, table);
+        } catch (SQLException ex) {
+            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+        }
+
+        if(result == null){
+            throw JDBCConnectionFactory.getException("Table " + table + " is not in JongoTables. Access Denied", JongoJDBCException.ILLEGAL_ACCESS_CODE);
+        }
+        
+        if(!result.getPermits().isReadable()){
+            throw JDBCConnectionFactory.getException("Cant read table " + table + ". Access Denied", JongoJDBCException.ILLEGAL_READ_CODE);
         }
         
         if(StringUtils.isEmpty(result.getCustomId())){
@@ -111,15 +156,20 @@ public class JDBCExecutor {
         return result;
     }
 
-    public static List<RowResponse> find(final String query, Object... params) throws SQLException {
+    public static List<RowResponse> find(final String query, Object... params) throws JongoJDBCException {
         l.debug(query + " params: " + JongoUtils.varargToString(params));
         QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
         ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(false);
-        List<RowResponse> results = run.query(query, res, params);
-        return results;
+        try {
+            List<RowResponse> results = run.query(query, res, params);
+            return results;
+        } catch (SQLException ex) {
+            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+        }
+        
     }
 
-    public static List<RowResponse> find(final DynamicFinder query, Object... params) {
+    public static List<RowResponse> find(final DynamicFinder query, Object... params) throws JongoJDBCException{
         l.debug(query + " params: " + JongoUtils.varargToString(params));
         QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
         ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(query.findAll());
@@ -127,9 +177,8 @@ public class JDBCExecutor {
             List<RowResponse> results = run.query(query.getSql(), res, params);
             return results;
         } catch (SQLException ex) {
-            l.error(ex.getMessage());
+            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
         }
-        return null;
     }
     
     private static int update(final String query, Object... params) throws SQLException {
@@ -138,7 +187,7 @@ public class JDBCExecutor {
         return run.update(query, params);
     }
 
-    public static List<RowResponse> getTableMetaData(final String table) {
+    public static List<RowResponse> getTableMetaData(final String table) throws JongoJDBCException {
         l.debug("Obtaining metadata from table " + table);
         QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
         ResultSetHandler<List<RowResponse>> res = new ResultSetMetaDataHandler();
@@ -147,21 +196,21 @@ public class JDBCExecutor {
             List<RowResponse> results = run.query(query, res);
             return results;
         } catch (SQLException ex) {
-            l.error(ex.getMessage());
+            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
         }
-        return null;
     }
     
     public static void createJongoTablesAndData() throws SQLException{
         QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
         try{
-            getJongoTable("JongoTable", run);
-        }catch(IllegalAccessException e){
-            l.info("JongoTable Exists. No need to continue");
-            return;
-        }catch(SQLException e){
-            l.info("JongoTable Doesn't Exists. Generating configuration");
+            isReadable("JongoTable", run);
+        }catch(JongoJDBCException e){
+            if(!e.isDatabaseUnavailable()){
+                l.info("JongoTable Exists. No need to continue");
+            }
         }
+        l.info("Creating Jongo Tables");
+        
         JongoJDBCConnection conn = JDBCConnectionFactory.getJongoJDBCConnection();
         
         update(conn.getCreateJongoQueryTable());

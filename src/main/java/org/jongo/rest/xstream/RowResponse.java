@@ -1,6 +1,7 @@
 package org.jongo.rest.xstream;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
@@ -13,6 +14,11 @@ public class RowResponse {
     private final int roi;
     private final Map<String, String> columns;// = new HashMap<String, String>();
 
+    public RowResponse(int roi) {
+        this.roi = roi;
+        this.columns = new HashMap<String, String>();
+    }
+    
     public RowResponse(int roi, Map<String, String> columns) {
         this.roi = roi;
         this.columns = columns;
@@ -34,9 +40,9 @@ public class RowResponse {
         for(String key: columns.keySet()){
             String val = columns.get(key);
             if(StringUtils.isNumeric(val)){
-                args.add("\"" + key + "\"" + ":" + val);
+                args.add("\"" + key.toLowerCase() + "\"" + ":" + val);
             }else{
-                args.add("\"" + key + "\"" + ":" + "\"" + val + "\"");
+                args.add("\"" + key.toLowerCase() + "\"" + ":" + "\"" + val + "\"");
             }
         }
         b.append(StringUtils.join(args, ","));

@@ -21,6 +21,7 @@ import javax.ws.rs.core.UriInfo;
 import org.jongo.JongoUtils;
 import org.jongo.jdbc.DynamicFinder;
 import org.jongo.jdbc.JDBCExecutor;
+import org.jongo.jdbc.exceptions.JongoJDBCException;
 import org.jongo.rest.xstream.JongoError;
 import org.jongo.rest.xstream.JongoResponse;
 import org.jongo.rest.xstream.RowResponse;
@@ -48,10 +49,10 @@ public class JongoWSImpl implements JongoWS {
         List<RowResponse> results;
         try {
             results = JDBCExecutor.get(table, id);
-        } catch (SQLException ex) {
+        } catch (JongoJDBCException ex) {
             l.info(ex.getMessage());
-            JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
-            return error.getResponse(format);
+            l.info("" + ex.getSqlErrorCode());
+            return ex.getResponse(format);
         } catch (Exception ex){
             l.info(ex.getMessage());
             JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
@@ -74,13 +75,12 @@ public class JongoWSImpl implements JongoWS {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Override
     public Response insert(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, final MultivaluedMap<String, String> formParams) {
-        int result;
+        int result = 0;
         try {
             result = JDBCExecutor.insert(table, formParams);
-        } catch (SQLException ex) {
+        } catch (JongoJDBCException ex) {
             l.info(ex.getMessage());
-            JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
-            return error.getResponse(format);
+            return ex.getResponse(format);
         } catch (Exception ex){
             l.info(ex.getMessage());
             JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
@@ -93,7 +93,7 @@ public class JongoWSImpl implements JongoWS {
         }
 
         List<RowResponse> results = new ArrayList<RowResponse>();
-        results.add(new RowResponse(0,null));
+        results.add(new RowResponse(0));
         JongoResponse r = new JongoResponse(null, results, Response.Status.CREATED);
         return r.getResponse(format);
     }
@@ -108,10 +108,9 @@ public class JongoWSImpl implements JongoWS {
         int result;
         try {
             result = JDBCExecutor.update(table, id, queryParams);
-        } catch (SQLException ex) {
+        } catch (JongoJDBCException ex) {
             l.info(ex.getMessage());
-            JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
-            return error.getResponse(format);
+            return ex.getResponse(format);
         } catch (Exception ex){
             l.info(ex.getMessage());
             JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
@@ -124,7 +123,7 @@ public class JongoWSImpl implements JongoWS {
         }
 
         List<RowResponse> results = new ArrayList<RowResponse>();
-        results.add(new RowResponse(0,null));
+        results.add(new RowResponse(0));
         JongoResponse r = new JongoResponse(null, results, Response.Status.OK);
         return r.getResponse(format);
     }
@@ -137,14 +136,9 @@ public class JongoWSImpl implements JongoWS {
         int result = 0;
         try {
             result = JDBCExecutor.delete(table, id);
-        } catch (SQLException ex) {
+        } catch (JongoJDBCException ex) {
             l.info(ex.getMessage());
-            JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
-            return error.getResponse(format);
-        } catch (IllegalAccessException ex){
-            l.info(ex.getMessage());
-            JongoError error = new JongoError(null, Response.Status.FORBIDDEN);
-            return error.getResponse(format);
+            return ex.getResponse(format);
         } catch (Exception ex){
             l.error(ex.getMessage());
             JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
@@ -157,7 +151,7 @@ public class JongoWSImpl implements JongoWS {
         }
 
         List<RowResponse> results = new ArrayList<RowResponse>();
-        results.add(new RowResponse(0,null));
+        results.add(new RowResponse(0));
         JongoResponse r = new JongoResponse(null, results, Response.Status.OK);
         return r.getResponse(format);
     }
@@ -175,10 +169,9 @@ public class JongoWSImpl implements JongoWS {
         List<RowResponse> results;
         try {
             results = JDBCExecutor.find(q, JongoUtils.parseValue(val));
-        } catch (SQLException ex) {
+        } catch (JongoJDBCException ex) {
             l.info(ex.getMessage());
-            JongoError error = new JongoError(null, Response.Status.BAD_REQUEST);
-            return error.getResponse(format);
+            return ex.getResponse(format);
         } catch (Exception ex){
             l.info(ex.getMessage());
             JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
@@ -201,7 +194,12 @@ public class JongoWSImpl implements JongoWS {
     public Response findBy(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @QueryParam("query") String query, @QueryParam("value") String value, @QueryParam("values")  List<String> values) {
         List<RowResponse> results = null;
         if(query == null){
-            results = JDBCExecutor.getTableMetaData(table);
+            try{
+                results = JDBCExecutor.getTableMetaData(table);
+            } catch (JongoJDBCException ex) {
+                l.info(ex.getMessage());
+                return ex.getResponse(format);
+            }
             if(results == null || results.isEmpty()){
                 JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "Invalid table " + table);
                 return error.getResponse(format);
@@ -210,15 +208,30 @@ public class JongoWSImpl implements JongoWS {
             if(values.isEmpty()){
                 if(value == null){
                     DynamicFinder df = DynamicFinder.valueOf(table, query);
-                    results = JDBCExecutor.find(df);
+                    try{
+                        results = JDBCExecutor.find(df);
+                    } catch (JongoJDBCException ex) {
+                        l.info(ex.getMessage());
+                        return ex.getResponse(format);
+                    }
                 }else{
                     DynamicFinder df = DynamicFinder.valueOf(table, query, value);
-                    results = JDBCExecutor.find(df, JongoUtils.parseValue(value));
+                    try{
+                        results = JDBCExecutor.find(df, JongoUtils.parseValue(value));
+                    } catch (JongoJDBCException ex) {
+                        l.info(ex.getMessage());
+                        return ex.getResponse(format);
+                    }
                 }
 
             }else{
                 DynamicFinder df = DynamicFinder.valueOf(table, query, values.toArray(new String []{}));
-                results = JDBCExecutor.find(df, JongoUtils.parseValues(values));
+                try{
+                    results = JDBCExecutor.find(df, JongoUtils.parseValues(values));
+                } catch (JongoJDBCException ex) {
+                    l.info(ex.getMessage());
+                    return ex.getResponse(format);
+                }
             }
             
             if(results == null || results.isEmpty()){

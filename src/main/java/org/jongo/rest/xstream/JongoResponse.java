@@ -46,7 +46,6 @@ public class JongoResponse {
         // I really tried to use XStream to generate the JSON, but it simply didn't do what I wanted.
         StringBuilder b = new StringBuilder("{\"response\":[");
         for(RowResponse row : rows){
-            b.append("\"row\":");
             b.append(row.toJSON());
             b.append(",");
         }
