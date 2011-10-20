@@ -13,6 +13,10 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 import org.jongo.JongoConfiguration;
 import org.jongo.jdbc.connections.HSQLConnection;
 import org.jongo.jdbc.connections.OracleConnection;
+import org.jongo.jdbc.exceptions.HSQLException;
+import org.jongo.jdbc.exceptions.JongoJDBCException;
+import org.jongo.jdbc.exceptions.MySQLException;
+import org.jongo.jdbc.exceptions.OracleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +42,7 @@ public class JDBCConnectionFactory {
                     break;
                 case ORACLE:
                     connection = new OracleConnection(configuration.getJdbcUrl(), configuration.getJdbcUsername(), configuration.getJdbcPassword());
+                    break;
                 default:
                     throw new IllegalArgumentException("Not implemented yet");
             }
@@ -71,4 +76,31 @@ public class JDBCConnectionFactory {
         datasource = dataSource;
     }
     
+    public static JongoJDBCException getException(final String msg, final SQLException e){
+        JongoConfiguration configuration = JongoConfiguration.instanceOf();
+            switch(configuration.getDriver()){
+                case MySQL:
+                    return new MySQLException(msg, e);
+                case HSQLDB:
+                    return new HSQLException(msg, e);
+                case ORACLE:
+                    return new OracleException(msg, e);
+                default:
+                    throw new IllegalArgumentException("Not implemented yet");
+            }
+    }
+    
+    public static JongoJDBCException getException(final String msg, final int e){
+        JongoConfiguration configuration = JongoConfiguration.instanceOf();
+            switch(configuration.getDriver()){
+                case MySQL:
+                    return new MySQLException(msg, e);
+                case HSQLDB:
+                    return new HSQLException(msg, e);
+                case ORACLE:
+                    return new OracleException(msg, e);
+                default:
+                    throw new IllegalArgumentException("Not implemented yet");
+            }
+    }
 }

@@ -1,6 +1,5 @@
 package org.jongo.jdbc;
 
-import java.util.Map;
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.enums.JDBCDriver;
