@@ -65,65 +65,67 @@ public class AppTest extends TestCase {
         }
     }
     
-    public void testCreate(){
-        List<List<NameValuePair>> users = getTestValues();
-        for(List<NameValuePair> al : users){
-            assertTrue(jongoPOSTRequest(jongoUrl + "user", al));
+    public void test1Create(){
+        if(request(jongoUrl + "user/0", "GET") != 200){
+            List<List<NameValuePair>> users = getTestValues();
+            for(List<NameValuePair> al : users){
+                assertEquals(jongoPOSTRequest(jongoUrl + "user", al), 201);
+            }
         }
     }
 
-    public void testRetrieve(){
-        assertTrue(request(jongoUrl + "user/3", "GET"));
-        assertTrue(request(jongoUrl + "user/name/foo", "GET"));
-        assertTrue(request(jongoUrl + "user/age/30", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findBy.Name&value=foo", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findBy.Name.And.Age&values=foo&values=30", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findBy.Age&value=30", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findBy.Age.Between&values=20&values=40", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findBy.Age.LessThan&value=50", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findBy.Name.Like&value=foo", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findBy.Name.IsNotNull", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findBy.Credit.IsNull", "GET"));
-        assertTrue(request(jongoUrl + "user?query=findBy.Age.GreaterThanEquals.And.Credit.IsNotNull&value=10", "GET"));
+    public void test2Retrieve(){
+        assertEquals(request(jongoUrl + "user/3", "GET"), 200);
+        assertEquals(request(jongoUrl + "user/name/foo", "GET"), 200);
+        assertEquals(request(jongoUrl + "user/age/30", "GET"), 200);
+        assertEquals(request(jongoUrl + "user?query=findBy.Name&value=foo", "GET"), 200);
+        assertEquals(request(jongoUrl + "user?query=findBy.Name.And.Age&values=foo&values=30", "GET"), 200);
+        assertEquals(request(jongoUrl + "user?query=findBy.Age&value=30", "GET"), 200);
+        assertEquals(request(jongoUrl + "user?query=findBy.Age.Between&values=20&values=40", "GET"), 200);
+        assertEquals(request(jongoUrl + "user?query=findBy.Age.LessThan&value=50", "GET"), 200);
+        assertEquals(request(jongoUrl + "user?query=findBy.Name.Like&value=foo", "GET"), 200);
+        assertEquals(request(jongoUrl + "user?query=findBy.Name.IsNotNull", "GET"), 200);
+        assertEquals(request(jongoUrl + "user?query=findBy.Credit.IsNull", "GET"), 200);
+        assertEquals(request(jongoUrl + "user?query=findBy.Age.GreaterThanEquals.And.Credit.IsNotNull&value=10", "GET"), 200);
     }
     
-    public void testUpdate(){
-        assertTrue(request(jongoUrl + "user/3?name=bar", "PUT"));
-        assertTrue(request(jongoUrl + "user/name/bar", "GET"));
-        assertFalse(request(jongoUrl + "user?query=findBy.Name&value=foo", "GET"));
+    public void test3Update(){
+        assertEquals(request(jongoUrl + "user/3?name=bar", "PUT"), 200);
+        assertEquals(request(jongoUrl + "user/name/bar", "GET"), 200);
+        assertEquals(request(jongoUrl + "user?query=findBy.Name&value=foo", "GET"), 404);
     }
     
-    public void testDelete(){
-        assertTrue(request(jongoUrl + "user/3", "DELETE"));
-        assertFalse(request(jongoUrl + "user/3", "GET"));
+    public void test4Delete(){
+        assertEquals(request(jongoUrl + "user/3", "DELETE"), 200);
+        assertEquals(request(jongoUrl + "user/3", "GET"), 404);
     }
     
-    public boolean request(final String url, final String method){
+    public int request(final String url, final String method){
         try {
             HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
             con.setRequestMethod(method);
             con.setDoOutput(true);
+            BufferedReader r = null;
+            
+            if(con.getResponseCode() != Response.Status.OK.getStatusCode()){
+                r = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+            }else{
+                r = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            }
             StringBuilder response = new StringBuilder();
-            System.out.println(con.getResponseCode());
-            BufferedReader r = new BufferedReader(new InputStreamReader(con.getInputStream()));
             String strLine = null;
             while((strLine = r.readLine()) != null){
                 response.append(strLine);
                 response.append("\n");
             }
-            
-            System.out.println(response);
-            if(con.getResponseCode() != Response.Status.OK.getStatusCode()){
-                return false;
-            }
-            return true;
+            return con.getResponseCode();
         } catch (Exception ex) {
             ex.printStackTrace();
-            return false;
+            return -1;
         }
     }
     
-    public boolean jongoPOSTRequest(final String url, final List<NameValuePair> parameters){
+    public int jongoPOSTRequest(final String url, final List<NameValuePair> parameters){
         
         final String urlParameters = URLEncodedUtils.format(parameters, "UTF-8");
         
@@ -140,22 +142,24 @@ public class AppTest extends TestCase {
             wr.flush ();
             wr.close ();
             
+            BufferedReader r = null;
+            if(con.getResponseCode() != Response.Status.CREATED.getStatusCode()){
+                r = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+            }else{
+                r = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            }
+            
             StringBuilder response = new StringBuilder();
-            BufferedReader r = new BufferedReader(new InputStreamReader(con.getInputStream()));
             String strLine = null;
             while((strLine = r.readLine()) != null){
                 response.append(strLine);
                 response.append("\n");
             }
-            System.out.println(con.getResponseCode());
-            System.out.println(response);
-            if(con.getResponseCode() != Response.Status.CREATED.getStatusCode()){
-                return false;
-            }
-            return true;
+            System.out.println(response.toString());
+            return con.getResponseCode();
         } catch (Exception ex) {
             ex.printStackTrace();
-            return false;
+            return -1;
         }
     }
     
