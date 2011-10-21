@@ -61,6 +61,7 @@ public class Jongo {
         JongoJDBCConnection conn = null;
         try{
             conn = JDBCConnectionFactory.getJongoJDBCConnection();
+            conn = JDBCConnectionFactory.getJongoAdminJDBCConnection();
             JDBCExecutor.createJongoTablesAndData();
         }catch(Exception e){
             l.error("Failed to generate Jongo Tables and default configuration.");

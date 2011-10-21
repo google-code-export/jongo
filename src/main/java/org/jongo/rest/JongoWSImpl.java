@@ -168,7 +168,7 @@ public class JongoWSImpl implements JongoWS {
         String q = "SELECT * FROM " + table + " WHERE " + col + " = ?";
         List<RowResponse> results;
         try {
-            results = JDBCExecutor.find(q, JongoUtils.parseValue(val));
+            results = JDBCExecutor.find(table, q, JongoUtils.parseValue(val));
         } catch (JongoJDBCException ex) {
             l.info(ex.getMessage());
             return ex.getResponse(format);

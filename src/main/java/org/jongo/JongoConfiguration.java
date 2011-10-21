@@ -21,11 +21,18 @@ public class JongoConfiguration {
     
     private String ip;
     private int port;
+    
     private JDBCDriver driver;
     private String jdbcUrl;
     private String jdbcUsername;
     private String jdbcPassword;
+    
     private String adminIp;
+    
+    private JDBCDriver adminDriver;
+    private String jdbcAdminUrl;
+    private String jdbcAdminUsername;
+    private String jdbcAdminPassword;
     
     private JongoConfiguration(){}
     
@@ -40,6 +47,10 @@ public class JongoConfiguration {
             instance.jdbcUsername = prop.getProperty("jongo.jdbc.username");
             instance.jdbcPassword = prop.getProperty("jongo.jdbc.password");
             instance.adminIp = prop.getProperty("jongo.admin.ip");
+            instance.adminDriver = JDBCDriver.driverOf(prop.getProperty("jongo.admin.jdbc.driver"));
+            instance.jdbcAdminUrl = prop.getProperty("jongo.admin.jdbc.url");
+            instance.jdbcAdminUsername = prop.getProperty("jongo.admin.jdbc.username");
+            instance.jdbcAdminPassword = prop.getProperty("jongo.admin.jdbc.password");
         }
         return instance;
     }
@@ -100,5 +111,21 @@ public class JongoConfiguration {
 
     public String getAdminIp() {
         return adminIp;
+    }
+
+    public JDBCDriver getAdminDriver() {
+        return adminDriver;
+    }
+
+    public String getJdbcAdminPassword() {
+        return jdbcAdminPassword;
+    }
+
+    public String getJdbcAdminUrl() {
+        return jdbcAdminUrl;
+    }
+
+    public String getJdbcAdminUsername() {
+        return jdbcAdminUsername;
     }
 }

@@ -241,6 +241,10 @@ public class DynamicFinder {
     public String getSql() {
         return sql;
     }
+
+    public String getTable() {
+        return table;
+    }
     
     public boolean findAll(){
         return this.command.equalsIgnoreCase(FINDALLBY);

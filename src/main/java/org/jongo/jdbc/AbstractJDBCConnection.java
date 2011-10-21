@@ -67,5 +67,20 @@ public class AbstractJDBCConnection {
     public String getCreateJongoTableTrigger() {
         throw new UnsupportedOperationException("Not supported.");
     }
-    
+
+    public JDBCDriver getDriver() {
+        return driver;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public String getUsername() {
+        return username;
+    }
 }
