@@ -1,6 +1,7 @@
 package org.jongo.jdbc;
 
 import javax.ws.rs.core.MultivaluedMap;
+import org.jongo.enums.JDBCDriver;
 
 /**
  *
@@ -28,4 +29,11 @@ public interface JongoJDBCConnection {
     
     public String getCreateJongoQueryTrigger();
     
+    public String getUrl();
+
+    public String getUsername();
+    
+    public String getPassword();
+    
+    public JDBCDriver getDriver();
 }
