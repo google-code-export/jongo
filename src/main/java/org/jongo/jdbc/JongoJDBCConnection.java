@@ -17,18 +17,6 @@ public interface JongoJDBCConnection {
     
     public String getDeleteQuery(final String table, final String key);
     
-    public String getCreateJongoTableQuery();
-    
-    public String getCreateJongoTableSequence();
-    
-    public String getCreateJongoTableTrigger();
-    
-    public String getCreateJongoQueryTable();
-    
-    public String getCreateJongoQuerySequence();
-    
-    public String getCreateJongoQueryTrigger();
-    
     public String getUrl();
 
     public String getUsername();
