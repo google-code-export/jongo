@@ -52,22 +52,6 @@ public class AbstractJDBCConnection {
          return query.toString();
     }
     
-    public String getCreateJongoQuerySequence() {
-        throw new UnsupportedOperationException("Not supported.");
-    }
-
-    public String getCreateJongoQueryTrigger() {
-        throw new UnsupportedOperationException("Not supported.");
-    }
-
-    public String getCreateJongoTableSequence() {
-        throw new UnsupportedOperationException("Not supported.");
-    }
-
-    public String getCreateJongoTableTrigger() {
-        throw new UnsupportedOperationException("Not supported.");
-    }
-
     public JDBCDriver getDriver() {
         return driver;
     }
