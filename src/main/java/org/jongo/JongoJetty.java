@@ -25,12 +25,14 @@ public class JongoJetty{
         sh.setInitParameter("com.sun.jersey.config.property.resourceConfigClass", "com.sun.jersey.api.core.PackagesResourceConfig");
         sh.setInitParameter("com.sun.jersey.config.property.packages", "org.jongo.rest");
         
-        ServletHolder admin = new ServletHolder(JongoAdminServlet.class);
+        ServletHolder shAdmin = new ServletHolder(ServletContainer.class);
+        shAdmin.setInitParameter("com.sun.jersey.config.property.resourceConfigClass", "com.sun.jersey.api.core.PackagesResourceConfig");
+        shAdmin.setInitParameter("com.sun.jersey.config.property.packages", "org.jongo.admin");
         
         Server server = new Server(configuration.getPort());
         Context context = new Context(server, "/", Context.SESSIONS);
         context.addServlet(sh, "/jongo/*");
-        context.addServlet(admin, "/jongo-admin/*");
+        context.addServlet(shAdmin, "/admin/*");
         server.start();
         server.join();
     }
