@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
+@Deprecated
 public class JongoAdminServlet extends HttpServlet{
     
     private static final Logger l = LoggerFactory.getLogger(JongoAdminServlet.class);
