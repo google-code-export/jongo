@@ -16,7 +16,6 @@ public class JongoConfiguration {
     private static final Logger l = LoggerFactory.getLogger(JongoConfiguration.class);
     
     private static final String propertiesFileName = "/org/jongo/jongo.properties";
-    
     private static JongoConfiguration instance;
     
     private String ip;
@@ -29,10 +28,10 @@ public class JongoConfiguration {
     
     private String adminIp;
     
-    private JDBCDriver adminDriver;
-    private String jdbcAdminUrl;
-    private String jdbcAdminUsername;
-    private String jdbcAdminPassword;
+    private static final JDBCDriver adminDriver = JDBCDriver.HSQLDB;
+    private static final String jdbcAdminUrl = "jdbc:hsqldb:file:data/jongoAdmin";
+    private static final String jdbcAdminUsername = "jongoAdmin";
+    private static final String jdbcAdminPassword = "jongoAdmin";
     
     private JongoConfiguration(){}
     
@@ -47,10 +46,6 @@ public class JongoConfiguration {
             instance.jdbcUsername = prop.getProperty("jongo.jdbc.username");
             instance.jdbcPassword = prop.getProperty("jongo.jdbc.password");
             instance.adminIp = prop.getProperty("jongo.admin.ip");
-            instance.adminDriver = JDBCDriver.driverOf(prop.getProperty("jongo.admin.jdbc.driver"));
-            instance.jdbcAdminUrl = prop.getProperty("jongo.admin.jdbc.url");
-            instance.jdbcAdminUsername = prop.getProperty("jongo.admin.jdbc.username");
-            instance.jdbcAdminPassword = prop.getProperty("jongo.admin.jdbc.password");
         }
         return instance;
     }
