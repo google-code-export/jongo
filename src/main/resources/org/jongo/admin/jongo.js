@@ -9,7 +9,7 @@ debug = function (log) {
 }
 
 function drawJongoTables(componentName) {
-    $.getJSON('http://localhost:8080/jongo/JongoTable?query=findAllBy.Id.GreaterThanEquals&values=0', function(data) {
+    $.getJSON('http://localhost:8080/admin/table/all', function(data) {
         var items = new Array();
             $.each(data.response, function(){
                 items.push('<form id="fieldForm')
@@ -40,7 +40,7 @@ function drawJongoTables(componentName) {
 }
 
 function drawJongoQueries(component){
-    $.getJSON('http://localhost:8080/jongo/JongoQuery?query=findAllBy.Id.GreaterThanEquals&values=0', function(data) {
+    $.getJSON('http://localhost:8080/admin/query/all', function(data) {
         var items = new Array();
             $.each(data.response.rows, function(){
                 //
@@ -84,7 +84,7 @@ function addTable(){
     data['customId'] = $("#tableCustomId").val()
     data['permits'] = $("#jongoPermissions").val()
     
-    var ret = $.post('http://localhost:8080/jongo/JongoTable', data, function() {}, 'json');
+    var ret = $.post('http://localhost:8080/admin/table', data, function() {}, 'json');
     
     ret.success(function(){
         showJQueryDialog("Successfully added new table", data['name']);
@@ -105,7 +105,7 @@ function editTable(id){
     
     var ret = $.ajax({
         type: 'PUT',
-        url: 'http://localhost:8080/jongo/JongoTable/' + id + '?' + data.join('&'),
+        url: 'http://localhost:8080/admin/table/' + id + '?' + data.join('&'),
         success: function() {},
         data: data,
         dataType: 'json'
@@ -128,7 +128,7 @@ function addQuery(){
     data['description'] = $("#queryDescription").val()
     data['query'] = $("#queryText").val()
     
-    var ret = $.post('http://localhost:8080/jongo/JongoQuery', data, function() {}, 'json');
+    var ret = $.post('http://localhost:8080/admin/query', data, function() {}, 'json');
     
     ret.success(function(){
         showJQueryDialog("Successfully added new query", data['name']);
