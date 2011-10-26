@@ -30,34 +30,4 @@ public class OracleConnection extends AbstractJDBCConnection implements JongoJDB
             l.error("Unable to load driver. Add the Oracle JDBC Connector jar to the lib folder");
         }
     }
-
-    @Override
-    public String getCreateJongoTableQuery() {
-        return "CREATE TABLE JongoTable ( id INTEGER, name VARCHAR(50) UNIQUE NOT NULL, customId VARCHAR(10), permits INTEGER) ";
-    }
-    
-    @Override
-    public String getCreateJongoTableSequence() {
-        return "CREATE SEQUENCE jongo_table_seq START WITH 0 INCREMENT BY 1 NOMAXVALUE";
-    }
-
-    @Override
-    public String getCreateJongoTableTrigger() {
-        return "CREATE TRIGGER jongo_table_trigger BEFORE INSERT ON JongoTable FOR EACH ROW BEGIN SELECT jongo_table_seq.nextval INTO :new.id FROM DUAL";
-    }
-    
-    @Override
-    public String getCreateJongoQueryTable() {
-        return "CREATE TABLE JongoQuery ( id INTEGER, name VARCHAR(50) UNIQUE NOT NULL, query VARCHAR NOT NULL, description VARCHAR(50) )";
-    }
-
-    @Override
-    public String getCreateJongoQuerySequence() {
-        return "CREATE SEQUENCE jongo_query_seq START WITH 0 INCREMENT BY 1 NOMAXVALUE";
-    }
-    
-    @Override
-    public String getCreateJongoQueryTrigger() {
-        return "CREATE TRIGGER jongo_query_trigger BEFORE INSERT ON JongoQuery FOR EACH ROW BEGIN SELECT jongo_query_seq.nextval INTO :new.id FROM DUAL";
-    }
 }

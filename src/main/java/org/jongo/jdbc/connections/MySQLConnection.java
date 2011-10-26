@@ -30,14 +30,4 @@ public class MySQLConnection extends AbstractJDBCConnection implements JongoJDBC
             l.error("Unable to load driver. Add the MySQL Connector jar to the lib folder");
         }
     }
-
-    @Override
-    public String getCreateJongoTableQuery() {
-        return "CREATE TABLE JongoTable ( id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(50) UNIQUE NOT NULL, customId VARCHAR(10), permits INTEGER )";
-    }
-
-    @Override
-    public String getCreateJongoQueryTable() {
-        return "CREATE TABLE JongoQuery ( id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(50) UNIQUE NOT NULL, query VARCHAR NOT NULL, description VARCHAR(50) )";
-    }
 }
