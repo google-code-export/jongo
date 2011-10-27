@@ -13,7 +13,6 @@ import org.jongo.JongoUtils;
 import org.jongo.domain.JongoTable;
 import org.jongo.enums.Permission;
 import org.jongo.handler.JongoTableResultSetHandler;
-import org.jongo.jdbc.connections.OracleConnection;
 import org.jongo.jdbc.exceptions.JongoJDBCException;
 import org.jongo.rest.xstream.RowResponse;
 import org.slf4j.Logger;
@@ -233,7 +232,7 @@ public class JDBCExecutor {
     }
     
     public static int adminInsert(final String table, MultivaluedMap<String, String> formParams) throws JongoJDBCException {
-        l.debug("Inserting in " + table);
+        l.debug("Inserting in admin " + table);
         
         List<String> params = new ArrayList<String>(formParams.size());
         for(String k : formParams.keySet()){
@@ -280,6 +279,21 @@ public class JDBCExecutor {
         QueryRunner run = new QueryRunner(JDBCConnectionFactory.getAdminDataSource());
         try {
             return run.update(query, JongoUtils.parseValues(params));
+        } catch (SQLException ex) {
+            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+        }
+    }
+    
+    public static int adminDelete(final String table, final String id) throws JongoJDBCException {
+        l.debug("Deleting admin " + table);
+        
+        JongoJDBCConnection conn = JDBCConnectionFactory.getJongoJDBCConnection();
+        String query = conn.getDeleteQuery(table, "id");
+        l.debug(query);
+        
+        QueryRunner run = new QueryRunner(JDBCConnectionFactory.getAdminDataSource());
+        try {
+            return run.update(query, JongoUtils.parseValue(id));
         } catch (SQLException ex) {
             throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
         }
