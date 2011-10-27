@@ -81,7 +81,7 @@ public class HSQLException extends JongoJDBCException {
      */
     @Override
     public boolean isUniqueConstraintViolation() {
-        return ((sqlErrorCode == 9) || (sqlErrorCode == 104));
+        return ((sqlErrorCode == 9) || (sqlErrorCode == 104) || (sqlErrorCode == -104));
     }
 
     /** was db exception caused by a an unbound variable (parameter)

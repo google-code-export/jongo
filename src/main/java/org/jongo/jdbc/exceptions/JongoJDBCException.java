@@ -1,10 +1,8 @@
 package org.jongo.jdbc.exceptions;
 
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 import java.sql.SQLException;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.jongo.rest.xstream.JongoError;
 
 /**
  * DatabaseException denotes a generic runtime data access (SQL) exception. By declaring the 
@@ -68,26 +66,6 @@ public abstract class JongoJDBCException extends Exception {
         return this.sqlErrorCode == ILLEGAL_READ_CODE;
     }
     
-    private static XStream initializeXStream(XStream xStream){
-        xStream.setMode(XStream.NO_REFERENCES);
-        xStream.autodetectAnnotations(false);
-//        xStream.alias("response", JongoError.class);
-//        xStream.useAttributeFor(JongoError.class, "sessionId");
-        return xStream;
-    }
-    
-    public String toXML(){
-        XStream xStream = new XStream();
-        xStream = initializeXStream(xStream);
-        return xStream.toXML(this);
-    }
-    
-    public String toJSON(){
-        XStream xStream = new XStream(new JettisonMappedXmlDriver());
-        xStream = initializeXStream(xStream);
-        return xStream.toXML(this);
-    }
-    
     private Response.Status getResponseStatus(){
         if(isDataIntegrityViolation() ||
                 isBadSQLGrammar() ||
@@ -104,8 +82,10 @@ public abstract class JongoJDBCException extends Exception {
     }
     
     public Response getResponse(final String format){
-        String response = (format.equalsIgnoreCase("json")) ? this.toJSON() : this.toXML();
-        String media = (format.equalsIgnoreCase("json")) ? MediaType.APPLICATION_JSON : MediaType.APPLICATION_XML;
-        return Response.status(getResponseStatus()).entity(response).type(media).build();
+        JongoError error = new JongoError(null, getResponseStatus(), this.getMessage());
+        return error.getResponse(format);
+//        String response = (format.equalsIgnoreCase("json")) ? this.toJSON() : this.toXML();
+//        String media = (format.equalsIgnoreCase("json")) ? MediaType.APPLICATION_JSON : MediaType.APPLICATION_XML;
+//        return Response.status(getResponseStatus()).entity(response).type(media).build();
     }
 }
