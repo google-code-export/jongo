@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -109,9 +110,18 @@ public class AdminWSImpl implements AdminWS {
         }
     }
     
+    @DELETE
+    @Path("table/{id}")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
-    public Response deleteJongoTable(@Context HttpServletRequest request, String format, String id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Response deleteJongoTable(@Context HttpServletRequest request, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") final String id) {
+        l.debug("Deleting admin table with ID " + id);
+        if(!isAdminRequest(request)){
+            l.debug("Admin console connection from " + request.getRemoteAddr() + " forbidden. Only admin IPs are allowed");
+            return Response.status(Response.Status.FORBIDDEN).entity(E403).type(MediaType.TEXT_HTML).build();
+        }else{
+            return deleteJongoResource("JongoTable", id, format);
+        }
     }
     
     @Override
@@ -126,9 +136,17 @@ public class AdminWSImpl implements AdminWS {
         }
     }
 
+    @DELETE
+    @Path("query/{id}")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
-    public Response deleteJongoQuery(@Context HttpServletRequest request, String format, String id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Response deleteJongoQuery(@Context HttpServletRequest request, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") final String id) {
+        if(!isAdminRequest(request)){
+            l.debug("Admin console connection from " + request.getRemoteAddr() + " forbidden. Only admin IPs are allowed");
+            return Response.status(Response.Status.FORBIDDEN).entity(E403).type(MediaType.TEXT_HTML).build();
+        }else{
+            return deleteJongoResource("JongoQuery", id, format);
+        }
     }
     
     @Override
@@ -219,6 +237,30 @@ public class AdminWSImpl implements AdminWS {
             return ex.getResponse(format);
         } catch (Exception ex){
             l.info(ex.getMessage());
+            JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+            return error.getResponse(format);
+        }
+        
+        if(result == 0){
+            JongoError error = new JongoError(null, Response.Status.NO_CONTENT);
+            return error.getResponse(format);
+        }
+
+        List<RowResponse> results = new ArrayList<RowResponse>();
+        results.add(new RowResponse(0));
+        JongoResponse r = new JongoResponse(null, results, Response.Status.OK);
+        return r.getResponse(format);
+    }
+    
+    private Response deleteJongoResource(String table, String id, String format){
+        int result = 0;
+        try {
+            result = JDBCExecutor.adminDelete(table, id);
+        } catch (JongoJDBCException ex) {
+            l.info(ex.getMessage());
+            return ex.getResponse(format);
+        } catch (Exception ex){
+            l.error(ex.getMessage());
             JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
             return error.getResponse(format);
         }
