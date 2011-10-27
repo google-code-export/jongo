@@ -7,23 +7,27 @@
         <script type="text/javascript" src="http://code.jquery.com/ui/1.8.16/jquery-ui.min.js"></script>
         <script type="text/javascript" src="jongo.js"></script>
         <link type="text/css" rel="stylesheet" href="jongo.css"/>
-        <link type="text/css" rel="stylesheet" href="http://code.jquery.com/ui/1.8.16/themes/trontastic/jquery-ui.css"/>
+        <link type="text/css" rel="stylesheet" href="http://code.jquery.com/ui/1.8.16/themes/humanity/jquery-ui.css"/>
 
         <script>
             $(function() {
                 $( "#tabs" ).tabs();
-                $( "#jqueries" ).accordion({
-                    autoHeight: false,
-                    navigation: true,
-                    collapsible: true
-                });
+//                $( "#jqueries" ).accordion({
+//                    autoHeight: false,
+//                    navigation: true,
+//                    collapsible: true
+//                });
 //                $( "#addJongoTable" ).button();
 //                $( "#addJongoTable" ).click(addTable(this));
+//                    $( '.jqueryButton' ).button();
+
             });
             
             $(document).ready(function(){
                 drawJongoTables('#jtables');
-//                drawJongoQueries('#jqueries');
+                drawJongoQueries('#jqueries');
+                $( '.jquery-button' ).button();
+                $('#jongoPermissions').buttonset();
             });
         </script>
 
@@ -36,24 +40,22 @@
                 <ul>
                     <li><a href="#tabs-1">Jongo Tables</a></li>
                     <li><a href="#tabs-2">Jongo Complex Queries</a></li>
-                    <li><a href="#tabs-3">Jongo Configuration</a></li>
+<!--                    <li><a href="#tabs-3">Jongo Configuration</a></li>-->
                 </ul>
                 <div id="tabs-1">
                     <div class="tableContainer">
                         <div id="jtables" class="jongo"></div>
                     </div>
                     <div class="tableFormContainer">
-                        <h2>Add table:</h2>
+                        <h2>Add table</h2>
                         <form>
-                            <input id="tableName" value="" type="text"/>
-                            <input id="tableCustomId" value="id" type="text"/>
-                            <select id="jongoPermissions">
-                                <option value="0">None</option>
-                                <option value="1">Read</option>
-                                <option value="2">Write</option>
-                                <option value="3">Read & Write</option>
-                            </select>
-                            <input type="submit" value="Add" id="addJongoTable" name="addJongoTable" onclick="addTable(); return false;"/>
+                            <input class="jongo-field" id="tableName" value="" type="text"/>
+                            <input class="jongo-field" id="tableCustomId" value="id" type="text"/>
+                            <span id="jongoPermissions">
+                                <input type="checkbox" id="read" name="radio" /><label for="read">Read</label>
+                                <input type="checkbox" id="write" name="radio" /><label for="write">Write</label>
+                            </span>
+                            <input type="submit" class="jquery-button" value="Add" id="addJongoTable" name="addJongoTable" onclick="addTable(); return false;"/>
                         </form>
                     </div>
                 </div>
@@ -64,39 +66,34 @@
                             <p>
                                 <label for="queryName">Name</label>
                             </p><p>
-                                <input type="text" style="width: 60%;" id="queryName" />
+                                <input class="jongo-field" type="text" style="width: 60%;" id="queryName" />
                             </p><p>
                                 <label for="queryDescription">Description</label>
                             </p><p>
-                                <input type="text" style="width: 60%;" id="queryDescription" />
+                                <input class="jongo-field" type="text" style="width: 60%;" id="queryDescription" />
                             </p><p>
                                 <label for="queryText">Query</label>
                             </p><p>
-                                <textarea style="width: 60%;" rows="6" id="queryText"></textarea>
+                                <textarea class="ui-widget ui-state-default ui-corner-all" style="width: 60%;" rows="6" id="queryText"></textarea>
                             </p><p>
-                                <input type="submit" value="Save" onclick="addQuery(); return false;"/>
+                                <input class="jquery-button" type="submit" value="Save" onclick="addQuery(); return false;"/>
                             </p>
                         </form>
                     </div>
-                    <div id="jqueries">
-                        <h3><a href="#">New Jongo Complex Query</a></h3>
-                            <div>
-                                <p><b>Name</b>Description</p>
-                                <p>SELEC</p>
-                            </div>
-                        <h3><a href="#">Section 2</a></h3>
-                        <div>
-                            <p>kkkkk</p>
-                        </div>
-                    </div>
+                    <div id="jqueries"></div>
                 </div>
+                <!--
                 <div id="tabs-3">
                     <table id="jconfig"></table>
                 </div>
+                -->
             </div>
         </div>
         <div id="errorDialog">
             <span id="errorDialogMessage"></span>
+        </div>
+        <div id="confirmDialog">
+            <span id="confirmDialogMessage"></span>
         </div>
     </body>
 </html>
