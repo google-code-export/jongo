@@ -1,53 +1,22 @@
-root { 
-    display: block;
-}
-
 body{
     font-size: small;
 }
 
-h1{
-    color: blue;
+.jongo-form-row{
+    margin-bottom: .4em;
 }
 
-table.jongo{
-    width: 100%;
-    border-style: dashed;
-    border-width: 1px;
+.jongo-field {
+    background: #EDE4D4 url(http://code.jquery.com/ui/1.8.16/themes/humanity/images/ui-bg_glass_70_ede4d4_1x400.png) 50% 50% repeat-x;
+    border: 1px solid #CDC3B7;
+    padding: .4em .2em;
+    margin-right: .5em;
 }
 
-table.jongo th{
-    border-bottom-style: solid;
-    border-bottom-width: 1px;
-    text-align: left;
+.ui-button-text {
+    line-height: 1.3 !important;
 }
 
-table.jongo td{
-    text-align: left;
+.jquery-button{
+    float:right;
 }
-
-.tableFormContainer input{
-    
-}
-
-.tableContainer input{
-    font: 11px Verdana, Geneva, Arial, Helvetica, sans-serif;
-    background-image:url('http://code.jquery.com/ui/1.8.16/themes/trontastic/images/ui-bg_gloss-wave_85_9fda58_500x100.png');
-/*    background-color: #D7E5F2;      */
-    color: #102132;      
-    border: 1px solid #56AC6E;
-}
-
-.tableContainer input[readonly]{
-    font: 11px Verdana, Geneva, Arial, Helvetica, sans-serif;      
-    background-color: #000000;      
-    color: #102132;      
-    border: 1px solid #56AC6E;
-}
-
-.tableContainer select {      
-    font: 11px Verdana, Geneva, Arial, Helvetica, sans-serif;      
-    background-color: #D7E5F2;
-    color: #102132;
-    border: 1px solid #56AC6E;
-}  
