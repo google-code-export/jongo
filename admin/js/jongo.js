@@ -8,78 +8,111 @@ debug = function (log) {
     }
 }
 
-function drawJongoTables(componentName) {
-    $.getJSON('http://localhost:8080/adminws/table/all', function(data) {
-        var items = new Array();
-        var ids = new Array();
-            $.each(data.response, function(){
-                ids.push(this.id);
-                items.push('<div class="jongo-form-row" id="tableRow_')
-                items.push(this.id);
-                items.push('"><form><input class="jongo-field" type="text" readonly="readonly" id="tableId');
-                items.push(this.id);
-                items.push('" value="');
-                items.push(this.id);
-                items.push('"/>');
-                items.push('<input class="jongo-field" type="text" id="tableName');
-                items.push(this.id);
-                items.push('" value="');
-                items.push(this.name);
-                items.push('"/><input class="jongo-field" type="text" id="tableCustomId');
-                items.push(this.id);
-                items.push('" value="');
-                items.push(this.customid);
-                items.push('"/>');
-                items.push(getPermissionsComboBox(this.id, this.permits));
-                items.push('<input type="submit" class="jquery-button" value="Edit" onclick="editTable(');
-                items.push(this.id);
-                items.push('); return false;"/>');
-                items.push('<input type="submit" class="jquery-button" value="Delete" onclick="deleteTable(');
-                items.push(this.id);
-                items.push('); return false;"/>');
-                items.push('</form></div>');
-            })
-        $(componentName).html(items.join(''));
-        $('.jquery-button').button();
-        $.each(ids, function(){
-            var name = "#jongoPermissions" + this;
-            $(name).buttonset();
-        });
+function getJongoTables(){
+    debug('Obtaining Jongo Tables');
+    var tables = null;
+    $.ajax({
+        url: '/adminws/table/all',
+        async: false,
+        dataType: 'json',
+        success: function(data){
+            tables = data.response
+        }
+    })
+    return tables;
+}
+
+function getJongoQueries(){
+    debug('Obtaining Jongo Queries');
+    var queries = null;
+    $.ajax({
+        url: '/adminws/query/all',
+        async: false,
+        dataType: 'json',
+        success: function(data){
+            queries = data.response
+        }
+    })
+    return queries;
+}
+
+function drawJongoTables(componentName, tables) {
+    var items = new Array();
+    var ids = new Array();
+    $.each(tables, function(){
+        ids.push(this.id);
+        items.push('<div class="jongo-form-row" id="tableRow_')
+        items.push(this.id);
+        items.push('"><form><input class="jongo-field" type="text" readonly="readonly" id="tableId');
+        items.push(this.id);
+        items.push('" value="');
+        items.push(this.id);
+        items.push('"/>');
+        items.push('<input class="jongo-field" type="text" id="tableName');
+        items.push(this.id);
+        items.push('" value="');
+        items.push(this.name);
+        items.push('"/><input class="jongo-field" type="text" id="tableCustomId');
+        items.push(this.id);
+        items.push('" value="');
+        items.push(this.customid);
+        items.push('"/>');
+        items.push(getPermissionsComboBox(this.id, this.permits));
+        items.push('<input type="submit" class="jquery-button" value="Edit" onclick="editTable(');
+        items.push(this.id);
+        items.push('); return false;"/>');
+        items.push('<input type="submit" class="jquery-button" value="Delete" onclick="deleteTable(');
+        items.push(this.id);
+        items.push('); return false;"/>');
+        items.push('</form></div>');
+    })
+    $(componentName).html(items.join(''));
+    $('.jquery-button').button();
+    $.each(ids, function(){
+        var name = "#jongoPermissions" + this;
+        $(name).buttonset();
     });
 }
 
-function drawJongoQueries(component){
-    $.getJSON('http://localhost:8080/adminws/query/all', function(data) {
-        var items = new Array();
-            $.each(data.response, function(){
-                items.push('<h3 id="h3_');
-                items.push(this.id);
-                items.push('"><a href="#">');
-                items.push(this.name);
-                items.push('</a></h3><div id="queryId_');
-                items.push(this.id);
-                items.push('"><p>');
-                items.push(this.description);
-                items.push('</p><p>');
-                items.push(this.query);
-                items.push('</p><form>');
-                items.push('<input type="hidden" value="');
-                items.push(this.name);
-                items.push('" id="query');
-                items.push(this.id);
-                items.push('">');
-                items.push('<input type="submit" class="jquery-button" value="Delete" onclick="deleteQuery(');
-                items.push(this.id);
-                items.push('); return false;"/>');
-                items.push('</form></div>');
-            });
-        $(component).html(items.join(''));
-        $(component).accordion({
-                    autoHeight: false,
-                    navigation: true,
-                    collapsible: true
-        });
-        $('.jquery-button').button();
+function drawJongoQueries(component, queries){
+    var items = new Array();
+    $.each(queries, function(){
+        items.push('<h3 id="h3_');
+        items.push(this.id);
+        items.push('"><a href="#">');
+        items.push(this.name);
+        items.push('</a></h3><div id="queryId_');
+        items.push(this.id);
+        items.push('"><p>');
+        items.push(this.description);
+        items.push('</p><p>');
+        items.push(this.query);
+        items.push('</p><form>');
+        items.push('<input type="hidden" value="');
+        items.push(this.name);
+        items.push('" id="query');
+        items.push(this.id);
+        items.push('">');
+        items.push('<input type="submit" class="jquery-button" value="Delete" onclick="deleteQuery(');
+        items.push(this.id);
+        items.push('); return false;"/>');
+        items.push('</form></div>');
+    });
+    $(component).html(items.join(''));
+    $(component).accordion({
+                autoHeight: false,
+                navigation: true,
+                collapsible: true
+    });
+    $('.jquery-button').button();
+}
+
+function drawJongoPlaygroundTablesCombo(component, tables){
+    var selector = $(component);
+    $.each(tables, function(){
+        selector.append(
+            $("<option></option>").attr("value", this.id).text(this.name)
+        );
     });
 }
 
@@ -111,7 +144,7 @@ function addTable(){
     data['customId'] = $("#tableCustomId").val()
     data['permits'] = getPermissionValue(null);
     
-    var ret = $.post('http://localhost:8080/admin/table', data, function() {}, 'json');
+    var ret = $.post('/adminws/table', data, function() {}, 'json');
     
     ret.success(function(){
         showJQueryDialog("Successfully added new table", data['name']);
@@ -133,7 +166,7 @@ function editTable(id){
     
     var ret = $.ajax({
         type: 'PUT',
-        url: 'http://localhost:8080/admin/table/' + id + '?' + data.join('&'),
+        url: '/adminws/table/' + id + '?' + data.join('&'),
         success: function() {},
         data: data,
         dataType: 'json'
@@ -165,7 +198,7 @@ function deleteTable(id){
                 $('#tableRow_'+id).remove();
                 var ret = $.ajax({
                     type: 'DELETE',
-                    url: 'http://localhost:8080/admin/table/' + id,
+                    url: 'http://localhost:8080/adminws/table/' + id,
                     success: function() {},
                     dataType: 'json'
                 });
@@ -205,7 +238,7 @@ function deleteQuery(id){
                 $('#queryId_'+id).remove();
                 var ret = $.ajax({
                     type: 'DELETE',
-                    url: 'http://localhost:8080/admin/query/' + id,
+                    url: '/adminws/query/' + id,
                     success: function() {},
                     dataType: 'json'
                 });
@@ -237,7 +270,7 @@ function addQuery(){
     data['description'] = $("#queryDescription").val();
     data['query'] = $("#queryText").val();
     
-    var ret = $.post('http://localhost:8080/admin/query', data, function() {}, 'json');
+    var ret = $.post('/adminws/query', data, function() {}, 'json');
     
     ret.success(function(){
         showJQueryDialog("Successfully added new query", data['name']);
@@ -306,4 +339,37 @@ function getPermissionValue(id){
     }
     return ret;
     
+}
+
+function loadTable(componentName, targetName){
+    var tableName = $(componentName).find(":selected").text();
+    var tableMetaData = null;
+    $.ajax({
+        url: '/jongo/' + tableName,
+        async: false,
+        dataType: 'json',
+        success: function(data){
+            tableMetaData = data.response
+        },
+        error: function(error){
+            var jongoError = JSON.parse(error.responseText);
+            showJQueryDialog("Error " + error.status, jongoError.response.message);
+        }
+    });
+    
+    if(tableMetaData != null){
+        var output = new Array();
+        output.push('<h3>' + tableName + '</h3><table class="meta-data-table"><tr><th>Name</th><th>Size</th><th>Type</th></tr>')
+        $.each(tableMetaData, function(){
+            output.push('<tr><td>');
+            output.push(this.columnname);
+            output.push('</td><td>');
+            output.push(this.columnsize);
+            output.push('</td><td>');
+            output.push(this.columntype);
+            output.push('</td></tr>');
+        })
+        output.push('</table>');
+        $(targetName).html(output.join(''));
+    }
 }

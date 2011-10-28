@@ -24,8 +24,11 @@
             });
             
             $(document).ready(function(){
-                drawJongoTables('#jtables');
-                drawJongoQueries('#jqueries');
+                var tables = getJongoTables();
+                var queries = getJongoQueries();
+                drawJongoTables('#jtables', tables);
+                drawJongoQueries('#jqueries', queries);
+                drawJongoPlaygroundTablesCombo('#tables-combobox', tables);
                 $( '.jquery-button' ).button();
                 $('#jongoPermissions').buttonset();
             });
@@ -40,7 +43,7 @@
                 <ul>
                     <li><a href="#tabs-1">Jongo Tables</a></li>
                     <li><a href="#tabs-2">Jongo Complex Queries</a></li>
-<!--                    <li><a href="#tabs-3">Jongo Configuration</a></li>-->
+                    <li><a href="#tabs-3">Jongo Playground</a></li>
                 </ul>
                 <div id="tabs-1">
                     <div class="tableContainer">
@@ -74,7 +77,7 @@
                             </p><p>
                                 <label for="queryText">Query</label>
                             </p><p>
-                                <textarea class="ui-widget ui-state-default ui-corner-all" style="width: 60%;" rows="6" id="queryText"></textarea>
+                                <textarea class="jongo-text-area" style="width: 60%;" rows="6" id="queryText"></textarea>
                             </p><p>
                                 <input class="jquery-button" type="submit" value="Save" onclick="addQuery(); return false;"/>
                             </p>
@@ -82,11 +85,16 @@
                     </div>
                     <div id="jqueries"></div>
                 </div>
-                <!--
                 <div id="tabs-3">
-                    <table id="jconfig"></table>
+                    <div id="jongo-play-form">
+                        <form>
+                            <select id="tables-combobox"></select>
+                            <input class="jquery-button" type="submit" value="Load" onclick="loadTable('#tables-combobox', '#jongo-play-results'); return false;"/>
+                        </form>
+                        
+                    </div>
+                    <div id="jongo-play-results"></div>
                 </div>
-                -->
             </div>
         </div>
         <div id="errorDialog">
