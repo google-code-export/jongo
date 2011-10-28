@@ -43,38 +43,6 @@ public class AdminWSImpl implements AdminWS {
     
     private static final String E403 = "<html><head></head><body>403</body></html>";
 
-    @GET
-    @Produces({ MediaType.TEXT_HTML })
-    @Override
-    public Response get(@Context HttpServletRequest request) {
-        return get("index.html", request);
-    }
-    
-    
-    @GET
-    @Path("{resource}")
-    @Produces({ MediaType.TEXT_HTML, MediaType.TEXT_PLAIN })
-    @Override
-    public Response get(@PathParam("resource") final String resource, @Context HttpServletRequest request) {
-        l.debug("Admin console connection from " + request.getRemoteAddr());
-        l.debug(request.getPathInfo());
-        
-        JongoConfiguration conf = JongoConfiguration.instanceOf();
-        
-        if(!isAdminRequest(request)){
-            l.debug("Admin console connection from " + request.getRemoteAddr() + " forbidden. Only localhost and " + conf.getAdminIp() + " are allowed");
-            return Response.status(Response.Status.FORBIDDEN).entity(E403).type(MediaType.TEXT_HTML).build();
-        }else{
-            if(request.getPathInfo().equalsIgnoreCase("/jongo.js")){
-                return readFileAndWriteToResponse(request.getPathInfo(), "text/javascript");
-            }else if(request.getPathInfo().equalsIgnoreCase("/jongo.css")){
-                return readFileAndWriteToResponse(request.getPathInfo(), "text/css");
-            }else{
-                return readFileAndWriteToResponse("/index.html", MediaType.TEXT_HTML.toString());
-            }
-        }
-    }
-    
     @Override
     @GET @Path("table/{resource}") @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public Response getJongoTable(@PathParam("resource") String resourceId, @Context  HttpServletRequest request, @DefaultValue("json") @QueryParam("format") String format) {
