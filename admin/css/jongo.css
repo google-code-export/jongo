@@ -1,5 +1,8 @@
 body{
     font-size: small;
+
+background-color: #F4F0EC;
+color: #1E1B1D;
 }
 
 .jongo-form-row{
@@ -7,7 +10,18 @@ body{
 }
 
 .jongo-field {
-    background: #EDE4D4 url(http://code.jquery.com/ui/1.8.16/themes/humanity/images/ui-bg_glass_70_ede4d4_1x400.png) 50% 50% repeat-x;
+    background: #EDE4D4 url(humanity/images/ui-bg_glass_70_ede4d4_1x400.png) 0% 50% repeat-x;
+    border: 1px solid #CDC3B7;
+    padding: .4em .2em;
+    margin-right: .5em;
+}
+
+.jongo-field[readonly] {
+    color: #BB5B2D;
+}
+
+.jongo-text-area {
+    background: #EDE4D4 url(humanity/images/ui-bg_glass_70_ede4d4_1x400.png) 0% 40% repeat-x;
     border: 1px solid #CDC3B7;
     padding: .4em .2em;
     margin-right: .5em;
@@ -19,4 +33,10 @@ body{
 
 .jquery-button{
     float:right;
+}
+
+.meta-data-table{
+    width: 100%;
+    border: 1px solid #CDC3B7;
+    padding: .4em .2em;
 }
