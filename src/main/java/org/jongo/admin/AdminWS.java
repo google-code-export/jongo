@@ -10,8 +10,6 @@ import javax.ws.rs.core.UriInfo;
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public interface AdminWS {
-    public Response get(final HttpServletRequest request);
-    public Response get(final String resource, final HttpServletRequest request);
     public Response getJongoTable(final String resourceId, final HttpServletRequest request, final String format);
     public Response insertJongoTable(final HttpServletRequest request, final String format, final MultivaluedMap<String, String> formParams);
     public Response updateJongoTable(final HttpServletRequest request, final String format, final String id, final UriInfo ui);

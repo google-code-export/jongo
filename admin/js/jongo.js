@@ -9,7 +9,7 @@ debug = function (log) {
 }
 
 function drawJongoTables(componentName) {
-    $.getJSON('http://localhost:8080/admin/table/all', function(data) {
+    $.getJSON('http://localhost:8080/adminws/table/all', function(data) {
         var items = new Array();
         var ids = new Array();
             $.each(data.response, function(){
@@ -49,7 +49,7 @@ function drawJongoTables(componentName) {
 }
 
 function drawJongoQueries(component){
-    $.getJSON('http://localhost:8080/admin/query/all', function(data) {
+    $.getJSON('http://localhost:8080/adminws/query/all', function(data) {
         var items = new Array();
             $.each(data.response, function(){
                 items.push('<h3 id="h3_');
