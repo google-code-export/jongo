@@ -28,8 +28,6 @@ public class JongoJetty{
         ContextHandlerCollection contexts = new ContextHandlerCollection();
         Context context = new Context(contexts, "/", Context.SESSIONS);
         
-        
-        
         l.debug("Creating Servlet for Jongo Webservices under org.jongo.rest");
         ServletHolder sh = new ServletHolder(ServletContainer.class);
         sh.setInitParameter("com.sun.jersey.config.property.resourceConfigClass", "com.sun.jersey.api.core.PackagesResourceConfig");
