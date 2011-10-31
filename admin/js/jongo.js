@@ -10,7 +10,7 @@ debug = function (log) {
 
 function getJongoTables(){
     debug('Obtaining Jongo Tables');
-    var tables = null;
+    var tables = new Array();
     $.ajax({
         url: '/adminws/table/all',
         async: false,
@@ -24,7 +24,7 @@ function getJongoTables(){
 
 function getJongoQueries(){
     debug('Obtaining Jongo Queries');
-    var queries = null;
+    var queries = new Array();
     $.ajax({
         url: '/adminws/query/all',
         async: false,
@@ -37,6 +37,7 @@ function getJongoQueries(){
 }
 
 function drawJongoTables(componentName, tables) {
+    $(componentName).html('');
     var items = new Array();
     var ids = new Array();
     $.each(tables, function(){
@@ -58,7 +59,7 @@ function drawJongoTables(componentName, tables) {
         items.push(this.customid);
         items.push('"/>');
         items.push(getPermissionsComboBox(this.id, this.permits));
-        items.push('<input type="submit" class="jquery-button" value="Edit" onclick="editTable(');
+        items.push('<input type="submit" class="jquery-button" value="Update" onclick="editTable(');
         items.push(this.id);
         items.push('); return false;"/>');
         items.push('<input type="submit" class="jquery-button" value="Delete" onclick="deleteTable(');
@@ -75,6 +76,7 @@ function drawJongoTables(componentName, tables) {
 }
 
 function drawJongoQueries(component, queries){
+    $(component).accordion("destroy");
     var items = new Array();
     $.each(queries, function(){
         items.push('<h3 id="h3_');
@@ -85,9 +87,9 @@ function drawJongoQueries(component, queries){
         items.push(this.id);
         items.push('"><p>');
         items.push(this.description);
-        items.push('</p><p>');
+        items.push('</p><p><textarea class="jongo-text-area" rows="10" readonly="true">');
         items.push(this.query);
-        items.push('</p><form>');
+        items.push('</textarea></p><form>');
         items.push('<input type="hidden" value="');
         items.push(this.name);
         items.push('" id="query');
@@ -99,12 +101,44 @@ function drawJongoQueries(component, queries){
         items.push('</form></div>');
     });
     $(component).html(items.join(''));
+    $(component).accordion({active: false, autoHeight: false, navigation: true, collapsible: true});
+    $('.jquery-button').button();
+}
+
+function addQueryToAccordion(component, id, name, description, query){
+    if(component == null){
+        component = '#jqueries';
+    }
+    
+    var items = new Array();
+    items.push('<h3 id="h3_');
+    items.push(id);
+    items.push('"><a href="#">');
+    items.push(name);
+    items.push('</a></h3><div id="queryId_');
+    items.push(id);
+    items.push('"><p>');
+    items.push(description);
+    items.push('</p><p><textarea class="jongo-text-area" rows="10" readonly="true">');
+    items.push(query);
+    items.push('</textarea></p><form>');
+    items.push('<input type="hidden" value="');
+    items.push(name);
+    items.push('" id="query');
+    items.push(id);
+    items.push('">');
+    items.push('<input type="submit" class="jquery-button" value="Delete" onclick="deleteQuery(');
+    items.push(id);
+    items.push('); return false;"/>');
+    items.push('</form></div>');
+    
+    $(component).append(items.join(''));
+    $(component).accordion("destroy");
     $(component).accordion({
                 autoHeight: false,
                 navigation: true,
                 collapsible: true
     });
-    $('.jquery-button').button();
 }
 
 function drawJongoPlaygroundTablesCombo(component, tables){
@@ -148,7 +182,9 @@ function addTable(){
     
     ret.success(function(){
         showJQueryDialog("Successfully added new table", data['name']);
-        window.location.reload();
+        var tables = getJongoTables();
+        drawJongoTables('#jtables', tables);
+//        window.location.reload();
     })
     
     ret.error(function(error){
@@ -162,7 +198,7 @@ function editTable(id){
     var tableName = $("#tableName" + id).val()
     data.push("name=" + tableName);
     data.push("customId=" + $("#tableCustomId" + id).val());
-    data.push("permits=" + $("#jongoPermissions" + id).val());
+    data.push("permits=" + getPermissionValue(id));
     
     var ret = $.ajax({
         type: 'PUT',
@@ -195,7 +231,6 @@ function deleteTable(id){
         title: 'Delete Table ' + tableName,
         buttons: {
             Ok: function() {
-                $('#tableRow_'+id).remove();
                 var ret = $.ajax({
                     type: 'DELETE',
                     url: 'http://localhost:8080/adminws/table/' + id,
@@ -205,7 +240,8 @@ function deleteTable(id){
 
                 ret.success(function(){
                     showJQueryDialog("Successfully deleted table", tableName);
-
+                    var tables = getJongoTables();
+                    drawJongoTables('#jtables', tables);
                 })
 
                 ret.error(function(error){
@@ -234,8 +270,6 @@ function deleteQuery(id){
         title: 'Delete Query ' + queryName,
         buttons: {
             Ok: function() {
-                $('#h3_'+id).remove();
-                $('#queryId_'+id).remove();
                 var ret = $.ajax({
                     type: 'DELETE',
                     url: '/adminws/query/' + id,
@@ -245,7 +279,8 @@ function deleteQuery(id){
 
                 ret.success(function(){
                     showJQueryDialog("Successfully deleted query", queryName);
-
+                    var queries = getJongoQueries();
+                    drawJongoQueries('#jqueries', queries);
                 })
 
                 ret.error(function(error){
@@ -253,27 +288,27 @@ function deleteQuery(id){
                     showJQueryDialog("Error " + error.status, jongoError.response.message);
                 });
                 $( this ).dialog( "close" );
-//                window.location.reload();
             },
             Cancel: function() {
                 $( this ).dialog( "close" );
             }
         }
     });
-    
-
 }
 
 function addQuery(){
     var data = {}
     data['name'] = $("#queryName").val();
     data['description'] = $("#queryDescription").val();
-    data['query'] = $("#queryText").val();
+    var queryText = $("#queryText").val()
+    data['query'] = queryText.replace(/(\r\n|\n|\r)/gm,"\\n"); // chrome doesn't like line breaks in json
     
     var ret = $.post('/adminws/query', data, function() {}, 'json');
     
     ret.success(function(){
         showJQueryDialog("Successfully added new query", data['name']);
+        var queries = getJongoQueries();
+        drawJongoQueries('#jqueries', queries);
     })
     
     ret.error(function(error){
@@ -359,7 +394,7 @@ function loadTable(componentName, targetName){
     
     if(tableMetaData != null){
         var output = new Array();
-        output.push('<h3>' + tableName + '</h3><table class="meta-data-table"><tr><th>Name</th><th>Size</th><th>Type</th></tr>')
+        output.push('<h3>' + tableName + '</h3><table class="meta-data-table ui-corner-all"><tr><th>Name</th><th>Size</th><th>Type</th></tr>')
         $.each(tableMetaData, function(){
             output.push('<tr><td>');
             output.push(this.columnname);
@@ -372,4 +407,8 @@ function loadTable(componentName, targetName){
         output.push('</table>');
         $(targetName).html(output.join(''));
     }
+}
+
+function clearControls(){
+    
 }

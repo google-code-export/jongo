@@ -1,8 +1,7 @@
 body{
     font-size: small;
-
-background-color: #F4F0EC;
-color: #1E1B1D;
+    background-color: #F4F0EC;
+    color: #1E1B1D;
 }
 
 .jongo-form-row{
@@ -24,7 +23,8 @@ color: #1E1B1D;
     background: #EDE4D4 url(humanity/images/ui-bg_glass_70_ede4d4_1x400.png) 0% 40% repeat-x;
     border: 1px solid #CDC3B7;
     padding: .4em .2em;
-    margin-right: .5em;
+    width: 100%;
+/*    margin-right: .5em;*/
 }
 
 .ui-button-text {
@@ -32,7 +32,7 @@ color: #1E1B1D;
 }
 
 .jquery-button{
-    float:right;
+/*    float:right;*/
 }
 
 .meta-data-table{
@@ -40,3 +40,45 @@ color: #1E1B1D;
     border: 1px solid #CDC3B7;
     padding: .4em .2em;
 }
+
+.meta-data-table td {
+    font: 11px verdana, arial, helvetica, sans-serif;
+    line-height: 12px;
+    padding: 5px 6px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.meta-data-table th {
+    background: #fff url(humanity/images/ui-bg_glass_70_ede4d4_1x400.png);
+    color: #666;
+    font-size: 11px;
+    font-weight: bold;
+    line-height: 17px;
+    padding: 2px 6px;
+    text-align: left;
+}
+
+.meta-data-table tr:hover {
+    background: #DBB486;
+}
+
+/*tr {
+    border: 0;
+}
+
+td, th {
+    font: 11px verdana, arial, helvetica, sans-serif;
+    line-height: 12px;
+    padding: 5px 6px;
+    text-align: left;
+    vertical-align: top;
+}
+
+th a:link, th a:visited, th a:hover {
+    color: #333;
+    display: block;
+    font-size: 10px;
+    text-decoration: none;
+    width: 100%;
+}*/
