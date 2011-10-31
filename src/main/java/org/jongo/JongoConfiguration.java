@@ -26,7 +26,7 @@ public class JongoConfiguration {
     private String jdbcUsername;
     private String jdbcPassword;
     
-    private boolean adminEnabled = false;
+    private boolean adminEnabled;
     private String adminIp;
     
     private static final JDBCDriver adminDriver = JDBCDriver.HSQLDB;
@@ -47,7 +47,7 @@ public class JongoConfiguration {
             instance.jdbcUsername = prop.getProperty("jongo.jdbc.username");
             instance.jdbcPassword = prop.getProperty("jongo.jdbc.password");
             instance.adminIp = prop.getProperty("jongo.admin.ip");
-            instance.adminEnabled = Boolean.getBoolean(prop.getProperty("jongo.admin.enabled"));
+            instance.adminEnabled = Boolean.valueOf(prop.getProperty("jongo.admin.enabled"));
         }
         return instance;
     }
