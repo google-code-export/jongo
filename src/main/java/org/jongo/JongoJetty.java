@@ -27,8 +27,8 @@ public class JongoJetty{
         l.debug("Creating Contexts for Jetty");
         ContextHandlerCollection contexts = new ContextHandlerCollection();
         Context context = new Context(contexts, "/", Context.SESSIONS);
-        Context ctxADocs= new Context(contexts,"/admin",Context.SESSIONS);
-        ctxADocs.setResourceBase("admin/"); // here we set where the servlet will look for the files
+        
+        
         
         l.debug("Creating Servlet for Jongo Webservices under org.jongo.rest");
         ServletHolder sh = new ServletHolder(ServletContainer.class);
@@ -36,22 +36,31 @@ public class JongoJetty{
         sh.setInitParameter("com.sun.jersey.config.property.packages", "org.jongo.rest");
         context.addServlet(sh, "/jongo/*");
         
-        l.debug("Creating Servlet for Jongo Admin Webservices under org.jongo.admin");
-        ServletHolder shAdmin = new ServletHolder(ServletContainer.class);
-        shAdmin.setInitParameter("com.sun.jersey.config.property.resourceConfigClass", "com.sun.jersey.api.core.PackagesResourceConfig");
-        shAdmin.setInitParameter("com.sun.jersey.config.property.packages", "org.jongo.admin");
-        context.addServlet(shAdmin, "/adminws/*");
+        if(configuration.isAdminEnabled()){
+            l.info("Admin Console is enabled. Creating its context");
+            Context ctxADocs= new Context(contexts,"/admin",Context.SESSIONS);
+            ctxADocs.setResourceBase("admin/"); // here we set where the servlet will look for the files
+            l.debug("Creating Servlet for Admin Console");
+            ServletHandler staticHandler = new ServletHandler();
+            ServletHolder staticHolder = new ServletHolder( new DefaultServlet() );
+            staticHolder.setInitParameter("dirAllowed", "false");
+            staticHolder.setServlet(new DefaultServlet());
+            staticHandler.addServletWithMapping( staticHolder, "/*" );
+            ctxADocs.addServlet(staticHolder, "/");
+            
+            l.debug("Creating Servlet for Jongo Admin Webservices under org.jongo.admin");
+            ServletHolder shAdmin = new ServletHolder(ServletContainer.class);
+            shAdmin.setInitParameter("com.sun.jersey.config.property.resourceConfigClass", "com.sun.jersey.api.core.PackagesResourceConfig");
+            shAdmin.setInitParameter("com.sun.jersey.config.property.packages", "org.jongo.admin");
+            context.addServlet(shAdmin, "/adminws/*");
+            
+            l.debug("Registering contexts");
+            contexts.setHandlers(new Handler[] { ctxADocs, context });
+        }else{
+            l.debug("Registering contexts");
+            contexts.setHandlers(new Handler[] { context });
+        }
         
-        l.debug("Creating Servlet for Admin Console");
-        ServletHandler staticHandler = new ServletHandler();
-        ServletHolder staticHolder = new ServletHolder( new DefaultServlet() );
-        staticHolder.setInitParameter("dirAllowed", "false");
-        staticHolder.setServlet(new DefaultServlet());
-        staticHandler.addServletWithMapping( staticHolder, "/*" );
-        ctxADocs.addServlet(staticHolder, "/");
-        
-        l.debug("Registering contexts");
-        contexts.setHandlers(new Handler[] { ctxADocs, context });
         
         l.debug("Starting Jetty with the new contexts");
         Server server = new Server(configuration.getPort());
