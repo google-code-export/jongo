@@ -30,4 +30,14 @@ public class MySQLConnection extends AbstractJDBCConnection implements JongoJDBC
             l.error("Unable to load driver. Add the MySQL Connector jar to the lib folder");
         }
     }
+    
+    /**
+     * MySQL doesn't support the standard way as described in http://en.wikipedia.org/wiki/Select_(SQL)#FETCH_FIRST_clause
+     * @param table
+     * @return a MySQL query that when executed should only return the first row of a table.
+     */
+    @Override
+    public String getFirstRowQuery(String table) {
+        return "SELECT * FROM " + table + " LIMIT 1";
+    }
 }
