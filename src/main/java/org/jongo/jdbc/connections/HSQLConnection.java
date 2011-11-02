@@ -30,4 +30,14 @@ public class HSQLConnection extends AbstractJDBCConnection implements JongoJDBCC
             l.error("Unable to load driver. Add the HSQLDB Connector jar to the lib folder");
         }
     }
+    
+    /**
+     * HSQLDB doesn't support the standard way as described in http://en.wikipedia.org/wiki/Select_(SQL)#FETCH_FIRST_clause
+     * @param table
+     * @return a HSQLDB query that when executed should only return the first row of a table.
+     */
+    @Override
+    public String getFirstRowQuery(String table) {
+        return "SELECT * FROM " + table + " LIMIT 1";
+    }
 }
