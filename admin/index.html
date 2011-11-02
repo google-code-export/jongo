@@ -29,7 +29,6 @@
                 drawJongoPlaygroundTablesCombo('#tables-combobox', tables);
                 $("#myProgressBar").progressbar({value:90});
                 $( '.jquery-button' ).button();
-                $('#jongoPermissions').buttonset();
                 $("#myProgressBar").progressbar({value:100});
                 $("#loading-bar-container").dialog( "close" );
             });
@@ -48,18 +47,7 @@
                     <div class="tableContainer">
                         <div id="jtables" class="jongo"></div>
                     </div>
-                    <div class="tableFormContainer">
-                        <h2>Add table</h2>
-                        <form>
-                            <input class="jongo-field" id="tableName" value="" type="text"/>
-                            <input class="jongo-field" id="tableCustomId" value="id" type="text"/>
-                            <span id="jongoPermissions">
-                                <input type="checkbox" id="read" name="radio" /><label for="read">Read</label>
-                                <input type="checkbox" id="write" name="radio" /><label for="write">Write</label>
-                            </span>
-                            <input type="submit" class="jquery-button" value="Add" id="addJongoTable" name="addJongoTable" onclick="addTable(); return false;"/>
-                        </form>
-                    </div>
+                    <input type="submit" class="jquery-button" value="Add" onclick="addTableDialog('#add-table-dialog'); return false;"/>
                 </div>
                 <div id="tabs-2">
                     <h2>New Complex Query</h2>
@@ -111,6 +99,22 @@
         </div>
         <div id="loading-bar-container">
             <div id='myProgressBar'></div>
+        </div>
+        <div id="add-table-dialog">
+<!--            <form>
+                <p>
+                    <input class="jongo-field" id="tableName" value="" type="text"/>
+                    <label class="low-contrast-label" for="tableName">Name</label>
+                </p>
+                <p>
+                    <input class="jongo-field" id="tableCustomId" value="id" type="text"/>
+                    <label class="low-contrast-label" for="tableCustomId">Custom ID</label>
+                </p>
+                <span id="jongoPermissions">
+                    <input type="checkbox" id="read" name="radio" /><label for="read">Read</label>
+                    <input type="checkbox" id="write" name="radio" /><label for="write">Write</label>
+                </span>
+            </form>-->
         </div>
     </body>
 </html>

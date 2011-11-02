@@ -63,6 +63,11 @@ body{
     background: #DBB486;
 }
 
+.low-contrast-label{
+    font: 11px verdana, arial, helvetica, sans-serif;
+    color: #CDC3B7;
+}
+
 /*tr {
     border: 0;
 }
