@@ -52,6 +52,15 @@ public class AbstractJDBCConnection {
          return query.toString();
     }
     
+    /**
+     * This is the default query to obtain the first row of a table as described in http://en.wikipedia.org/wiki/SQL:2008
+     * @param table
+     * @return a query that when executed should only return the first row of a table.
+     */
+    public String getFirstRowQuery(String table) {
+        return "SELECT * FROM " + table + " FETCH FIRST 1 ROW ONLY";
+    }
+    
     public JDBCDriver getDriver() {
         return driver;
     }

@@ -196,7 +196,7 @@ public class JDBCExecutor {
         
         QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
         ResultSetHandler<List<RowResponse>> res = new ResultSetMetaDataHandler();
-        String query = "SELECT * FROM " + table;
+        String query = JDBCConnectionFactory.getJongoJDBCConnection().getFirstRowQuery(table);
         try {
             List<RowResponse> results = run.query(query, res);
             return results;
