@@ -37,6 +37,9 @@ function getJongoQueries(){
 }
 
 function drawJongoTables(componentName, tables) {
+    if(tables == null){
+        tables = getJongoTables();
+    }
     $(componentName).html('');
     var items = new Array();
     var ids = new Array();
@@ -59,6 +62,9 @@ function drawJongoTables(componentName, tables) {
         items.push(this.customid);
         items.push('"/>');
         items.push(getPermissionsComboBox(this.id, this.permits));
+        items.push('<input type="submit" class="jquery-button" value="Show" onclick="showTable(\'');
+        items.push(this.name);
+        items.push('\'); return false;"/>');
         items.push('<input type="submit" class="jquery-button" value="Update" onclick="editTable(');
         items.push(this.id);
         items.push('); return false;"/>');
@@ -76,6 +82,9 @@ function drawJongoTables(componentName, tables) {
 }
 
 function drawJongoQueries(component, queries){
+    if(queries == null){
+        queries = getJongoQueries();
+    }
     $(component).accordion("destroy");
     var items = new Array();
     $.each(queries, function(){
@@ -182,14 +191,45 @@ function addTable(){
     
     ret.success(function(){
         showJQueryDialog("Successfully added new table", data['name']);
-        var tables = getJongoTables();
-        drawJongoTables('#jtables', tables);
-//        window.location.reload();
+        drawJongoTables('#jtables');
     })
     
     ret.error(function(error){
         var jongoError = JSON.parse(error.responseText);
         showJQueryDialog("Error " + error.status, jongoError.response.message);
+    });
+}
+
+function addTableDialog(componentName){
+    $(componentName).html('');
+
+    var output = new Array();
+    output.push('<form><p>');
+    output.push('<input class="jongo-field" id="tableName" value="" type="text"/>');
+    output.push('<label class="low-contrast-label" for="tableName">Name</label>');
+    output.push('</p><p>');
+    output.push('<input class="jongo-field" id="tableCustomId" value="id" type="text"/>');
+    output.push('<label class="low-contrast-label" for="tableCustomId">Custom ID</label>');
+    output.push('</p><span id="jongo-permissions">');
+    output.push('<input type="checkbox" id="read" name="radio" /><label for="read">Read</label>');
+    output.push('<input type="checkbox" id="write" name="radio" /><label for="write">Write</label>');
+    output.push('</span></form>');
+    $(componentName).html(output.join(''));
+
+    $('#jongo-permissions').buttonset();
+
+    $(componentName).dialog({
+        modal: true,
+        title: 'Add Table',
+        buttons: {
+            Ok: function() {
+                $( this ).dialog( "close" );
+                addTable();
+            },
+            Cancel: function() {
+                $( this ).dialog( "close" );
+            }
+        }
     });
 }
 
@@ -210,8 +250,8 @@ function editTable(id){
     
     ret.success(function(){
         showJQueryDialog("Successfully edited table", tableName);
-        
-    })
+        drawJongoTables('#jtables');
+    });
     
     ret.error(function(error){
         var jongoError = JSON.parse(error.responseText);
@@ -240,8 +280,7 @@ function deleteTable(id){
 
                 ret.success(function(){
                     showJQueryDialog("Successfully deleted table", tableName);
-                    var tables = getJongoTables();
-                    drawJongoTables('#jtables', tables);
+                    drawJongoTables('#jtables');
                 })
 
                 ret.error(function(error){
@@ -249,7 +288,6 @@ function deleteTable(id){
                     showJQueryDialog("Error " + error.status, jongoError.response.message);
                 });
                 $( this ).dialog( "close" );
-//                window.location.reload();
             },
             Cancel: function() {
                 $( this ).dialog( "close" );
@@ -279,8 +317,7 @@ function deleteQuery(id){
 
                 ret.success(function(){
                     showJQueryDialog("Successfully deleted query", queryName);
-                    var queries = getJongoQueries();
-                    drawJongoQueries('#jqueries', queries);
+                    drawJongoQueries('#jqueries');
                 })
 
                 ret.error(function(error){
@@ -307,8 +344,7 @@ function addQuery(){
     
     ret.success(function(){
         showJQueryDialog("Successfully added new query", data['name']);
-        var queries = getJongoQueries();
-        drawJongoQueries('#jqueries', queries);
+        drawJongoQueries('#jqueries');
     })
     
     ret.error(function(error){
@@ -409,6 +445,43 @@ function loadTable(componentName, targetName){
     }
 }
 
-function clearControls(){
+function showTable(tableName){
+    var tableMetaData = null;
+    $.ajax({
+        url: '/jongo/' + tableName,
+        async: false,
+        dataType: 'json',
+        success: function(data){
+            tableMetaData = data.response
+        },
+        error: function(error){
+            var jongoError = JSON.parse(error.responseText);
+            showJQueryDialog("Error " + error.status, jongoError.response.message);
+        }
+    });
     
+    if(tableMetaData != null){
+        var output = new Array();
+        output.push('<table class="meta-data-table ui-corner-all"><tr><th>Name</th><th>Size</th><th>Type</th></tr>')
+        $.each(tableMetaData, function(){
+            output.push('<tr><td>');
+            output.push(this.columnname);
+            output.push('</td><td>');
+            output.push(this.columnsize);
+            output.push('</td><td>');
+            output.push(this.columntype);
+            output.push('</td></tr>');
+        })
+        output.push('</table>');
+        
+        $("#errorDialogMessage").html(output.join(''));
+        $("#errorDialog").dialog({
+            title: tableName + ' data',
+            buttons: {
+                Ok: function() {
+                    $( this ).dialog( "close" );
+                }
+            }
+        })
+    }
 }
