@@ -137,3 +137,37 @@ function deleteQuery(id){
         }
     });
 }
+
+function addQueryDialog(componentName){
+    $(componentName).html('');
+
+    var output = new Array();
+    
+    output.push('<form><table><tr>');
+    output.push('<td><label for="queryName">Name</label></td>');
+    output.push('<td><label for="queryDescription">Description</label></td>');
+    output.push('</tr><tr>');
+    output.push('<td><input class="jongo-field" type="text" style="width: 90%;" id="queryName" /></td>');
+    output.push('<td><input class="jongo-field" type="text" style="width: 100%;" size="50" id="queryDescription" /></td>');
+    output.push('</tr><tr><td colspan="2"><label for="queryText">Query</label></td>');
+    output.push('</tr><tr><td colspan="2">');
+    output.push('<textarea class="jongo-text-area" rows="10" id="queryText"></textarea>');
+    output.push('</td></tr></table></form>');
+    
+    $(componentName).html(output.join(''));
+
+    $(componentName).dialog({
+        modal: true,
+        width: 500,
+        title: 'Add Query',
+        buttons: {
+            Ok: function() {
+                $( this ).dialog( "close" );
+                addQuery();
+            },
+            Cancel: function() {
+                $( this ).dialog( "close" );
+            }
+        }
+    });
+}
