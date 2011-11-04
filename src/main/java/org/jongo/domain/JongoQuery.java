@@ -12,6 +12,7 @@ public class JongoQuery {
     private String description;
     
     public static final String CREATE = "INSERT INTO JongoQuery ( name, query, description ) VALUES ( ?, ?, ? )";
+    public static final String GET = "SELECT * FROM JongoQuery WHERE name = ?";
 
     public JongoQuery(String name, String query, String description) {
         this.name = name;
@@ -51,6 +52,9 @@ public class JongoQuery {
         this.query = query;
     }
     
-    
+    public String getCleanQuery() {
+        // the query comes with \n for break lines, so we have to remote them.
+        return this.query.replace("\\n", " ");
+    }
     
 }
