@@ -10,8 +10,10 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.JongoUtils;
+import org.jongo.domain.JongoQuery;
 import org.jongo.domain.JongoTable;
 import org.jongo.enums.Permission;
+import org.jongo.handler.JongoQueryResultSetHandler;
 import org.jongo.handler.JongoTableResultSetHandler;
 import org.jongo.jdbc.exceptions.JongoJDBCException;
 import org.jongo.rest.xstream.RowResponse;
@@ -136,7 +138,8 @@ public class JDBCExecutor {
         try {
             result = run.query(JongoTable.GET, rh, table);
         } catch (SQLException ex) {
-            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+            l.debug(ex.getMessage());
+//            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
         }
 
         if(result == null){
@@ -184,7 +187,7 @@ public class JDBCExecutor {
         }
     }
     
-    private static int update(final QueryRunner run, final String query, Object... params) throws SQLException {
+    private static int update(final QueryRunner run, final String query, final Object... params) throws SQLException {
         l.debug(query + " params: " + JongoUtils.varargToString(params));
         return run.update(query, params);
     }
@@ -203,6 +206,37 @@ public class JDBCExecutor {
         } catch (SQLException ex) {
             throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
         }
+    }
+    
+    public static List<RowResponse> executeQuery(final String queryName, final Object... params) throws JongoJDBCException {
+        l.debug("Executing query " + queryName + " params: " + JongoUtils.varargToString(params));
+        
+        JongoQuery query = getJongoQuery(queryName);
+        if(query == null){
+            return null;
+        }
+        
+        QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
+        ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(true);
+        try {
+            List<RowResponse> results = run.query(query.getCleanQuery(), res, params);
+            return results;
+        } catch (SQLException ex) {
+            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+        }
+    }
+    
+    private static JongoQuery getJongoQuery(final String name) throws JongoJDBCException{
+        ResultSetHandler<JongoQuery> rh = new JongoQueryResultSetHandler();
+        QueryRunner run = new QueryRunner(JDBCConnectionFactory.getAdminDataSource());
+        JongoQuery result = null;
+        try {
+            result = run.query(JongoQuery.GET, rh, name);
+        } catch (SQLException ex) {
+            l.debug(ex.getMessage());
+        }
+        
+        return result;
     }
     
     public static void createJongoTablesAndData() throws SQLException{
