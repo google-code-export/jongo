@@ -109,6 +109,7 @@ public class JDBCConnectionFactory {
     }
 
     public static JongoJDBCException getException(final String msg, final SQLException e) {
+        l.debug("Throwing JDBC Exception with id " + e.getErrorCode());
         switch (configuration.getDriver()) {
             case MySQL:
                 return new MySQLException(msg, e);
@@ -122,6 +123,7 @@ public class JDBCConnectionFactory {
     }
 
     public static JongoJDBCException getException(final String msg, final int e) {
+        l.debug("Throwing JDBC Exception with id " + e);
         switch (configuration.getDriver()) {
             case MySQL:
                 return new MySQLException(msg, e);
