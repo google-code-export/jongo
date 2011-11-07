@@ -247,8 +247,26 @@ public class JongoWSImpl implements JongoWS {
     @Path("query/{query}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
-    public Response query(@PathParam("query") String query, @QueryParam("format") String format, @QueryParam("args") List<String> arguments) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Response query(@PathParam("query") String query, @DefaultValue("json") @QueryParam("format") String format, @QueryParam("args") List<String> arguments) {
+        List<RowResponse> results;
+        try {
+            results = JDBCExecutor.executeQuery(query, JongoUtils.parseValues(arguments));
+        } catch (JongoJDBCException ex) {
+            l.info(ex.getMessage());
+            return ex.getResponse(format);
+        } catch (Exception ex){
+            l.info(ex.getMessage());
+            JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+            return error.getResponse(format);
+        }
+        
+        if(results == null || results.isEmpty()){
+            JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "No results for " + query);
+            return error.getResponse(format);
+        }
+        
+        JongoResponse r = new JongoResponse(null, results);
+        return r.getResponse(format);
     }
     
     
