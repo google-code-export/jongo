@@ -84,8 +84,5 @@ public abstract class JongoJDBCException extends Exception {
     public Response getResponse(final String format){
         JongoError error = new JongoError(null, getResponseStatus(), this.getMessage());
         return error.getResponse(format);
-//        String response = (format.equalsIgnoreCase("json")) ? this.toJSON() : this.toXML();
-//        String media = (format.equalsIgnoreCase("json")) ? MediaType.APPLICATION_JSON : MediaType.APPLICATION_XML;
-//        return Response.status(getResponseStatus()).entity(response).type(media).build();
     }
 }
