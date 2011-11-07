@@ -1,5 +1,8 @@
 package org.jongo.enums;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
@@ -19,6 +22,8 @@ public enum Operator {
     NOT,
     EQUALS,
     NOTEQUALS;
+    
+    private static final List<String> keywords = new ArrayList<String>();
     
     public String sql(){
         switch(this){
@@ -76,5 +81,26 @@ public enum Operator {
             default:
                 return false;
         }
+    }
+    
+    /**
+     * Returns a list with the supported SQL keywords which may render an operator.
+     * @return 
+     */
+    public static List<String> keywords(){
+        if(keywords.isEmpty()){
+            keywords.add("Is");
+            keywords.add("Not");
+            keywords.add("Null");
+            keywords.add("Greater");
+            keywords.add("Less");
+            keywords.add("Than");
+            keywords.add("Between");
+            keywords.add("Equals");
+            keywords.add("And");
+            keywords.add("Or");
+        }
+        
+        return keywords;
     }
 }
