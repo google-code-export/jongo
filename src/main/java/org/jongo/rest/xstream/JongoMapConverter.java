@@ -20,7 +20,12 @@ public class JongoMapConverter implements Converter {
         for(String key: map.keySet()){
             Object val = map.get(key);
             writer.startNode(key.toLowerCase());
-            writer.setValue(val.toString());
+            if(val != null){
+                writer.setValue(val.toString());
+            }else{
+                writer.setValue("");
+            }
+            
             writer.endNode();
         }
     }
