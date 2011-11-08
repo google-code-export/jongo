@@ -52,14 +52,14 @@ public class AppTest extends TestCase {
         assertEquals(request(jongoUrl + "user/name/foo", "GET"), 200);
         assertEquals(request(jongoUrl + "user/age/30", "GET"), 200);
         assertEquals(request(jongoUrl + "user?query=findByName&value=foo", "GET"), 200);
-        assertEquals(request(jongoUrl + "user?query=findByName.And.Age&values=foo&values=30", "GET"), 200);
+        assertEquals(request(jongoUrl + "user?query=findByNameAndAge&values=foo&values=30", "GET"), 200);
         assertEquals(request(jongoUrl + "user?query=findByAge&value=30", "GET"), 200);
         assertEquals(request(jongoUrl + "user?query=findByAgeBetween&values=20&values=40", "GET"), 200);
         assertEquals(request(jongoUrl + "user?query=findByAgeLessThan&value=50", "GET"), 200);
         assertEquals(request(jongoUrl + "user?query=findByNameLike&value=foo", "GET"), 200);
         assertEquals(request(jongoUrl + "user?query=findByNameIsNotNull", "GET"), 200);
         assertEquals(request(jongoUrl + "user?query=findByCreditIsNull", "GET"), 200);
-        assertEquals(request(jongoUrl + "user?query=findByAgeGreaterThanEquals.And.Credit.IsNotNull&value=10", "GET"), 200);
+        assertEquals(request(jongoUrl + "user?query=findByAgeGreaterThanEqualsAndCreditIsNotNull&value=10", "GET"), 200);
     }
     
     public void test3Update(){
