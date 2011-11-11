@@ -1,5 +1,6 @@
 package org.jongo;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +71,19 @@ public class JongoUtils {
         b.append(StringUtils.join(params, ","));
         b.append("]");
         return b.toString();
+    }
+    
+    public static List<String> getListOfApps(){
+        List<String> apps = new ArrayList<String>();
         
+        File appsDir = new File("apps");
+        
+        for(File dir : appsDir.listFiles()){
+            if(dir.isDirectory()){
+                apps.add(dir.getName());
+            }
+        }
+        
+        return apps;
     }
 }
