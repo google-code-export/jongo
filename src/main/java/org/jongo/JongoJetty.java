@@ -1,6 +1,8 @@
 package org.jongo;
 
 import com.sun.jersey.spi.container.servlet.ServletContainer;
+import java.util.ArrayList;
+import java.util.List;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
@@ -26,13 +28,15 @@ public class JongoJetty{
         
         l.debug("Creating Contexts for Jetty");
         ContextHandlerCollection contexts = new ContextHandlerCollection();
-        Context context = new Context(contexts, "/", Context.SESSIONS);
+        Context mainContext = new Context(contexts, "/", Context.SESSIONS);
         
         l.debug("Creating Servlet for Jongo Webservices under org.jongo.rest");
         ServletHolder sh = new ServletHolder(ServletContainer.class);
         sh.setInitParameter("com.sun.jersey.config.property.resourceConfigClass", "com.sun.jersey.api.core.PackagesResourceConfig");
         sh.setInitParameter("com.sun.jersey.config.property.packages", "org.jongo.rest");
-        context.addServlet(sh, "/jongo/*");
+        mainContext.addServlet(sh, "/jongo/*");
+        
+        List<Context> contextsList = new ArrayList<Context>();
         
         if(configuration.isAdminEnabled()){
             l.info("Admin Console is enabled. Creating its context");
@@ -45,20 +49,35 @@ public class JongoJetty{
             staticHolder.setServlet(new DefaultServlet());
             staticHandler.addServletWithMapping( staticHolder, "/*" );
             ctxADocs.addServlet(staticHolder, "/");
+            contextsList.add(ctxADocs);
             
             l.debug("Creating Servlet for Jongo Admin Webservices under org.jongo.admin");
             ServletHolder shAdmin = new ServletHolder(ServletContainer.class);
             shAdmin.setInitParameter("com.sun.jersey.config.property.resourceConfigClass", "com.sun.jersey.api.core.PackagesResourceConfig");
             shAdmin.setInitParameter("com.sun.jersey.config.property.packages", "org.jongo.admin");
-            context.addServlet(shAdmin, "/adminws/*");
-            
-            l.debug("Registering contexts");
-            contexts.setHandlers(new Handler[] { ctxADocs, context });
-        }else{
-            l.debug("Registering contexts");
-            contexts.setHandlers(new Handler[] { context });
+            mainContext.addServlet(shAdmin, "/adminws/*");
+        }
+        l.debug("Loading apps");
+
+        List<String> apps = JongoUtils.getListOfApps();
+        for(String app : apps){
+            l.debug("Creating Servlet for " + app);
+            Context ctxADocs= new Context(contexts, "/" + app ,Context.SESSIONS);
+            ctxADocs.setResourceBase("apps/" + app + "/"); // here we set where the servlet will look for the files
+            ServletHandler staticHandler = new ServletHandler();
+            ServletHolder staticHolder = new ServletHolder( new DefaultServlet() );
+            staticHolder.setInitParameter("dirAllowed", "false");
+            staticHolder.setServlet(new DefaultServlet());
+            staticHandler.addServletWithMapping( staticHolder, "/*" );
+            ctxADocs.addServlet(staticHolder, "/");
+            contextsList.add(ctxADocs);
         }
         
+        
+        contextsList.add(mainContext);
+        
+        l.debug("Registering contexts");
+        contexts.setHandlers(contextsList.toArray(new Handler[]{}));
         
         l.debug("Starting Jetty with the new contexts");
         Server server = new Server(configuration.getPort());
