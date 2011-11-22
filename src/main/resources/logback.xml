@@ -9,7 +9,7 @@
     </encoder>
   </appender>
   
-  <!-- HTML Rolling Appender -->
+  <!-- HTML Rolling Appender
   
   <appender name="H" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <file>logs/jongo.html</file>
@@ -27,6 +27,8 @@
       <MaxFileSize>1024KB</MaxFileSize>
     </triggeringPolicy>
   </appender>
+  
+  -->
   
   <!-- Plain Text Rolling Appender -->
   
@@ -46,9 +48,9 @@
   <logger name="com.sun.jersey" level="OFF"/>
   <logger name="org.slf4j" level="OFF"/>
 
-  <root level="DEBUG">
+  <root level="INFO">
     <appender-ref ref="S"/>
+    <appender-ref ref="R"/>
 <!--    <appender-ref ref="H"/>-->
-<!--    <appender-ref ref="R"/>-->
   </root>
 </configuration>
