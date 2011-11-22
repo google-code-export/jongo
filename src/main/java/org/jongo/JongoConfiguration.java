@@ -29,6 +29,8 @@ public class JongoConfiguration {
     private boolean adminEnabled;
     private String adminIp;
     
+    private boolean appsEnabled;
+    
     private static final JDBCDriver adminDriver = JDBCDriver.HSQLDB;
     private static final String jdbcAdminUrl = "jdbc:hsqldb:file:data/jongoAdmin";
     private static final String jdbcAdminUsername = "jongoAdmin";
@@ -48,6 +50,7 @@ public class JongoConfiguration {
             instance.jdbcPassword = prop.getProperty("jongo.jdbc.password");
             instance.adminIp = prop.getProperty("jongo.admin.ip");
             instance.adminEnabled = Boolean.valueOf(prop.getProperty("jongo.admin.enabled"));
+            instance.appsEnabled = Boolean.valueOf(prop.getProperty("jongo.allow.apps"));
         }
         return instance;
     }
@@ -128,5 +131,9 @@ public class JongoConfiguration {
 
     public boolean isAdminEnabled() {
         return adminEnabled;
+    }
+
+    public boolean areAppsEnabled() {
+        return appsEnabled;
     }
 }

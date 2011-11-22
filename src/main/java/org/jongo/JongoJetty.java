@@ -57,21 +57,24 @@ public class JongoJetty{
             shAdmin.setInitParameter("com.sun.jersey.config.property.packages", "org.jongo.admin");
             mainContext.addServlet(shAdmin, "/adminws/*");
         }
-        l.debug("Loading apps");
-
-        List<String> apps = JongoUtils.getListOfApps();
-        for(String app : apps){
-            l.debug("Creating Servlet for " + app);
-            Context ctxADocs= new Context(contexts, "/" + app ,Context.SESSIONS);
-            ctxADocs.setResourceBase("apps/" + app + "/"); // here we set where the servlet will look for the files
-            ServletHandler staticHandler = new ServletHandler();
-            ServletHolder staticHolder = new ServletHolder( new DefaultServlet() );
-            staticHolder.setInitParameter("dirAllowed", "false");
-            staticHolder.setServlet(new DefaultServlet());
-            staticHandler.addServletWithMapping( staticHolder, "/*" );
-            ctxADocs.addServlet(staticHolder, "/");
-            contextsList.add(ctxADocs);
+        
+        if(configuration.areAppsEnabled()){
+            l.debug("Loading apps");
+            List<String> apps = JongoUtils.getListOfApps();
+            for(String app : apps){
+                l.debug("Creating Servlet for " + app);
+                Context ctxADocs= new Context(contexts, "/" + app ,Context.SESSIONS);
+                ctxADocs.setResourceBase("apps/" + app + "/"); // here we set where the servlet will look for the files
+                ServletHandler staticHandler = new ServletHandler();
+                ServletHolder staticHolder = new ServletHolder( new DefaultServlet() );
+                staticHolder.setInitParameter("dirAllowed", "false");
+                staticHolder.setServlet(new DefaultServlet());
+                staticHandler.addServletWithMapping( staticHolder, "/*" );
+                ctxADocs.addServlet(staticHolder, "/");
+                contextsList.add(ctxADocs);
+            }
         }
+        
         
         
         contextsList.add(mainContext);
