@@ -94,16 +94,34 @@ public class JDBCExecutor {
         
         JongoTable result = isReadable(table);
         
-        String query = "SELECT * FROM " + table + " WHERE " + result.getCustomId() + " = ?";
-        l.debug(query);
+        List<RowResponse> response = null;
         
-        QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
-        ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(false);
-        try {
-            return run.query(query, res, JongoUtils.parseValue(id));
-        } catch (SQLException ex) {
-            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+        
+        if(StringUtils.isBlank(id)){
+            String query = "SELECT * FROM " + table;
+            l.debug(query);
+        
+            QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
+            ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(true);
+            try {
+                response = run.query(query, res);
+            } catch (SQLException ex) {
+                throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+            }
+        }else{
+            String query = "SELECT * FROM " + table + " WHERE " + result.getCustomId() + " = ?";
+            l.debug(query);
+        
+            QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
+            ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(false);
+            try {
+                response =  run.query(query, res, JongoUtils.parseValue(id));
+            } catch (SQLException ex) {
+                throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+            }
         }
+        return response;
+        
     }
     
     private static JongoTable isWritable(final String table) throws JongoJDBCException{
