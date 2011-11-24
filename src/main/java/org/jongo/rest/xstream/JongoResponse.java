@@ -11,19 +11,19 @@ import javax.ws.rs.core.Response;
  */
 public class JongoResponse {
     
-    private final String sessionId;
     private final boolean success = true;
     private final Response.Status status;
     private final List<RowResponse> rows;
+    private final String table;
     
-    public JongoResponse(String sessionId, List<RowResponse> results, Response.Status status) {
-        this.sessionId = sessionId;
+    public JongoResponse(String table, List<RowResponse> results, Response.Status status) {
+        this.table = table;
         this.rows = results;
         this.status = status;
     }
     
-    public JongoResponse(String sessionId, List<RowResponse> results) {
-        this.sessionId = sessionId;
+    public JongoResponse(String table, List<RowResponse> results) {
+        this.table = table;
         this.rows = results;
         this.status = Response.Status.OK;
     }
@@ -36,15 +36,17 @@ public class JongoResponse {
         xStream.alias("row", RowResponse.class);
         xStream.registerConverter(new JongoMapConverter());
         xStream.aliasAttribute(RowResponse.class, "roi", "roi");
-        xStream.omitField(JongoResponse.class, "sessionId");
-        xStream.omitField(JongoResponse.class, "status");
-        xStream.omitField(JongoResponse.class, "success");
         return xStream.toXML(this);
     }
     
     public String toJSON(){
-        // I really tried to use XStream to generate the JSON, but it simply didn't do what I wanted.
-        StringBuilder b = new StringBuilder("{\"response\":[");
+        // I really tried to use XStream to generate the JSON, but it simply didn't do what I wanted. 
+        // It kept adding the response as an object and I want an array here.
+        StringBuilder b = new StringBuilder("{");
+        b.append("\"success\":");b.append(success);
+        b.append(",\"count\":");b.append(rows.size());
+        b.append(",\"table\":\"");b.append(table);
+        b.append("\",\"response\":[");
         for(RowResponse row : rows){
             b.append(row.toJSON());
             b.append(",");
