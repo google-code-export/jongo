@@ -1,13 +1,17 @@
 package org.jongo;
 
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.jongo.rest.xstream.JongoMapConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,5 +89,13 @@ public class JongoUtils {
         }
         
         return apps;
+    }
+    
+    public static MultivaluedMap<String, String> getParamsFromJSON(final String json){
+        XStream xStream = new XStream(new JettisonMappedXmlDriver());
+        xStream.setMode(XStream.NO_REFERENCES);
+        xStream.registerConverter(new JongoMapConverter());
+        xStream.alias("request", MultivaluedMap.class);
+        return (MultivaluedMap<String, String>)xStream.fromXML(json);
     }
 }
