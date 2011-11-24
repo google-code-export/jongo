@@ -14,16 +14,16 @@ public class JongoResponse {
     private final boolean success = true;
     private final Response.Status status;
     private final List<RowResponse> rows;
-    private final String table;
+    private final String resource;
     
-    public JongoResponse(String table, List<RowResponse> results, Response.Status status) {
-        this.table = table;
+    public JongoResponse(String resource, List<RowResponse> results, Response.Status status) {
+        this.resource = resource;
         this.rows = results;
         this.status = status;
     }
     
-    public JongoResponse(String table, List<RowResponse> results) {
-        this.table = table;
+    public JongoResponse(String resource, List<RowResponse> results) {
+        this.resource = resource;
         this.rows = results;
         this.status = Response.Status.OK;
     }
@@ -45,7 +45,7 @@ public class JongoResponse {
         StringBuilder b = new StringBuilder("{");
         b.append("\"success\":");b.append(success);
         b.append(",\"count\":");b.append(rows.size());
-        b.append(",\"table\":\"");b.append(table);
+        b.append(",\"resource\":\"");b.append(resource);
         b.append("\",\"response\":[");
         for(RowResponse row : rows){
             b.append(row.toJSON());
