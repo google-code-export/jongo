@@ -92,10 +92,12 @@ public class JongoUtils {
     }
     
     public static MultivaluedMap<String, String> getParamsFromJSON(final String json){
+        // XStream needs the response to be nested inside an object it can understand
+        final String formattedJson = "{\"request\":" + json + "}";
         XStream xStream = new XStream(new JettisonMappedXmlDriver());
         xStream.setMode(XStream.NO_REFERENCES);
         xStream.registerConverter(new JongoMapConverter());
         xStream.alias("request", MultivaluedMap.class);
-        return (MultivaluedMap<String, String>)xStream.fromXML(json);
+        return (MultivaluedMap<String, String>)xStream.fromXML(formattedJson);
     }
 }
