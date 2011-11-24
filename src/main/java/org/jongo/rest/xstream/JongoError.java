@@ -31,7 +31,6 @@ public class JongoError {
         xStream.setMode(XStream.NO_REFERENCES);
         xStream.autodetectAnnotations(false);
         xStream.alias("response", JongoError.class);
-        xStream.useAttributeFor(JongoError.class, "sessionId");
         return xStream;
     }
     
