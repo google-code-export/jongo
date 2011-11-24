@@ -12,11 +12,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import org.jongo.JongoUtils;
 import org.jongo.jdbc.DynamicFinder;
 import org.jongo.jdbc.JDBCExecutor;
@@ -37,6 +34,14 @@ public class JongoWSImpl implements JongoWS {
     private static final Logger l = LoggerFactory.getLogger(JongoWSImpl.class);
     
     @GET
+    @Path("{table}")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Override
+    public Response get(@PathParam("table") String table, @DefaultValue("json") @QueryParam("format") String format) {
+        return get(table, format, null);
+    }
+    
+    @GET
     @Path("{table}/{id}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
@@ -54,16 +59,16 @@ public class JongoWSImpl implements JongoWS {
             return ex.getResponse(format);
         } catch (Exception ex){
             l.info(ex.getMessage());
-            JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+            JongoError error = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
             return error.getResponse(format);
         }
         
         if(results == null || results.isEmpty()){
-            JongoError error = new JongoError(null, Response.Status.NOT_FOUND);
+            JongoError error = new JongoError(table, Response.Status.NOT_FOUND);
             return error.getResponse(format);
         }
         
-        JongoResponse r = new JongoResponse(null, results);
+        JongoResponse r = new JongoResponse(table, results);
         return r.getResponse(format);
         
     }
@@ -71,59 +76,58 @@ public class JongoWSImpl implements JongoWS {
     @POST
     @Path("{table}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Override
-    public Response insert(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, final MultivaluedMap<String, String> formParams) {
+    public Response insert(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, final String jsonRequest) {
         int result = 0;
         try {
-            result = JDBCExecutor.insert(table, formParams);
+            result = JDBCExecutor.insert(table, JongoUtils.getParamsFromJSON(jsonRequest));
         } catch (JongoJDBCException ex) {
             l.info(ex.getMessage());
             return ex.getResponse(format);
         } catch (Exception ex){
             l.info(ex.getMessage());
-            JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+            JongoError error = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
             return error.getResponse(format);
         }
         
         if(result == 0){
-            JongoError error = new JongoError(null, Response.Status.NO_CONTENT);
+            JongoError error = new JongoError(table, Response.Status.NO_CONTENT);
             return error.getResponse(format);
         }
 
         List<RowResponse> results = new ArrayList<RowResponse>();
         results.add(new RowResponse(0));
-        JongoResponse r = new JongoResponse(null, results, Response.Status.CREATED);
+        JongoResponse r = new JongoResponse(table, results, Response.Status.CREATED);
         return r.getResponse(format);
     }
 
     @PUT
     @Path("{table}/{id}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Consumes(MediaType.APPLICATION_JSON)
     @Override
-    public Response update(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") final String id, @Context final UriInfo ui) {
-        MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
-
-        int result;
+    public Response update(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") final String id, final String jsonRequest) {
+        int result = 0;
         try {
-            result = JDBCExecutor.update(table, id, queryParams);
+            result = JDBCExecutor.update(table, id, JongoUtils.getParamsFromJSON(jsonRequest));
         } catch (JongoJDBCException ex) {
             l.info(ex.getMessage());
             return ex.getResponse(format);
         } catch (Exception ex){
             l.info(ex.getMessage());
-            JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+            JongoError error = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
             return error.getResponse(format);
         }
         
         if(result == 0){
-            JongoError error = new JongoError(null, Response.Status.NO_CONTENT);
+            JongoError error = new JongoError(table, Response.Status.NO_CONTENT);
             return error.getResponse(format);
         }
 
         List<RowResponse> results = new ArrayList<RowResponse>();
         results.add(new RowResponse(0));
-        JongoResponse r = new JongoResponse(null, results, Response.Status.OK);
+        JongoResponse r = new JongoResponse(table, results, Response.Status.OK);
         return r.getResponse(format);
     }
 
@@ -140,18 +144,18 @@ public class JongoWSImpl implements JongoWS {
             return ex.getResponse(format);
         } catch (Exception ex){
             l.error(ex.getMessage());
-            JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+            JongoError error = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
             return error.getResponse(format);
         }
         
         if(result == 0){
-            JongoError error = new JongoError(null, Response.Status.NO_CONTENT);
+            JongoError error = new JongoError(table, Response.Status.NO_CONTENT);
             return error.getResponse(format);
         }
 
         List<RowResponse> results = new ArrayList<RowResponse>();
         results.add(new RowResponse(0));
-        JongoResponse r = new JongoResponse(null, results, Response.Status.OK);
+        JongoResponse r = new JongoResponse(table, results, Response.Status.OK);
         return r.getResponse(format);
     }
     
@@ -173,36 +177,28 @@ public class JongoWSImpl implements JongoWS {
             return ex.getResponse(format);
         } catch (Exception ex){
             l.info(ex.getMessage());
-            JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+            JongoError error = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
             return error.getResponse(format);
         }
         
         if(results == null || results.isEmpty()){
-            JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "No results for " + q);
+            JongoError error = new JongoError(table, Response.Status.NOT_FOUND, "No results for " + q);
             return error.getResponse(format);
         }
         
-        JongoResponse r = new JongoResponse(null, results);
+        JongoResponse r = new JongoResponse(table, results);
         return r.getResponse(format);
     }
     
     @GET
-    @Path("{table}")
+    @Path("{table}/dynamic/{query}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
-    public Response findBy(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @QueryParam("query") String query, @QueryParam("value") String value, @QueryParam("values")  List<String> values) {
+    public Response findBy(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("query") String query, @QueryParam("value") String value, @QueryParam("values")  List<String> values) {
         List<RowResponse> results = null;
         if(query == null){
-            try{
-                results = JDBCExecutor.getTableMetaData(table);
-            } catch (JongoJDBCException ex) {
-                l.info(ex.getMessage());
-                return ex.getResponse(format);
-            }
-            if(results == null || results.isEmpty()){
-                JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "Invalid table " + table);
-                return error.getResponse(format);
-            }
+            JongoError error = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
+            return error.getResponse(format);
         }else{
             if(values.isEmpty()){
                 if(value == null){
@@ -234,12 +230,12 @@ public class JongoWSImpl implements JongoWS {
             }
             
             if(results == null || results.isEmpty()){
-                JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "No results for " + query);
+                JongoError error = new JongoError(table, Response.Status.NOT_FOUND, "No results for " + query);
                 return error.getResponse(format);
             }
         }
         
-        JongoResponse r = new JongoResponse(null, results);
+        JongoResponse r = new JongoResponse(table, results);
         return r.getResponse(format);
     }
 
@@ -256,12 +252,12 @@ public class JongoWSImpl implements JongoWS {
             return ex.getResponse(format);
         } catch (Exception ex){
             l.info(ex.getMessage());
-            JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+            JongoError error = new JongoError(query, Response.Status.INTERNAL_SERVER_ERROR);
             return error.getResponse(format);
         }
         
         if(results == null || results.isEmpty()){
-            JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "No results for " + query);
+            JongoError error = new JongoError(query, Response.Status.NOT_FOUND, "No results for " + query);
             return error.getResponse(format);
         }
         
