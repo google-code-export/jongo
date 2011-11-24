@@ -10,19 +10,19 @@ import javax.ws.rs.core.Response;
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public class JongoError {
-    private final String sessionId;
+    private final String resource;
     private final boolean success = false;
     private final Response.Status errorCode;
     private final String message;
 
-    public JongoError(String sessionId, Response.Status errorCode) {
-        this.sessionId = sessionId;
+    public JongoError(String resource, Response.Status errorCode) {
+        this.resource = resource;
         this.errorCode = errorCode;
         this.message = errorCode.getReasonPhrase();
     }
 
-    public JongoError(String sessionId, Response.Status errorCode, String message) {
-        this.sessionId = sessionId;
+    public JongoError(String resource, Response.Status errorCode, String message) {
+        this.resource = resource;
         this.errorCode = errorCode;
         this.message = message;
     }
