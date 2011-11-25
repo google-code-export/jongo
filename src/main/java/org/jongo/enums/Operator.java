@@ -99,6 +99,7 @@ public enum Operator {
             keywords.add("Equals");
             keywords.add("And");
             keywords.add("Or");
+            keywords.add("Like");
         }
         
         return keywords;
