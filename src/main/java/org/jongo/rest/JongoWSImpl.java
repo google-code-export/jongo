@@ -202,30 +202,43 @@ public class JongoWSImpl implements JongoWS {
         }else{
             if(values.isEmpty()){
                 if(value == null){
-                    DynamicFinder df = DynamicFinder.valueOf(table, query);
                     try{
+                        DynamicFinder df = DynamicFinder.valueOf(table, query);
                         results = JDBCExecutor.find(df);
                     } catch (JongoJDBCException ex) {
                         l.info(ex.getMessage());
                         return ex.getResponse(format);
+                    } catch (IllegalArgumentException ex){
+                        l.info(ex.getMessage());
+                        JongoError error = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
+                        return error.getResponse(format);
                     }
                 }else{
-                    DynamicFinder df = DynamicFinder.valueOf(table, query, value);
                     try{
+                        DynamicFinder df = DynamicFinder.valueOf(table, query, value);
                         results = JDBCExecutor.find(df, JongoUtils.parseValue(value));
                     } catch (JongoJDBCException ex) {
                         l.info(ex.getMessage());
                         return ex.getResponse(format);
+                    } catch (IllegalArgumentException ex){
+                        l.info(ex.getMessage());
+                        JongoError error = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
+                        return error.getResponse(format);
                     }
                 }
 
             }else{
-                DynamicFinder df = DynamicFinder.valueOf(table, query, values.toArray(new String []{}));
+                
                 try{
+                    DynamicFinder df = DynamicFinder.valueOf(table, query, values.toArray(new String []{}));
                     results = JDBCExecutor.find(df, JongoUtils.parseValues(values));
                 } catch (JongoJDBCException ex) {
                     l.info(ex.getMessage());
                     return ex.getResponse(format);
+                } catch (IllegalArgumentException ex){
+                    l.info(ex.getMessage());
+                    JongoError error = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
+                    return error.getResponse(format);
                 }
             }
             
