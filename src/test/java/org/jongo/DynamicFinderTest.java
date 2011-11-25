@@ -134,9 +134,16 @@ public class DynamicFinderTest extends TestCase {
         String query = "SELECT * FROM sometable WHERE age = ? AND name IS NULL";
         doTest(dynamicQuery, query);
     }
+    
+    public void test_findAllByNameLike() {
+        String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
+        String query = "SELECT * FROM sometable WHERE name LIKE ?";
+        doTest(dynamicQuery, query);
+    }
 
     private void doTest(String dynamicQuery, String query) {
         DynamicFinder d = DynamicFinder.valueOf("sometable", dynamicQuery);
+        System.out.println(d.getSql());
         assertTrue(d.getSql().equalsIgnoreCase(query));
     }
     
