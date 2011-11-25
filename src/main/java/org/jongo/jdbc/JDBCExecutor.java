@@ -47,12 +47,22 @@ public class JDBCExecutor {
     public static int insert(final String table, MultivaluedMap<String, String> formParams) throws JongoJDBCException {
         l.debug("Inserting in " + table);
         
-        isWritable(table);
+        JongoTable jongoTable = isWritable(table);
         JongoJDBCConnection conn = JDBCConnectionFactory.getJongoJDBCConnection();
         
         List<String> params = new ArrayList<String>(formParams.size());
         for(String k : formParams.keySet()){
-            params.add(formParams.getFirst(k));
+            if(k.equalsIgnoreCase(jongoTable.getCustomId())){
+                if(!StringUtils.isBlank(formParams.getFirst(k))){
+                    params.add(formParams.getFirst(k));
+                }else{
+                    l.warn("For some reason I'm receiving and empty " + k + ". I'm removing it from the params. Are you using ExtJS?");
+                    formParams.remove(k);
+                }
+            }else{
+                params.add(formParams.getFirst(k));
+            }
+            
         }
         
         String query = conn.getInsertQuery(table, formParams);
