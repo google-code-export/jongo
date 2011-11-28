@@ -51,18 +51,22 @@ public class JDBCExecutor {
         JongoJDBCConnection conn = JDBCConnectionFactory.getJongoJDBCConnection();
         
         List<String> params = new ArrayList<String>(formParams.size());
+        String idToBeRemoved = null;
         for(String k : formParams.keySet()){
             if(k.equalsIgnoreCase(jongoTable.getCustomId())){
                 if(!StringUtils.isBlank(formParams.getFirst(k))){
                     params.add(formParams.getFirst(k));
                 }else{
-                    l.warn("For some reason I'm receiving and empty " + k + ". I'm removing it from the params. Are you using ExtJS?");
-                    formParams.remove(k);
+                    l.info("For some reason I'm receiving and empty " + k + ". I'm removing it from the params. Are you using ExtJS?");
+                    idToBeRemoved = k;
                 }
             }else{
                 params.add(formParams.getFirst(k));
             }
-            
+        }
+        
+        if(idToBeRemoved != null){
+            formParams.remove(idToBeRemoved);
         }
         
         String query = conn.getInsertQuery(table, formParams);
@@ -76,7 +80,7 @@ public class JDBCExecutor {
         }
     }
     
-    public static int update(final String table, final String id, MultivaluedMap<String, String> formParams) throws JongoJDBCException {
+    public static List<RowResponse> update(final String table, final String id, MultivaluedMap<String, String> formParams) throws JongoJDBCException {
         l.debug("Updating table " + table);
         
         JongoTable result = isWritable(table);
@@ -91,12 +95,18 @@ public class JDBCExecutor {
         
         String query = conn.getUpdateQuery(table, result.getCustomId(), formParams);
         l.debug(query);
+        
         QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
+        List<RowResponse> results = null;
         try {
-            return run.update(query, JongoUtils.parseValues(params));
+            int ret = run.update(query, JongoUtils.parseValues(params));
+            if(ret != 0){
+                results = get(table, id);
+            }
         } catch (SQLException ex) {
             throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
         }
+        return results;
     }
     
     public static List<RowResponse> get(final String table, final String id) throws JongoJDBCException {
