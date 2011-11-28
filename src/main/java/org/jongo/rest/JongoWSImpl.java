@@ -108,9 +108,9 @@ public class JongoWSImpl implements JongoWS {
     @Consumes(MediaType.APPLICATION_JSON)
     @Override
     public Response update(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") final String id, final String jsonRequest) {
-        int result = 0;
+        List<RowResponse> results = null;
         try {
-            result = JDBCExecutor.update(table, id, JongoUtils.getParamsFromJSON(jsonRequest));
+            results = JDBCExecutor.update(table, id, JongoUtils.getParamsFromJSON(jsonRequest));
         } catch (JongoJDBCException ex) {
             l.info(ex.getMessage());
             return ex.getResponse(format);
@@ -120,13 +120,11 @@ public class JongoWSImpl implements JongoWS {
             return error.getResponse(format);
         }
         
-        if(result == 0){
+        if(results == null){
             JongoError error = new JongoError(table, Response.Status.NO_CONTENT);
             return error.getResponse(format);
         }
 
-        List<RowResponse> results = new ArrayList<RowResponse>();
-        results.add(new RowResponse(0));
         JongoResponse r = new JongoResponse(table, results, Response.Status.OK);
         return r.getResponse(format);
     }
