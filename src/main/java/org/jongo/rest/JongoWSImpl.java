@@ -74,7 +74,7 @@ public class JongoWSImpl implements JongoWS {
             }
         }
         
-        if(results == null || results.isEmpty()){
+        if(results == null){
             JongoError error = new JongoError(table, Response.Status.NOT_FOUND);
             return error.getResponse(format);
         }
