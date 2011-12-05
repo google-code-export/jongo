@@ -14,6 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.apache.commons.lang.StringUtils;
 import org.jongo.JongoUtils;
 import org.jongo.jdbc.DynamicFinder;
 import org.jongo.jdbc.JDBCExecutor;
@@ -51,16 +52,26 @@ public class JongoWSImpl implements JongoWS {
             @PathParam("id") String id ) {
         
         List<RowResponse> results;
-        try {
-            results = JDBCExecutor.get(table, id);
-        } catch (JongoJDBCException ex) {
-            l.info(ex.getMessage());
-            l.info("" + ex.getSqlErrorCode());
-            return ex.getResponse(format);
-        } catch (Exception ex){
-            l.info(ex.getMessage());
-            JongoError error = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
-            return error.getResponse(format);
+        
+        if(!StringUtils.isBlank(id) && id.equalsIgnoreCase("meta")){
+            try{
+                results = JDBCExecutor.getTableMetaData(table);
+            } catch (JongoJDBCException ex) {
+                l.info(ex.getMessage());
+                return ex.getResponse(format);
+            }
+        }else{
+            try {
+                results = JDBCExecutor.get(table, id);
+            } catch (JongoJDBCException ex) {
+                l.info(ex.getMessage());
+                l.info("" + ex.getSqlErrorCode());
+                return ex.getResponse(format);
+            } catch (Exception ex){
+                l.info(ex.getMessage());
+                JongoError error = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
+                return error.getResponse(format);
+            }
         }
         
         if(results == null || results.isEmpty()){
