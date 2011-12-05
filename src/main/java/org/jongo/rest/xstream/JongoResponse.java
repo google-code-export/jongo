@@ -46,7 +46,7 @@ public class JongoResponse {
         b.append("\"success\":");b.append(success);
         b.append(",\"count\":");b.append(rows.size());
         b.append(",\"resource\":\"");b.append(resource);
-        b.append("\",\"response\":[");
+        b.append("\",\"response\":[ "); //this last space is important!
         for(RowResponse row : rows){
             b.append(row.toJSON());
             b.append(",");
