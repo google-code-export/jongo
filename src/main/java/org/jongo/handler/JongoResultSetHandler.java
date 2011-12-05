@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jongo.handler;
 
 import java.sql.ResultSet;
@@ -68,6 +64,7 @@ public class JongoResultSetHandler implements ResultSetHandler<List<RowResponse>
             }
         }catch(SQLException e){
             l.error("Failed to map ResultSet");
+            l.error(e.getMessage());
             return null;
         }
         
