@@ -175,7 +175,7 @@ function deleteTable(id){
 function showTable(tableName){
     var tableMetaData = null;
     $.ajax({
-        url: '/jongo/' + tableName,
+        url: '/jongo/' + tableName + '/meta',
         async: false,
         dataType: 'json',
         success: function(data){
