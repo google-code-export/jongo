@@ -3,6 +3,7 @@ package org.jongo.jdbc.exceptions;
 import java.sql.SQLException;
 import javax.ws.rs.core.Response;
 import org.jongo.rest.xstream.JongoError;
+import org.jongo.rest.xstream.JongoResponse;
 
 /**
  * DatabaseException denotes a generic runtime data access (SQL) exception. By declaring the 
@@ -82,7 +83,7 @@ public abstract class JongoJDBCException extends Exception {
     }
     
     public Response getResponse(final String format){
-        JongoError error = new JongoError(null, getResponseStatus(), this.getMessage());
+        JongoResponse error = new JongoError(null, getResponseStatus(), this.getMessage());
         return error.getResponse(format);
     }
 }

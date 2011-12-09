@@ -28,6 +28,7 @@ import org.jongo.jdbc.JDBCExecutor;
 import org.jongo.jdbc.exceptions.JongoJDBCException;
 import org.jongo.rest.xstream.JongoError;
 import org.jongo.rest.xstream.JongoResponse;
+import org.jongo.rest.xstream.JongoSuccess;
 import org.jongo.rest.xstream.RowResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,16 +158,16 @@ public class AdminWSImpl implements AdminWS {
             return ex.getResponse(format);
         } catch (Exception ex){
             l.info(ex.getMessage());
-            JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+            JongoResponse error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
             return error.getResponse(format);
         }
         
         if(results == null || results.isEmpty()){
-            JongoError error = new JongoError(null, Response.Status.NOT_FOUND, "No results for " + query);
+            JongoResponse error = new JongoError(null, Response.Status.NOT_FOUND, "No results for " + query);
             return error.getResponse(format);
         }
         
-        JongoResponse r = new JongoResponse(null, results);
+        JongoResponse r = new JongoSuccess(null, results);
         return r.getResponse(format);
     }
     
@@ -179,18 +180,18 @@ public class AdminWSImpl implements AdminWS {
             return ex.getResponse(format);
         } catch (Exception ex){
             l.info(ex.getMessage());
-            JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+            JongoResponse error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
             return error.getResponse(format);
         }
         
         if(result == 0){
-            JongoError error = new JongoError(null, Response.Status.NO_CONTENT);
+            JongoResponse error = new JongoError(null, Response.Status.NO_CONTENT);
             return error.getResponse(format);
         }
 
         List<RowResponse> results = new ArrayList<RowResponse>();
         results.add(new RowResponse(0));
-        JongoResponse r = new JongoResponse(null, results, Response.Status.CREATED);
+        JongoResponse r = new JongoSuccess(null, results, Response.Status.CREATED);
         return r.getResponse(format);
     }
     
@@ -205,18 +206,18 @@ public class AdminWSImpl implements AdminWS {
             return ex.getResponse(format);
         } catch (Exception ex){
             l.info(ex.getMessage());
-            JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+            JongoResponse error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
             return error.getResponse(format);
         }
         
         if(result == 0){
-            JongoError error = new JongoError(null, Response.Status.NO_CONTENT);
+            JongoResponse error = new JongoError(null, Response.Status.NO_CONTENT);
             return error.getResponse(format);
         }
 
         List<RowResponse> results = new ArrayList<RowResponse>();
         results.add(new RowResponse(0));
-        JongoResponse r = new JongoResponse(null, results, Response.Status.OK);
+        JongoResponse r = new JongoSuccess(null, results, Response.Status.OK);
         return r.getResponse(format);
     }
     
@@ -229,18 +230,18 @@ public class AdminWSImpl implements AdminWS {
             return ex.getResponse(format);
         } catch (Exception ex){
             l.error(ex.getMessage());
-            JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+            JongoResponse error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
             return error.getResponse(format);
         }
         
         if(result == 0){
-            JongoError error = new JongoError(null, Response.Status.NO_CONTENT);
+            JongoResponse error = new JongoError(null, Response.Status.NO_CONTENT);
             return error.getResponse(format);
         }
 
         List<RowResponse> results = new ArrayList<RowResponse>();
         results.add(new RowResponse(0));
-        JongoResponse r = new JongoResponse(null, results, Response.Status.OK);
+        JongoResponse r = new JongoSuccess(null, results, Response.Status.OK);
         return r.getResponse(format);
     }
     
