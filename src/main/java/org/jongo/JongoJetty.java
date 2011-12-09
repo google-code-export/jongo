@@ -24,6 +24,9 @@ public class JongoJetty{
     public static void main(String[] args) throws Exception {
         l.info("Starting Jongo in Jetty Embedded mode");
         
+        l.debug("Registering the shutdown hook");
+        Runtime.getRuntime().addShutdownHook(new JongoShutdown());
+        
         JongoConfiguration configuration = Jongo.loadConfiguration();
         
         l.debug("Creating Contexts for Jetty");
@@ -74,8 +77,6 @@ public class JongoJetty{
                 contextsList.add(ctxADocs);
             }
         }
-        
-        
         
         contextsList.add(mainContext);
         
