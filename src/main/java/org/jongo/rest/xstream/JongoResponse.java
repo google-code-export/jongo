@@ -41,12 +41,13 @@ public class JongoResponse {
     
     public String toJSON(){
         // I really tried to use XStream to generate the JSON, but it simply didn't do what I wanted. 
-        // It kept adding the response as an object and I want an array here.
+        // It kept adding the response as an object and I want an array.
         StringBuilder b = new StringBuilder("{");
         b.append("\"success\":");b.append(success);
         b.append(",\"count\":");b.append(rows.size());
         b.append(",\"resource\":\"");b.append(resource);
-        b.append("\",\"response\":[ "); //this last space is important!
+        b.append("\",\"code\":");b.append(status.getStatusCode());
+        b.append(",\"response\":[ "); //this last space is important!
         for(RowResponse row : rows){
             b.append(row.toJSON());
             b.append(",");
