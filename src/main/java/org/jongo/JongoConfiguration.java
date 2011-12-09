@@ -3,6 +3,7 @@ package org.jongo;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import org.jongo.demo.Demo;
 import org.jongo.enums.JDBCDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +33,11 @@ public class JongoConfiguration {
     private boolean appsEnabled;
     
     private static final JDBCDriver adminDriver = JDBCDriver.HSQLDB;
-    private static final String jdbcAdminUrl = "jdbc:hsqldb:file:data/jongoAdmin";
+    private String jdbcAdminUrl;
     private static final String jdbcAdminUsername = "jongoAdmin";
     private static final String jdbcAdminPassword = "jongoAdmin";
+    
+    private static final boolean demo = (System.getProperty("environment") != null && System.getProperty("environment").equalsIgnoreCase("demo")); 
     
     private JongoConfiguration(){}
     
@@ -44,13 +47,25 @@ public class JongoConfiguration {
             Properties prop = loadProperties();
             instance.ip = prop.getProperty("jongo.ip");
             instance.port = Integer.valueOf(prop.getProperty("jongo.port"));
-            instance.driver = JDBCDriver.driverOf(prop.getProperty("jongo.jdbc.driver"));
-            instance.jdbcUrl = prop.getProperty("jongo.jdbc.url");
-            instance.jdbcUsername = prop.getProperty("jongo.jdbc.username");
-            instance.jdbcPassword = prop.getProperty("jongo.jdbc.password");
             instance.adminIp = prop.getProperty("jongo.admin.ip");
             instance.adminEnabled = Boolean.valueOf(prop.getProperty("jongo.admin.enabled"));
             instance.appsEnabled = Boolean.valueOf(prop.getProperty("jongo.allow.apps"));
+            
+            if(demo){
+                l.debug("Loading demo configuration with memory databases");
+                instance.driver = Demo.driver;
+                instance.jdbcUrl = Demo.db;
+                instance.jdbcUsername = Demo.user;
+                instance.jdbcPassword = Demo.pass;
+                instance.jdbcAdminUrl = "jdbc:hsqldb:mem:adminDemo";
+            }else{
+                instance.driver = JDBCDriver.driverOf(prop.getProperty("jongo.jdbc.driver"));
+                instance.jdbcUrl = prop.getProperty("jongo.jdbc.url");
+                instance.jdbcUsername = prop.getProperty("jongo.jdbc.username");
+                instance.jdbcPassword = prop.getProperty("jongo.jdbc.password");
+                instance.jdbcAdminUrl = "jdbc:hsqldb:file:data/jongoAdmin";
+            }
+            
         }
         return instance;
     }
@@ -135,5 +150,9 @@ public class JongoConfiguration {
 
     public boolean areAppsEnabled() {
         return appsEnabled;
+    }
+    
+    public boolean isDemoModeActive(){
+        return demo;
     }
 }
