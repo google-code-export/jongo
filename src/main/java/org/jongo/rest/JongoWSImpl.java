@@ -193,10 +193,9 @@ public class JongoWSImpl implements JongoWS {
     public Response find(@PathParam("table") String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("column") final String col, @PathParam("value") final String val) {
         l.debug("Geting resource from " + table + " with " + col + " value " + val);
         Response response = null;
-        String q = "SELECT * FROM " + table + " WHERE " + col + " = ?";
         List<RowResponse> results = null;
         try {
-            results = JDBCExecutor.find(table, q, JongoUtils.parseValue(val));
+            results = JDBCExecutor.findByColumn(table, col, JongoUtils.parseValue(val));
         } catch (JongoJDBCException ex) {
             l.info("Received a JongoJDBCException " + ex.getMessage());
             response =  ex.getResponse(format);
@@ -207,7 +206,7 @@ public class JongoWSImpl implements JongoWS {
         }
         
         if((results == null || results.isEmpty()) && response == null ){
-            JongoError error = new JongoError(table, Response.Status.NOT_FOUND, "No results for " + q);
+            JongoError error = new JongoError(table, Response.Status.NOT_FOUND, "No results for " + table + " with " + col + " = " + val);
             response =  error.getResponse(format);
         }
         
