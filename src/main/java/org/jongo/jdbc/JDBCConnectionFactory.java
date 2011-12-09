@@ -53,6 +53,7 @@ public class JDBCConnectionFactory {
         JongoJDBCConnection cx = null;
         switch (driver) {
             case MySQL:
+                l.debug("New MySQL Connection to " + url);
                 cx = new MySQLConnection(url, user, pass);
                 break;
             case HSQLDB:
@@ -60,6 +61,7 @@ public class JDBCConnectionFactory {
                 cx = new HSQLConnection(url, user, pass);
                 break;
             case ORACLE:
+                l.debug("New Oracle Connection to " + url);
                 cx = new OracleConnection(url, user, pass);
                 break;
             default:
