@@ -1,5 +1,6 @@
 package org.jongo.jdbc;
 
+import org.jongo.jdbc.exceptions.JongoJDBCExceptionFactory;
 import org.jongo.handler.ResultSetMetaDataHandler;
 import org.jongo.handler.JongoResultSetHandler;
 import java.sql.SQLException;
