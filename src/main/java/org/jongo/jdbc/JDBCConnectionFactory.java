@@ -13,10 +13,6 @@ import org.jongo.JongoConfiguration;
 import org.jongo.enums.JDBCDriver;
 import org.jongo.jdbc.connections.HSQLConnection;
 import org.jongo.jdbc.connections.OracleConnection;
-import org.jongo.jdbc.exceptions.HSQLException;
-import org.jongo.jdbc.exceptions.JongoJDBCException;
-import org.jongo.jdbc.exceptions.MySQLException;
-import org.jongo.jdbc.exceptions.OracleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,33 +104,5 @@ public class JDBCConnectionFactory {
         PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, connectionPool, null, null, false, true);
         PoolingDataSource dataSource = new PoolingDataSource(connectionPool);
         return dataSource;
-    }
-
-    public static JongoJDBCException getException(final String msg, final SQLException e) {
-        l.debug("Throwing JDBC Exception with id " + e.getErrorCode());
-        switch (configuration.getDriver()) {
-            case MySQL:
-                return new MySQLException(msg, e);
-            case HSQLDB:
-                return new HSQLException(msg, e);
-            case ORACLE:
-                return new OracleException(msg, e);
-            default:
-                throw new IllegalArgumentException("Not implemented yet");
-        }
-    }
-
-    public static JongoJDBCException getException(final String msg, final int e) {
-        l.debug("Throwing JDBC Exception with id " + e);
-        switch (configuration.getDriver()) {
-            case MySQL:
-                return new MySQLException(msg, e);
-            case HSQLDB:
-                return new HSQLException(msg, e);
-            case ORACLE:
-                return new OracleException(msg, e);
-            default:
-                throw new IllegalArgumentException("Not implemented yet");
-        }
     }
 }
