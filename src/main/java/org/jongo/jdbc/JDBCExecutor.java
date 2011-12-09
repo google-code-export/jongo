@@ -1,5 +1,6 @@
 package org.jongo.jdbc;
 
+import java.util.logging.Level;
 import org.jongo.jdbc.exceptions.JongoJDBCExceptionFactory;
 import org.jongo.handler.ResultSetMetaDataHandler;
 import org.jongo.handler.JongoResultSetHandler;
@@ -10,6 +11,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.lang.StringUtils;
+import org.jongo.JongoConfiguration;
 import org.jongo.JongoUtils;
 import org.jongo.demo.Demo;
 import org.jongo.domain.JongoQuery;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
 public class JDBCExecutor {
 
     private static final Logger l = LoggerFactory.getLogger(JDBCExecutor.class);
+    private static final JongoConfiguration configuration = JongoConfiguration.instanceOf();
     
     public static int delete(final String table, final String id) throws JongoJDBCException {
         l.debug("Deleting from " + table);
@@ -298,8 +301,7 @@ public class JDBCExecutor {
             update(adminRun, JDBCConnectionFactory.createJongoQueryTableQuery);
         }
         
-        String env = System.getProperty("environment");
-        if(env != null && env.equalsIgnoreCase("demo")){
+        if(configuration.isDemoModeActive()){
             Demo.generateDemoDatabase();
         }
     }
@@ -369,6 +371,17 @@ public class JDBCExecutor {
             return run.update(query, JongoUtils.parseValue(id));
         } catch (SQLException ex) {
             throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
+        }
+    }
+    
+    public static void shutdown(){
+        l.debug("Shutting down JDBC connections");
+        try {
+            JDBCConnectionFactory.getDataSource().getConnection().close();
+            JDBCConnectionFactory.getAdminDataSource().getConnection().close();
+        } catch (SQLException ex) {
+            l.warn("Failed to close connection to database?");
+            l.debug(ex.getMessage());
         }
     }
 }
