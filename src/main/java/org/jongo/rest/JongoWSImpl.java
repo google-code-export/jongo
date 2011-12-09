@@ -13,6 +13,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.JongoUtils;
@@ -87,7 +88,7 @@ public class JongoWSImpl implements JongoWS {
     @Consumes(MediaType.APPLICATION_JSON)
     @Override
     public Response insert(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, final String jsonRequest) {
-        l.debug("Insert new " + table + " with values: " + jsonRequest);
+        l.debug("Insert new " + table + " with JSON values: " + jsonRequest);
         Response response = null;
         int result = 0;
         try {
@@ -113,6 +114,41 @@ public class JongoWSImpl implements JongoWS {
             response =  r.getResponse(format);
         }
         
+        l.debug(response.getEntity().toString());
+        return response;
+    }
+    
+    @POST
+    @Path("{table}")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Override
+    public Response insert(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, final MultivaluedMap<String, String> formParams) {
+        l.debug("Insert new " + table + " with values: " + formParams);
+        Response response = null;
+        int result = 0;
+        try {
+            result = JDBCExecutor.insert(table, formParams);
+        } catch (JongoJDBCException ex) {
+            l.info("Received a JongoJDBCException " + ex.getMessage());
+            response = ex.getResponse(format);
+        } catch (Exception ex){
+            l.info("Received an Unhandled Exception " + ex.getMessage());
+            JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+            response = error.getResponse(format);
+        }
+        
+        if(result == 0 && response == null){
+            JongoError error = new JongoError(null, Response.Status.NO_CONTENT);
+            response = error.getResponse(format);
+        }
+
+        if(response == null){
+            List<RowResponse> results = new ArrayList<RowResponse>();
+            results.add(new RowResponse(0));
+            JongoResponse r = new JongoResponse(null, results, Response.Status.CREATED);
+            response = r.getResponse(format);
+        }
         l.debug(response.getEntity().toString());
         return response;
     }
@@ -150,7 +186,7 @@ public class JongoWSImpl implements JongoWS {
         l.debug(response.getEntity().toString());
         return response;
     }
-
+    
     @DELETE
     @Path("{table}/{id}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
