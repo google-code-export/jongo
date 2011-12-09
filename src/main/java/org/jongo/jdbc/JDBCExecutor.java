@@ -113,12 +113,12 @@ public class JDBCExecutor {
         l.debug("Getting table " + table);
         
         JongoTable result = isReadable(table);
+        JongoJDBCConnection conn = JDBCConnectionFactory.getJongoJDBCConnection();
         
         List<RowResponse> response = null;
         
-        
         if(StringUtils.isBlank(id)){
-            String query = "SELECT * FROM " + table;
+            String query = conn.getSelectAllFromTableQuery(table);
             l.debug(query);
         
             QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
@@ -129,7 +129,7 @@ public class JDBCExecutor {
                 throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
             }
         }else{
-            String query = "SELECT * FROM " + table + " WHERE " + result.getCustomId() + " = ?";
+            String query = conn.getSelectAllFromTableQuery(table, result.getCustomId());
             l.debug(query);
         
             QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
