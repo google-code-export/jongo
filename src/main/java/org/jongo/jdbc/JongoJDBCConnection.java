@@ -11,6 +11,10 @@ public interface JongoJDBCConnection {
     
     public void loadDriver();
     
+    public String getSelectAllFromTableQuery(final String table);
+    
+    public String getSelectAllFromTableQuery(final String table, final String idCol);
+    
     public String getInsertQuery(final String table, final MultivaluedMap<String,String> params);
     
     public String getUpdateQuery(final String table, final String key, final MultivaluedMap<String,String> params);
