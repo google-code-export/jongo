@@ -15,6 +15,21 @@ public class AbstractJDBCConnection {
     protected String password;
     protected JDBCDriver driver;
     
+    public String getSelectAllFromTableQuery(final String table){
+        final StringBuilder query = new StringBuilder("SELECT * FROM ");
+        query.append(table);
+        return query.toString();
+    }
+    
+    public String getSelectAllFromTableQuery(final String table, final String idCol){
+        final StringBuilder query = new StringBuilder("SELECT * FROM ");
+        query.append(table);
+        query.append(" WHERE ");
+        query.append(idCol);
+        query.append(" = ?");
+        return query.toString();
+    }
+    
     public String getInsertQuery(final String table, final MultivaluedMap<String,String> params){
         final StringBuilder query = new StringBuilder("INSERT INTO ");
         query.append(table);
@@ -36,7 +51,6 @@ public class AbstractJDBCConnection {
         }
         
         query.deleteCharAt(query.length() - 1);
-        
         query.append(" WHERE ");
         query.append(key);
         query.append(" = ?");
@@ -52,13 +66,11 @@ public class AbstractJDBCConnection {
          return query.toString();
     }
     
-    /**
-     * This is the default query to obtain the first row of a table as described in http://en.wikipedia.org/wiki/SQL:2008
-     * @param table
-     * @return a query that when executed should only return the first row of a table.
-     */
     public String getFirstRowQuery(String table) {
-        return "SELECT * FROM " + table + " FETCH FIRST 1 ROW ONLY";
+        final StringBuilder query = new StringBuilder("SELECT * FROM ");
+        query.append(table);
+        query.append(" FETCH FIRST 1 ROW ONLY");
+        return query.toString();
     }
     
     public JDBCDriver getDriver() {
