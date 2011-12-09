@@ -1,54 +1,87 @@
 package org.jongo.rest.xstream;
 
 import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 /**
  *
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
-public class JongoError {
+public class JongoError implements JongoResponse {
+    
+    private static final XStream xStream = initializeXStream(); 
+    
     private final String resource;
     private final boolean success = false;
-    private final Response.Status errorCode;
+    private final Response.Status status;
     private final String message;
 
-    public JongoError(String resource, Response.Status errorCode) {
+    public JongoError(String resource, Response.Status status) {
         this.resource = resource;
-        this.errorCode = errorCode;
-        this.message = errorCode.getReasonPhrase();
+        this.status = status;
+        this.message = status.getReasonPhrase();
     }
 
     public JongoError(String resource, Response.Status errorCode, String message) {
         this.resource = resource;
-        this.errorCode = errorCode;
+        this.status = errorCode;
         this.message = message;
     }
     
-    private static XStream initializeXStream(XStream xStream){
-        xStream.setMode(XStream.NO_REFERENCES);
-        xStream.autodetectAnnotations(false);
-        xStream.alias("response", JongoError.class);
-        return xStream;
+    private static XStream initializeXStream(){
+        XStream xStreamInstance = new XStream();
+        xStreamInstance.setMode(XStream.NO_REFERENCES);
+        xStreamInstance.autodetectAnnotations(false);
+        xStreamInstance.alias("response", JongoError.class);
+        return xStreamInstance;
     }
     
+    @Override
     public String toXML(){
-        XStream xStream = new XStream();
-        xStream = initializeXStream(xStream);
         return xStream.toXML(this);
     }
     
+    public static JongoError fromXML(final String xml){
+        return (JongoError)xStream.fromXML(xml);
+    }
+    
+    @Override
     public String toJSON(){
-        XStream xStream = new XStream(new JettisonMappedXmlDriver());
-        xStream = initializeXStream(xStream);
-        return xStream.toXML(this);
+        StringBuilder b = new StringBuilder("{");
+        b.append("\"success\":");b.append(success);
+        b.append(",\"resource\":\"");b.append(resource);
+        b.append("\",\"error\":\"");b.append(status.name());
+        b.append("\",\"code\":");b.append(status.getStatusCode());
+        b.append(",\"message\":\"");b.append(message);
+        b.append("\"}");
+        return b.toString();
     }
     
+    @Override
     public Response getResponse(final String format){
         String response = (format.equalsIgnoreCase("json")) ? this.toJSON() : this.toXML();
         String media = (format.equalsIgnoreCase("json")) ? MediaType.APPLICATION_JSON : MediaType.APPLICATION_XML;
-        return Response.status(this.errorCode).entity(response).type(media).build();
+        return Response.status(this.status).entity(response).type(media).build();
+    }
+
+    @Override
+    public Status getStatus() {
+        return status;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public String getResource() {
+        return resource;
+    }
+
+    @Override
+    public boolean isSuccess() {
+        return success;
     }
 }
