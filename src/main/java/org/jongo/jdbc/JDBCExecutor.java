@@ -40,7 +40,7 @@ public class JDBCExecutor {
         try {
             return run.update(query, JongoUtils.parseValue(id));
         } catch (SQLException ex) {
-            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+            throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
         }
     }
     
@@ -76,7 +76,7 @@ public class JDBCExecutor {
         try {
             return run.update(query, JongoUtils.parseValues(params));
         } catch (SQLException ex) {
-            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+            throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
         }
     }
     
@@ -104,7 +104,7 @@ public class JDBCExecutor {
                 results = get(table, id);
             }
         } catch (SQLException ex) {
-            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+            throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
         }
         return results;
     }
@@ -114,6 +114,7 @@ public class JDBCExecutor {
         
         JongoTable result = isReadable(table);
         JongoJDBCConnection conn = JDBCConnectionFactory.getJongoJDBCConnection();
+        QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
         
         List<RowResponse> response = null;
         
@@ -121,23 +122,21 @@ public class JDBCExecutor {
             String query = conn.getSelectAllFromTableQuery(table);
             l.debug(query);
         
-            QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
             ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(true);
             try {
                 response = run.query(query, res);
             } catch (SQLException ex) {
-                throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+                throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
             }
         }else{
             String query = conn.getSelectAllFromTableQuery(table, result.getCustomId());
             l.debug(query);
         
-            QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
             ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(false);
             try {
                 response =  run.query(query, res, JongoUtils.parseValue(id));
             } catch (SQLException ex) {
-                throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+                throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
             }
         }
         return response;
@@ -151,15 +150,15 @@ public class JDBCExecutor {
         try {
             result = run.query(JongoTable.GET, rh, table);
         } catch (SQLException ex) {
-            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+            throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
         }
 
         if(result == null){
-            throw JDBCConnectionFactory.getException("Table " + table + " is not in JongoTables. Access Denied", JongoJDBCException.ILLEGAL_ACCESS_CODE);
+            throw JongoJDBCExceptionFactory.getException("Table " + table + " is not in JongoTables. Access Denied", JongoJDBCException.ILLEGAL_ACCESS_CODE);
         }
         
         if(!result.getPermits().isWritable()){
-            throw JDBCConnectionFactory.getException("Cant write to table " + table + ". Access Denied", JongoJDBCException.ILLEGAL_WRITE_CODE);
+            throw JongoJDBCExceptionFactory.getException("Cant write to table " + table + ". Access Denied", JongoJDBCException.ILLEGAL_WRITE_CODE);
         }
         
         if(StringUtils.isEmpty(result.getCustomId())){
@@ -181,11 +180,11 @@ public class JDBCExecutor {
         }
 
         if(result == null){
-            throw JDBCConnectionFactory.getException("Table " + table + " is not in JongoTables. Access Denied", JongoJDBCException.ILLEGAL_ACCESS_CODE);
+            throw JongoJDBCExceptionFactory.getException("Table " + table + " is not in JongoTables. Access Denied", JongoJDBCException.ILLEGAL_ACCESS_CODE);
         }
         
         if(!result.getPermits().isReadable()){
-            throw JDBCConnectionFactory.getException("Cant read table " + table + ". Access Denied", JongoJDBCException.ILLEGAL_READ_CODE);
+            throw JongoJDBCExceptionFactory.getException("Cant read table " + table + ". Access Denied", JongoJDBCException.ILLEGAL_READ_CODE);
         }
         
         if(StringUtils.isEmpty(result.getCustomId())){
@@ -206,7 +205,7 @@ public class JDBCExecutor {
             List<RowResponse> results = run.query(query, res, params);
             return results;
         } catch (SQLException ex) {
-            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+            throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
         }
     }
     
@@ -221,7 +220,7 @@ public class JDBCExecutor {
             List<RowResponse> results = run.query(query.getSql(), res, params);
             return results;
         } catch (SQLException ex) {
-            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+            throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
         }
     }
     
@@ -242,7 +241,7 @@ public class JDBCExecutor {
             List<RowResponse> results = run.query(query, res);
             return results;
         } catch (SQLException ex) {
-            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+            throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
         }
     }
     
@@ -260,7 +259,7 @@ public class JDBCExecutor {
             List<RowResponse> results = run.query(query.getCleanQuery(), res, params);
             return results;
         } catch (SQLException ex) {
-            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+            throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
         }
     }
     
@@ -316,7 +315,7 @@ public class JDBCExecutor {
         try {
             return run.update(query, JongoUtils.parseValues(params));
         } catch (SQLException ex) {
-            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+            throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
         }
     }
     
@@ -328,7 +327,7 @@ public class JDBCExecutor {
             List<RowResponse> results = run.query(query, res, params);
             return results;
         } catch (SQLException ex) {
-            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+            throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
         }
     }
     
@@ -349,7 +348,7 @@ public class JDBCExecutor {
         try {
             return run.update(query, JongoUtils.parseValues(params));
         } catch (SQLException ex) {
-            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+            throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
         }
     }
     
@@ -364,7 +363,7 @@ public class JDBCExecutor {
         try {
             return run.update(query, JongoUtils.parseValue(id));
         } catch (SQLException ex) {
-            throw JDBCConnectionFactory.getException(ex.getMessage(), ex);
+            throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
         }
     }
 }
