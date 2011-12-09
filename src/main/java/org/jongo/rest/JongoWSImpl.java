@@ -22,6 +22,7 @@ import org.jongo.jdbc.JDBCExecutor;
 import org.jongo.jdbc.exceptions.JongoJDBCException;
 import org.jongo.rest.xstream.JongoError;
 import org.jongo.rest.xstream.JongoResponse;
+import org.jongo.rest.xstream.JongoSuccess;
 import org.jongo.rest.xstream.RowResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,17 +64,17 @@ public class JongoWSImpl implements JongoWS {
             response =  ex.getResponse(format);
         } catch (Exception ex){
             l.info("Received an Unhandled Exception " + ex.getMessage());
-            JongoError error = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
+            JongoResponse error = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
             response =  error.getResponse(format);
         }
         
         if(results == null && response == null){
-            JongoError error = new JongoError(table, Response.Status.NOT_FOUND);
+            JongoResponse error = new JongoError(table, Response.Status.NOT_FOUND);
             response =  error.getResponse(format);
         }
         
         if(response == null){
-            JongoResponse r = new JongoResponse(table, results);
+            JongoResponse r = new JongoSuccess(table, results);
             response = r.getResponse(format);
         }
         
@@ -98,19 +99,19 @@ public class JongoWSImpl implements JongoWS {
             response = ex.getResponse(format);
         } catch (Exception ex){
             l.info("Received an Unhandled Exception " + ex.getMessage());
-            JongoError error = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
+            JongoResponse error = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
             response =  error.getResponse(format);
         }
         
         if(result == 0 && response == null){
-            JongoError error = new JongoError(table, Response.Status.NO_CONTENT);
+            JongoResponse error = new JongoError(table, Response.Status.NO_CONTENT);
             response =  error.getResponse(format);
         }
 
         if(response == null){
             List<RowResponse> results = new ArrayList<RowResponse>();
             results.add(new RowResponse(0));
-            JongoResponse r = new JongoResponse(table, results, Response.Status.CREATED);
+            JongoResponse r = new JongoSuccess(table, results, Response.Status.CREATED);
             response =  r.getResponse(format);
         }
         
@@ -134,19 +135,19 @@ public class JongoWSImpl implements JongoWS {
             response = ex.getResponse(format);
         } catch (Exception ex){
             l.info("Received an Unhandled Exception " + ex.getMessage());
-            JongoError error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+            JongoResponse error = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
             response = error.getResponse(format);
         }
         
         if(result == 0 && response == null){
-            JongoError error = new JongoError(null, Response.Status.NO_CONTENT);
+            JongoResponse error = new JongoError(null, Response.Status.NO_CONTENT);
             response = error.getResponse(format);
         }
 
         if(response == null){
             List<RowResponse> results = new ArrayList<RowResponse>();
             results.add(new RowResponse(0));
-            JongoResponse r = new JongoResponse(null, results, Response.Status.CREATED);
+            JongoResponse r = new JongoSuccess(null, results, Response.Status.CREATED);
             response = r.getResponse(format);
         }
         l.debug(response.getEntity().toString());
@@ -169,17 +170,17 @@ public class JongoWSImpl implements JongoWS {
             response = ex.getResponse(format);
         } catch (Exception ex){
             l.info("Received an Unhandled Exception " + ex.getMessage());
-            JongoError error = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
+            JongoResponse error = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
             response = error.getResponse(format);
         }
         
         if(results == null && response == null){
-            JongoError error = new JongoError(table, Response.Status.NO_CONTENT);
+            JongoResponse error = new JongoError(table, Response.Status.NO_CONTENT);
             response =  error.getResponse(format);
         }
 
         if(response == null){
-            JongoResponse r = new JongoResponse(table, results, Response.Status.OK);
+            JongoResponse r = new JongoSuccess(table, results, Response.Status.OK);
             response = r.getResponse(format);
         }
         
@@ -202,19 +203,19 @@ public class JongoWSImpl implements JongoWS {
             response = ex.getResponse(format);
         } catch (Exception ex){
             l.info("Received an Unhandled Exception " + ex.getMessage());
-            JongoError error = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
+            JongoResponse error = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
             response = error.getResponse(format);
         }
         
         if(result == 0 && response == null){
-            JongoError error = new JongoError(table, Response.Status.NO_CONTENT);
+            JongoResponse error = new JongoError(table, Response.Status.NO_CONTENT);
             response = error.getResponse(format);
         }
 
         if(response == null){
             List<RowResponse> results = new ArrayList<RowResponse>();
             results.add(new RowResponse(0));
-            JongoResponse r = new JongoResponse(table, results, Response.Status.OK);
+            JongoResponse r = new JongoSuccess(table, results, Response.Status.OK);
             response = r.getResponse(format);
         }
         
@@ -237,17 +238,17 @@ public class JongoWSImpl implements JongoWS {
             response =  ex.getResponse(format);
         } catch (Exception ex){
             l.info("Received an Unhandled Exception " + ex.getMessage());
-            JongoError error = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
+            JongoResponse error = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
             response =  error.getResponse(format);
         }
         
         if((results == null || results.isEmpty()) && response == null ){
-            JongoError error = new JongoError(table, Response.Status.NOT_FOUND, "No results for " + table + " with " + col + " = " + val);
+            JongoResponse error = new JongoError(table, Response.Status.NOT_FOUND, "No results for " + table + " with " + col + " = " + val);
             response =  error.getResponse(format);
         }
         
         if(response == null){
-            JongoResponse r = new JongoResponse(table, results);
+            JongoResponse r = new JongoSuccess(table, results);
             response =  r.getResponse(format);
         }
         
@@ -264,7 +265,7 @@ public class JongoWSImpl implements JongoWS {
         Response response = null;
         List<RowResponse> results = null;
         if(query == null){
-            JongoError error = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
+            JongoResponse error = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
             response =  error.getResponse(format);
         }else{
             if(values.isEmpty()){
@@ -277,7 +278,7 @@ public class JongoWSImpl implements JongoWS {
                         response =  ex.getResponse(format);
                     } catch (IllegalArgumentException ex){
                         l.info("Received an Unhandled Exception " + ex.getMessage());
-                        JongoError error = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
+                        JongoResponse error = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
                         response =  error.getResponse(format);
                     }
                 }else{
@@ -289,7 +290,7 @@ public class JongoWSImpl implements JongoWS {
                         response =  ex.getResponse(format);
                     } catch (IllegalArgumentException ex){
                         l.info("Received an Unhandled Exception " + ex.getMessage());
-                        JongoError error = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
+                        JongoResponse error = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
                         response =  error.getResponse(format);
                     }
                 }
@@ -304,18 +305,18 @@ public class JongoWSImpl implements JongoWS {
                     response =  ex.getResponse(format);
                 } catch (IllegalArgumentException ex){
                     l.info("Received an Unhandled Exception " + ex.getMessage());
-                    JongoError error = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
+                    JongoResponse error = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
                     response =  error.getResponse(format);
                 }
             }
             
             if((results == null || results.isEmpty()) && response == null){
-                JongoError error = new JongoError(table, Response.Status.NOT_FOUND, "No results for " + query);
+                JongoResponse error = new JongoError(table, Response.Status.NOT_FOUND, "No results for " + query);
                 response =  error.getResponse(format);
             }
         }
         if(response == null){
-            JongoResponse r = new JongoResponse(table, results);
+            JongoResponse r = new JongoSuccess(table, results);
             response =  r.getResponse(format);
         }
         
@@ -338,17 +339,17 @@ public class JongoWSImpl implements JongoWS {
             response =  ex.getResponse(format);
         } catch (Exception ex){
             l.info("Received an Unhandled Exception " + ex.getMessage());
-            JongoError error = new JongoError(query, Response.Status.INTERNAL_SERVER_ERROR);
+            JongoResponse error = new JongoError(query, Response.Status.INTERNAL_SERVER_ERROR);
             response =  error.getResponse(format);
         }
         
         if((results == null || results.isEmpty()) && response == null){
-            JongoError error = new JongoError(query, Response.Status.NOT_FOUND, "No results for " + query);
+            JongoResponse error = new JongoError(query, Response.Status.NOT_FOUND, "No results for " + query);
             response =  error.getResponse(format);
         }
         
         if(response == null){
-            JongoResponse r = new JongoResponse(null, results);
+            JongoResponse r = new JongoSuccess(null, results);
             response =  r.getResponse(format);
         }
         
