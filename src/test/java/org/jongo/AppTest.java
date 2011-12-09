@@ -1,5 +1,25 @@
+/**
+ * Copyright (C) 2011, 2012 Alejandro Ayuso
+ *
+ * This file is part of Jongo.
+ * Jongo is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ * 
+ * Jongo is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Jongo.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 package org.jongo;
 
+import com.thoughtworks.xstream.io.StreamException;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
@@ -19,9 +39,12 @@ import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.jongo.rest.xstream.JongoError;
+import org.jongo.rest.xstream.JongoResponse;
+import org.jongo.rest.xstream.JongoSuccess;
 
 /**
- * Unit test for simple App.
+ * Unit test for simple App. This tests are based on data generated when running in demo mode with the Demo.java object.
  */
 public class AppTest extends TestCase {
     
@@ -39,43 +62,43 @@ public class AppTest extends TestCase {
     }
     
     public void test1Create(){
-        if(request(jongoUrl + "user/0", "GET") != 200){
-            List<List<NameValuePair>> users = getTestValues();
-            for(List<NameValuePair> al : users){
-                assertEquals(jongoPOSTRequest(jongoUrl + "user", al), 201);
-            }
+        List<List<NameValuePair>> users = getTestValues();
+        for(List<NameValuePair> al : users){
+            doTestResponse(jongoPOSTRequest("user?format=xml", al), Response.Status.CREATED, 1);
         }
     }
 
     public void test2Retrieve(){
-        assertEquals(request(jongoUrl + "user/3", "GET"), 200);
-        assertEquals(request(jongoUrl + "user/name/foo", "GET"), 200);
-        assertEquals(request(jongoUrl + "user/age/30", "GET"), 200);
-        assertEquals(request(jongoUrl + "user?query=findByName&value=foo", "GET"), 200);
-        assertEquals(request(jongoUrl + "user?query=findByNameAndAge&values=foo&values=30", "GET"), 200);
-        assertEquals(request(jongoUrl + "user?query=findByAge&value=30", "GET"), 200);
-        assertEquals(request(jongoUrl + "user?query=findByAgeBetween&values=20&values=40", "GET"), 200);
-        assertEquals(request(jongoUrl + "user?query=findByAgeLessThan&value=50", "GET"), 200);
-        assertEquals(request(jongoUrl + "user?query=findByNameLike&value=foo", "GET"), 200);
-        assertEquals(request(jongoUrl + "user?query=findByNameIsNotNull", "GET"), 200);
-        assertEquals(request(jongoUrl + "user?query=findByCreditIsNull", "GET"), 200);
-        assertEquals(request(jongoUrl + "user?query=findByAgeGreaterThanEqualsAndCreditIsNotNull&value=10", "GET"), 200);
+        doTestResponse(request("user/1?format=xml", "GET"), Response.Status.OK, 1);
+        doTestResponse(request("user/name/foo?format=xml", "GET"), Response.Status.OK, 1);
+        doTestResponse(request("user/age/30?format=xml", "GET"), Response.Status.OK, 1);
+        
+        
+//        assertEquals(request(jongoUrl + "user/name/foo", "GET"), 200);
+//        assertEquals(request(jongoUrl + "user/age/30", "GET"), 200);
+//        assertEquals(request(jongoUrl + "user?query=findByName&value=foo", "GET"), 200);
+//        assertEquals(request(jongoUrl + "user?query=findByNameAndAge&values=foo&values=30", "GET"), 200);
+//        assertEquals(request(jongoUrl + "user?query=findByAge&value=30", "GET"), 200);
+//        assertEquals(request(jongoUrl + "user?query=findByAgeBetween&values=20&values=40", "GET"), 200);
+//        assertEquals(request(jongoUrl + "user?query=findByAgeLessThan&value=50", "GET"), 200);
+//        assertEquals(request(jongoUrl + "user?query=findByNameLike&value=foo", "GET"), 200);
+//        assertEquals(request(jongoUrl + "user?query=findByNameIsNotNull", "GET"), 200);
+//        assertEquals(request(jongoUrl + "user?query=findByCreditIsNull", "GET"), 200);
+//        assertEquals(request(jongoUrl + "user?query=findByAgeGreaterThanEqualsAndCreditIsNotNull&value=10", "GET"), 200);
     }
     
     public void test3Update(){
-        assertEquals(request(jongoUrl + "user/3?name=bar", "PUT"), 200);
-        assertEquals(request(jongoUrl + "user/name/bar", "GET"), 200);
-        assertEquals(request(jongoUrl + "user?query=findByName&value=foo", "GET"), 404);
+        doTestResponse(request("user/3?name=bar", "PUT"), Response.Status.OK, 1);
     }
     
-    public void test4Delete(){
+    public void Xtest4Delete(){
         assertEquals(request(jongoUrl + "user/3", "DELETE"), 200);
         assertEquals(request(jongoUrl + "user/3", "GET"), 404);
     }
     
-    public int request(final String url, final String method){
+    public JongoSuccess request(final String url, final String method){
         try {
-            HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+            HttpURLConnection con = (HttpURLConnection) new URL(jongoUrl + url).openConnection();
             con.setRequestMethod(method);
             con.setDoOutput(true);
             BufferedReader r = null;
@@ -91,19 +114,20 @@ public class AppTest extends TestCase {
                 response.append(strLine);
                 response.append("\n");
             }
-            return con.getResponseCode();
+            return JongoSuccess.fromXML(response.toString());
         } catch (Exception ex) {
             ex.printStackTrace();
-            return -1;
+            return null;
         }
     }
     
-    public int jongoPOSTRequest(final String url, final List<NameValuePair> parameters){
+    public JongoResponse jongoPOSTRequest(final String url, final List<NameValuePair> parameters){
         
         final String urlParameters = URLEncodedUtils.format(parameters, "UTF-8");
+        JongoResponse response = null;
         
         try {
-            HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+            HttpURLConnection con = (HttpURLConnection) new URL(jongoUrl + url).openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             con.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
@@ -122,18 +146,25 @@ public class AppTest extends TestCase {
                 r = new BufferedReader(new InputStreamReader(con.getInputStream()));
             }
             
-            StringBuilder response = new StringBuilder();
+            StringBuilder rawresponse = new StringBuilder();
             String strLine = null;
             while((strLine = r.readLine()) != null){
-                response.append(strLine);
-                response.append("\n");
+                rawresponse.append(strLine);
+                rawresponse.append("\n");
             }
-            System.out.println(response.toString());
-            return con.getResponseCode();
+            
+            try{
+                response = JongoSuccess.fromXML(rawresponse.toString());
+            }catch(StreamException e){
+                response = JongoError.fromXML(rawresponse.toString());
+            }
+            
         } catch (Exception ex) {
             ex.printStackTrace();
-            return -1;
         }
+        
+        return response;
+        
     }
     
     
@@ -166,6 +197,20 @@ public class AppTest extends TestCase {
         u4.add(new BasicNameValuePair("lastupdate", birth));
         r.add(u4);
         return r;
+        
+    }
+    
+    private void doTestResponse(JongoResponse r, Response.Status expectedStatus, int expectedCount){
+        assertNotNull(r);
+        assertEquals(r.getStatus(), expectedStatus);
+        if(r instanceof JongoSuccess){
+            JongoSuccess s = (JongoSuccess)r;
+            assertTrue(s.isSuccess());
+            assertEquals(s.getRows().size(), expectedCount);
+        }else{
+            JongoError e = (JongoError)r;
+            assertFalse(e.isSuccess());
+        }
         
     }
 }
