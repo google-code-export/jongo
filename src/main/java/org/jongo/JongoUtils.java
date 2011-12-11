@@ -42,13 +42,36 @@ public class JongoUtils {
     private static final Logger l = LoggerFactory.getLogger(JongoUtils.class);
     
     public static DateTime isDateTime(final String arg){
+        if(arg == null)  return null;
         DateTimeFormatter f = ISODateTimeFormat.dateTime();
-        try{
-            return f.parseDateTime(arg);
-        }catch(IllegalArgumentException e){
-            l.debug(arg + " is not a valid date");
-            return null;
+        DateTime ret = isDate(arg);
+        if(ret == null){
+            try{
+                ret = f.parseDateTime(arg);
+            }catch(IllegalArgumentException e){
+                l.debug(arg + " is not a valid ISO DateTime");
+            }
         }
+        return ret;
+    }
+    
+    private static DateTime isDate(final String arg){
+        if(arg == null) return null;
+        DateTime ret = null;
+        DateTimeFormatter df = null;
+        if(arg.contains("-")){
+            df = ISODateTimeFormat.date();
+        }else{
+            df = ISODateTimeFormat.basicDate();
+        }
+        
+        try{
+            ret = df.parseDateTime(arg);
+        }catch(IllegalArgumentException e){
+            l.debug(arg + " is not a valid ISO date");
+        }
+        
+        return ret;
     }
     
     public static String splitCamelCase(String s) {
@@ -66,26 +89,28 @@ public class JongoUtils {
     }
     
     public static Object parseValue(String val){
+        Object ret = null;
         if(StringUtils.isNumeric(val)){
             try{
-                return Integer.valueOf(val);
+                ret = Integer.valueOf(val);
             }catch(Exception e){
                 l.debug(e.getMessage());
             }
         }else{
             DateTime date = JongoUtils.isDateTime(val);
             if(date != null){
-                return new java.sql.Date(date.getMillisOfDay());
+                l.debug("Got a DateTime " + date.toString(ISODateTimeFormat.dateTime()));
+                ret = new java.sql.Date(date.getMillis());
             }else{
                 try{
-                    return new BigDecimal(val);
+                    ret = new BigDecimal(val);
                 }catch(NumberFormatException e){
                     l.debug(e.getMessage());
-                    return val;
+                    ret = val;
                 }
             }
         }
-        return val;
+        return ret;
     }
     
     public static String varargToString(Object... params){
@@ -100,7 +125,7 @@ public class JongoUtils {
         
         File appsDir = new File("apps");
         
-        if(appsDir == null){
+        if(appsDir.listFiles() == null){
             l.warn("Failed to read the apps folder. Does it exists?");
         }else{
             for(File dir : appsDir.listFiles()){
