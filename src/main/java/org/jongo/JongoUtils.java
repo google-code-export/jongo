@@ -100,9 +100,13 @@ public class JongoUtils {
         
         File appsDir = new File("apps");
         
-        for(File dir : appsDir.listFiles()){
-            if(dir.isDirectory()){
-                apps.add(dir.getName());
+        if(appsDir == null){
+            l.warn("Failed to read the apps folder. Does it exists?");
+        }else{
+            for(File dir : appsDir.listFiles()){
+                if(dir.isDirectory()){
+                    apps.add(dir.getName());
+                }
             }
         }
         
