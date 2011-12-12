@@ -88,8 +88,10 @@ public class DynamicFinder {
         }
         
         DynamicFinder finder = null;
-        if (operators.isEmpty()) {
+        if (operators.isEmpty() && ops.isEmpty()) {
             finder = new DynamicFinder(table, cmd, columns.get(0));
+        } else if (operators.isEmpty() && !ops.isEmpty()) {
+            throw new JongoBadRequestException("Invalid Operator", table);
         } else {
             if (columns.size() == 1) {
                 finder = new DynamicFinder(table, cmd, columns.get(0), operators.get(0));
@@ -152,9 +154,9 @@ public class DynamicFinder {
      * @param booleanOperator an operator AND or OR
      * @param secondColumn  command either findBy or findAllBy
      */
-    public DynamicFinder(String table, String command, String firstColumn, Operator booleanOperator, String secondColumn) {
+    public DynamicFinder(String table, String command, String firstColumn, Operator booleanOperator, String secondColumn) throws JongoBadRequestException {
         if (!booleanOperator.isBoolean()) {
-            throw new IllegalArgumentException("Invalid Operator " + booleanOperator);
+            throw new JongoBadRequestException("Invalid Operator " + booleanOperator);
         }
         this.table = table;
         this.command = command;
@@ -174,9 +176,9 @@ public class DynamicFinder {
      * @param secondColumn the name of an existing column
      * @param secondOperator a binary operator for the second column
      */
-    public DynamicFinder(String table, String command, String firstColumn, Operator booleanOperator, String secondColumn, Operator secondOperator) {
+    public DynamicFinder(String table, String command, String firstColumn, Operator booleanOperator, String secondColumn, Operator secondOperator) throws JongoBadRequestException {
         if (!booleanOperator.isBoolean()) {
-            throw new IllegalArgumentException("Invalid Operator");
+            throw new JongoBadRequestException("Invalid Operator");
         }
         this.table = table;
         this.command = command;
@@ -201,9 +203,9 @@ public class DynamicFinder {
      * @param secondColumn the name of an existing column
      * @param secondOperator a binary operator for the second column
      */
-    public DynamicFinder(String table, String command, String firstColumn, Operator firstOperator, Operator booleanOperator, String secondColumn, Operator secondOperator) {
+    public DynamicFinder(String table, String command, String firstColumn, Operator firstOperator, Operator booleanOperator, String secondColumn, Operator secondOperator) throws JongoBadRequestException {
         if (!booleanOperator.isBoolean()) {
-            throw new IllegalArgumentException("Invalid Operator");
+            throw new JongoBadRequestException("Invalid Operator");
         }
         this.table = table;
         this.command = command;
