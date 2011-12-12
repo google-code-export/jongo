@@ -18,6 +18,9 @@
 
 package org.jongo;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.jongo.exceptions.JongoBadRequestException;
 import static org.junit.Assert.*;
 
 import java.util.HashMap;
@@ -178,11 +181,13 @@ public class DynamicFinderTest {
         doTest(dynamicQuery, query);
     }
 
-    @Test
     private void doTest(String dynamicQuery, String query) {
-        DynamicFinder d = DynamicFinder.valueOf("sometable", dynamicQuery);
-        System.out.println(d.getSql());
-        assertTrue(d.getSql().equalsIgnoreCase(query));
+        try {
+            DynamicFinder d = DynamicFinder.valueOf("sometable", dynamicQuery);
+            assertTrue(d.getSql().equalsIgnoreCase(query));
+        } catch (JongoBadRequestException ex) {
+            System.out.print(ex.getMessage());
+        }
     }
     
     private void generateDynamicFindersTests(){
