@@ -91,7 +91,7 @@ public class JongoResultSetHandler implements ResultSetHandler<List<RowResponse>
                     v = new DateTime(resultSet.getTimestamp(i)).toString(timeFTR);
                     l.debug("Mapped TIME column " + colName + " with value : " + v);
                 }else{
-                    l.debug("Mapped GENERIC (" + colType + ") column " + colName + " with value : " + v);
+                    l.debug("Mapped " + meta.getColumnTypeName(i) + " column " + colName + " with value : " + v);
                 }
                 map.put(colName, v);
             }
