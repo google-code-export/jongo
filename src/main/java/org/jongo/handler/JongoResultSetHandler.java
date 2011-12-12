@@ -26,6 +26,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.hsqldb.types.Types;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.jongo.rest.xstream.RowResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +43,9 @@ public class JongoResultSetHandler implements ResultSetHandler<List<RowResponse>
     private final boolean all;
     
     private static final Logger l = LoggerFactory.getLogger(JongoResultSetHandler.class);
+    private static final DateTimeFormatter dateTimeFTR = ISODateTimeFormat.dateTime();
+    private static final DateTimeFormatter dateFTR = ISODateTimeFormat.date();
+    private static final DateTimeFormatter timeFTR = ISODateTimeFormat.time();
     
     public JongoResultSetHandler(final boolean all){
         super();
@@ -69,16 +76,24 @@ public class JongoResultSetHandler implements ResultSetHandler<List<RowResponse>
 
             l.debug("Mapping a result set with " + columnCount + " columns to a Map");
 
-    //        if (columnCount < 2) {
-    //            throw new SQLException("resultSetToMap: At least two columns needed for conversion.");
-    //        }
-
             ResultSetMetaData meta = resultSet.getMetaData();
             for(int i = 1; i < columnCount + 1; i++){
-                String k = meta.getColumnName(i).toUpperCase();
+                String colName = meta.getColumnName(i).toUpperCase();
+                int colType = meta.getColumnType(i);
                 String v = resultSet.getString(i);
-                l.debug("Mapping column " + k + " with value : " + v);
-                map.put(k, v);
+                if(colType == Types.DATE){
+                    v = new DateTime(resultSet.getDate(i)).toString(dateFTR);
+                    l.debug("Mapped DATE column " + colName + " with value : " + v);
+                }else if(colType == Types.TIMESTAMP){
+                    v = new DateTime(resultSet.getTimestamp(i)).toString(dateTimeFTR);
+                    l.debug("Mapped TIMESTAMP column " + colName + " with value : " + v);
+                }else if(colType == Types.TIME){
+                    v = new DateTime(resultSet.getTimestamp(i)).toString(timeFTR);
+                    l.debug("Mapped TIME column " + colName + " with value : " + v);
+                }else{
+                    l.debug("Mapped GENERIC (" + colType + ") column " + colName + " with value : " + v);
+                }
+                map.put(colName, v);
             }
         }catch(SQLException e){
             l.error("Failed to map ResultSet");
