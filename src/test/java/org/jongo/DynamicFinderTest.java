@@ -18,8 +18,6 @@
 
 package org.jongo;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jongo.exceptions.JongoBadRequestException;
 import static org.junit.Assert.*;
 
@@ -180,7 +178,61 @@ public class DynamicFinderTest {
         String query = "SELECT * FROM sometable WHERE name LIKE ?";
         doTest(dynamicQuery, query);
     }
-
+    
+    @Test(expected=JongoBadRequestException.class)
+    public void test_findAllByAgeGreaterTahnEquals() throws JongoBadRequestException{
+        String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
+        doTest(dynamicQuery);
+    }
+    
+    @Test(expected=JongoBadRequestException.class)
+    public void test_findAllByAgeGreateroThanEqualos() throws JongoBadRequestException{
+        String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
+        doTest(dynamicQuery);
+    }
+    
+    @Test(expected=JongoBadRequestException.class)
+    public void test_findAllByAgeGreateroThanEquals() throws JongoBadRequestException{
+        String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
+        doTest(dynamicQuery);
+    }
+    
+    @Test(expected=JongoBadRequestException.class)
+    public void test_findAllByCreditIsNall() throws JongoBadRequestException{
+        String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
+        doTest(dynamicQuery);
+    }
+    
+    @Test(expected=JongoBadRequestException.class)
+    public void test_findAllByCreditIsNatNull() throws JongoBadRequestException{
+        String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
+        doTest(dynamicQuery);
+    }
+    
+    @Test(expected=JongoBadRequestException.class)
+    public void test_findAllByCreditAndoAgeEquals() throws JongoBadRequestException{
+        String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
+        doTest(dynamicQuery);
+    }
+    
+    @Test(expected=JongoBadRequestException.class)
+    public void test_findAllByCreditEqualsAndoAgeEquals() throws JongoBadRequestException{
+        String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
+        doTest(dynamicQuery);
+    }
+    
+    @Test(expected=JongoBadRequestException.class)
+    public void test_findAllByCreditOxAgeEquals() throws JongoBadRequestException{
+        String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
+        doTest(dynamicQuery);
+    }
+    
+    @Test(expected=JongoBadRequestException.class)
+    public void test_findAllByCreditEqualsOxAgeEquals() throws JongoBadRequestException{
+        String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
+        doTest(dynamicQuery);
+    }
+    
     private void doTest(String dynamicQuery, String query) {
         try {
             DynamicFinder d = DynamicFinder.valueOf("sometable", dynamicQuery);
@@ -188,6 +240,10 @@ public class DynamicFinderTest {
         } catch (JongoBadRequestException ex) {
             System.out.print(ex.getMessage());
         }
+    }
+    
+    private void doTest(String dynamicQuery) throws JongoBadRequestException {
+        DynamicFinder d = DynamicFinder.valueOf("sometable", dynamicQuery);
     }
     
     private void generateDynamicFindersTests(){
