@@ -34,7 +34,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jettison.json.JSONException;
 import org.jongo.JongoUtils;
+import org.jongo.exceptions.JongoBadRequestException;
 import org.jongo.jdbc.DynamicFinder;
 import org.jongo.jdbc.JDBCExecutor;
 import org.jongo.jdbc.exceptions.JongoJDBCException;
@@ -115,6 +117,10 @@ public class JongoWSImpl implements JongoWS {
         } catch (JongoJDBCException ex) {
             l.info("Received a JongoJDBCException " + ex.getMessage());
             response = ex.getResponse(format);
+        } catch (JongoBadRequestException ex){
+            l.info("Received a JongoBadRequestException " + ex.getMessage());
+            ex.setResource(table);
+            response = ex.getResponse(format);
         } catch (Exception ex){
             l.info("Received an Unhandled Exception " + ex.getMessage());
             JongoResponse error = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
@@ -144,10 +150,15 @@ public class JongoWSImpl implements JongoWS {
     @Override
     public Response insert(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, final MultivaluedMap<String, String> formParams) {
         l.debug("Insert new " + table + " with values: " + formParams);
+        
         Response response = null;
+        if(formParams.size() == 0)
+            response = new JongoError(table, Response.Status.BAD_REQUEST, "No arguments given").getResponse(format);
+        
         int result = 0;
         try {
-            result = JDBCExecutor.insert(table, formParams);
+            if(response == null)
+                result = JDBCExecutor.insert(table, formParams);
         } catch (JongoJDBCException ex) {
             l.info("Received a JongoJDBCException " + ex.getMessage());
             response = ex.getResponse(format);
@@ -185,6 +196,10 @@ public class JongoWSImpl implements JongoWS {
             results = JDBCExecutor.update(table, id, JongoUtils.getParamsFromJSON(jsonRequest));
         } catch (JongoJDBCException ex) {
             l.info("Received a JongoJDBCException " + ex.getMessage());
+            response = ex.getResponse(format);
+        } catch (JongoBadRequestException ex){
+            l.info("Received a JongoBadRequestException " + ex.getMessage());
+            ex.setResource(table);
             response = ex.getResponse(format);
         } catch (Exception ex){
             l.info("Received an Unhandled Exception " + ex.getMessage());
