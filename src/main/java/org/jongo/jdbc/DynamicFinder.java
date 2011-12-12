@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.JongoUtils;
 import org.jongo.enums.Operator;
+import org.jongo.exceptions.JongoBadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,7 @@ public class DynamicFinder {
     private Operator secondOperator;
     private final String sql;
 
-    public static DynamicFinder valueOf(String table, final String query, final String... values) {
+    public static DynamicFinder valueOf(String table, final String query, final String... values) throws JongoBadRequestException {
         l.debug("Generating dynamic finder for " + query + " with values: [ " + StringUtils.join(values, ",") + "]");
         String str = query;
         String cmd = null;
@@ -55,7 +56,7 @@ public class DynamicFinder {
             str = str.substring(FINDALLBY.length());
             cmd = FINDALLBY;
         } else {
-            throw new IllegalArgumentException("Invalid Command " + str);
+            throw new JongoBadRequestException("Invalid Command " + str, table);
         }
 
         String[] strs = JongoUtils.splitCamelCase(str).split("\\ ");
@@ -63,7 +64,7 @@ public class DynamicFinder {
         List<String> ops = new ArrayList<String>();
         for (String word : strs) {
             if (!Operator.keywords().contains(word)) {
-                columns.add(word);
+                columns.add(word.toLowerCase());
             } else {
                 ops.add(word);
             }
@@ -86,26 +87,29 @@ public class DynamicFinder {
             } catch (IllegalArgumentException e) {}
         }
         
+        DynamicFinder finder = null;
         if (operators.isEmpty()) {
-            return new DynamicFinder(table, cmd, columns.get(0));
+            finder = new DynamicFinder(table, cmd, columns.get(0));
         } else {
             if (columns.size() == 1) {
-                return new DynamicFinder(table, cmd, columns.get(0), operators.get(0));
+                finder = new DynamicFinder(table, cmd, columns.get(0), operators.get(0));
             } else if (columns.size() == 2) {
                 if (operators.size() == 1) {
-                    return new DynamicFinder(table, cmd, columns.get(0), operators.get(0), columns.get(1));
+                    finder = new DynamicFinder(table, cmd, columns.get(0), operators.get(0), columns.get(1));
                 } else if (operators.size() == 2) {
-                    return new DynamicFinder(table, cmd, columns.get(0), operators.get(0), columns.get(1), operators.get(1));
+                    finder = new DynamicFinder(table, cmd, columns.get(0), operators.get(0), columns.get(1), operators.get(1));
                 } else if (operators.size() == 3) {
-                    return new DynamicFinder(table, cmd, columns.get(0), operators.get(0), operators.get(1), columns.get(1), operators.get(2));
+                    finder = new DynamicFinder(table, cmd, columns.get(0), operators.get(0), operators.get(1), columns.get(1), operators.get(2));
                 } else {
-                    throw new IllegalArgumentException("Too many operators: " + operators.size());
+                    throw new JongoBadRequestException("Too many operators: " + operators.size(), table);
                 }
 
             } else {
-                throw new IllegalArgumentException("Too many columns: " + columns.size());
+                throw new JongoBadRequestException("Too many columns: " + columns.size(), table);
             }
         }
+        l.debug(finder.getSql());
+        return finder;
     }
     
     /**
