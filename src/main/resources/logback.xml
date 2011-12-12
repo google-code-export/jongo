@@ -48,7 +48,7 @@
   <logger name="com.sun.jersey" level="OFF"/>
   <logger name="org.slf4j" level="OFF"/>
 
-  <root level="INFO">
+  <root level="DEBUG">
     <appender-ref ref="S"/>
     <appender-ref ref="R"/>
 <!--    <appender-ref ref="H"/>-->
