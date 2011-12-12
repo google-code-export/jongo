@@ -34,7 +34,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONException;
 import org.jongo.JongoUtils;
 import org.jongo.exceptions.JongoBadRequestException;
 import org.jongo.jdbc.DynamicFinder;
@@ -309,6 +308,10 @@ public class JongoWSImpl implements JongoWS {
                     } catch (JongoJDBCException ex) {
                         l.info("Received a JongoJDBCException " + ex.getMessage());
                         response =  ex.getResponse(format);
+                    } catch (JongoBadRequestException ex){
+                        l.info("Received a JongoBadRequestException " + ex.getMessage());
+                        ex.setResource(table);
+                        response = ex.getResponse(format);
                     } catch (IllegalArgumentException ex){
                         l.info("Received an Unhandled Exception " + ex.getMessage());
                         JongoResponse error = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
@@ -321,6 +324,10 @@ public class JongoWSImpl implements JongoWS {
                     } catch (JongoJDBCException ex) {
                         l.info("Received a JongoJDBCException " + ex.getMessage());
                         response =  ex.getResponse(format);
+                    } catch (JongoBadRequestException ex){
+                        l.info("Received a JongoBadRequestException " + ex.getMessage());
+                        ex.setResource(table);
+                        response = ex.getResponse(format);
                     } catch (IllegalArgumentException ex){
                         l.info("Received an Unhandled Exception " + ex.getMessage());
                         JongoResponse error = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
@@ -336,6 +343,10 @@ public class JongoWSImpl implements JongoWS {
                 } catch (JongoJDBCException ex) {
                     l.info("Received a JongoJDBCException " + ex.getMessage());
                     response =  ex.getResponse(format);
+                } catch (JongoBadRequestException ex){
+                    l.info("Received a JongoBadRequestException " + ex.getMessage());
+                    ex.setResource(table);
+                    response = ex.getResponse(format);
                 } catch (IllegalArgumentException ex){
                     l.info("Received an Unhandled Exception " + ex.getMessage());
                     JongoResponse error = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
