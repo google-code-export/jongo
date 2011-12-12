@@ -29,6 +29,7 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.jongo.exceptions.JongoBadRequestException;
 import org.jongo.rest.xstream.JongoMapConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,13 +139,22 @@ public class JongoUtils {
         return apps;
     }
     
-    public static MultivaluedMap<String, String> getParamsFromJSON(final String json){
+    public static MultivaluedMap<String, String> getParamsFromJSON(final String json) throws JongoBadRequestException{
         // XStream needs the response to be nested inside an object it can understand
         final String formattedJson = "{\"request\":" + json + "}";
         XStream xStream = new XStream(new JettisonMappedXmlDriver());
         xStream.setMode(XStream.NO_REFERENCES);
         xStream.registerConverter(new JongoMapConverter());
         xStream.alias("request", MultivaluedMap.class);
-        return (MultivaluedMap<String, String>)xStream.fromXML(formattedJson);
+        try{
+            MultivaluedMap<String, String> ret = (MultivaluedMap<String, String>)xStream.fromXML(formattedJson);
+            if(ret.size() == 0){
+                throw new JongoBadRequestException("Invalid number of arguments for request " + json);
+            }
+            return ret;
+        }catch(Exception e){
+            throw new JongoBadRequestException(e.getMessage());
+        }
+        
     }
 }
