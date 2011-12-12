@@ -90,7 +90,7 @@ public class Demo {
             adminRun.update("INSERT INTO JongoTable ( name, customId, permits ) VALUES ( ?, ?, ? )", "user", "id", 3);
             adminRun.update("INSERT INTO JongoTable ( name, customId, permits ) VALUES ( ?, ?, ? )", "car", "cid", 3);
             adminRun.update("INSERT INTO JongoTable ( name, customId, permits ) VALUES ( ?, ?, ? )", "comments", "id", 1);
-            adminRun.update("INSERT INTO JongoTable ( name, customId, permits ) VALUES ( ?, ?, ? )", "pictures", "id", 1);
+            adminRun.update("INSERT INTO JongoTable ( name, customId, permits ) VALUES ( ?, ?, ? )", "pictures", "id", 2);
             adminRun.update("INSERT INTO JongoQuery ( name, query, description ) VALUES ( ?, ?, ? )", "allDataForCar", "SELECT * FROM car LEFT JOIN comments ON comments.cid = car.cid LEFT JOIN pictures ON pictures.cid = pictures.cid", "Returns all data for a car");
             
         } catch (SQLException ex) {
