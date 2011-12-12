@@ -235,7 +235,7 @@ public class JDBCExecutor {
     }
     
     public static List<RowResponse> find(final DynamicFinder query, Object... params) throws JongoJDBCException{
-        l.debug(query + " params: " + JongoUtils.varargToString(params));
+        l.debug(query.getSql() + " params: " + JongoUtils.varargToString(params));
         
         isReadable(query.getTable());
         
