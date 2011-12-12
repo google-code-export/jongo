@@ -32,9 +32,9 @@ import org.jongo.rest.xstream.JongoResponse;
  */
 public abstract class JongoJDBCException extends Exception {
     
-    public static final int ILLEGAL_READ_CODE = -2;
-    public static final int ILLEGAL_WRITE_CODE = -3;
-    public static final int ILLEGAL_ACCESS_CODE = -4;
+    public static final int ILLEGAL_READ_CODE = 999991;
+    public static final int ILLEGAL_WRITE_CODE = 999992;
+    public static final int ILLEGAL_ACCESS_CODE = 999993;
     
 	protected int sqlErrorCode = 0;
 	protected String sqlState = null;
@@ -50,19 +50,20 @@ public abstract class JongoJDBCException extends Exception {
     
     public JongoJDBCException(String msg){
         super(msg);
-        sqlErrorCode = -1;
     }
     
     public JongoJDBCException(String msg, SQLException e){
 		super(msg);
 		sqlErrorCode = e.getErrorCode();
-		sqlState = e.getSQLState (); 
+		sqlState = e.getSQLState ();
+        if(this.sqlErrorCode < 0) this.sqlErrorCode = this.sqlErrorCode * -1;
 	}
     
     public JongoJDBCException(String msg, int sqlErrorCode){
 		super(msg);
 		this.sqlErrorCode = sqlErrorCode;
 		sqlState = null;
+        if(this.sqlErrorCode < 0) this.sqlErrorCode = this.sqlErrorCode * -1;
 	}
     
 	public int getSqlErrorCode(){
