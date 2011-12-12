@@ -67,7 +67,7 @@ public class Demo {
             run.update("INSERT INTO user (name, age, birthday, credit) VALUES (?,?,?,?)", "bar", 33, "1992-01-15", 0);
             
             run.update("INSERT INTO car (maker, model, year, fuel, transmission, currentMarketValue, newValue) VALUES (?,?,?,?,?,?,?)", "Citroen", "C2", "2008", "Gasoline", "Manual", 9.000, 13.000);
-            run.update("INSERT INTO car (maker, model, year, fuel, transmission, currentMarketValue, newValue) VALUES (?,?,?,?,?,?,?)", "Fiat", "500", "2010", "Gasoline", "Manual", 19.000, 23.000);
+            run.update("INSERT INTO car (maker, model, year, transmission, currentMarketValue, newValue) VALUES (?,?,?,?,?,?)", "Fiat", "500", "2010", "Manual", 19.000, 23.000);
             run.update("INSERT INTO car (maker, model, year, fuel, transmission, currentMarketValue, newValue) VALUES (?,?,?,?,?,?,?)", "BMW", "X5", "2011", "Diesel", "Automatic", 59.000, 73.000);
             
             run.update("INSERT INTO comments (cid, comment) VALUES (?,?)", 1, "The Citroen C2 is a small car with a great attitude"); 
