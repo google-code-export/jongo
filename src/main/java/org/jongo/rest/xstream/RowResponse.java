@@ -51,18 +51,22 @@ public class RowResponse {
     }
     
     public String toJSON(){
-        StringBuilder b = new StringBuilder();
-        b.append("{");
-        
         List<String> args = new ArrayList<String>();
         for(String key: columns.keySet()){
             String val = columns.get(key);
             if(StringUtils.isNumeric(val)){
-                args.add("\"" + key.toLowerCase() + "\"" + ":" + val);
+                if(StringUtils.isWhitespace(val)){
+                    args.add("\"" + key.toLowerCase() + "\"" + ":" + "\"\"");
+                }else{
+                    args.add("\"" + key.toLowerCase() + "\"" + ":" + val);
+                }
             }else{
                 args.add("\"" + key.toLowerCase() + "\"" + ":" + "\"" + val + "\"");
             }
         }
+        
+        StringBuilder b = new StringBuilder();
+        b.append("{");
         b.append(StringUtils.join(args, ","));
         b.append("}");
         return b.toString();
