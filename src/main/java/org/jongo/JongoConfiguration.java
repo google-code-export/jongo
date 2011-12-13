@@ -87,6 +87,8 @@ public class JongoConfiguration {
                 instance.jdbcAdminUrl = "jdbc:hsqldb:file:data/jongoAdmin";
             }
             
+            if(!instance.isValid()) instance = null;
+            
         }
         return instance;
     }
@@ -119,6 +121,36 @@ public class JongoConfiguration {
             }
         }
         return prop;
+    }
+    
+    private boolean isValid(){
+        boolean ret = true;
+        if(jongoName == null){
+            l.warn("Invalid jongo.name value. Check your configuration.");
+            ret = false;
+        }
+        
+        if(jdbcUrl == null){
+            l.warn("Invalid jongo.jdbc.url value. Check your configuration.");
+            ret = false;
+        }
+        
+        if(jdbcUsername == null){
+            l.warn("Invalid jongo.jdbc.username value. Check your configuration.");
+            ret = false;
+        }
+        
+        if(jdbcPassword == null){
+            l.warn("Invalid jongo.jdbc.password value. Check your configuration.");
+            ret = false;
+        }
+        
+         if(jdbcAdminUrl == null){
+            l.warn("Invalid jongo.jdbc.password value. Check your configuration.");
+            ret = false;
+        }
+        
+        return ret;
     }
 
     public JDBCDriver getDriver() {
