@@ -396,7 +396,7 @@ public class JDBCExecutor {
         try {
             JDBCConnectionFactory.getDataSource().getConnection().close();
             JDBCConnectionFactory.getAdminDataSource().getConnection().close();
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             l.warn("Failed to close connection to database?");
             l.debug(ex.getMessage());
         }
