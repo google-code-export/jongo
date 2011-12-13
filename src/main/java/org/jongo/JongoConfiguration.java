@@ -40,6 +40,8 @@ public class JongoConfiguration {
     private String ip;
     private int port;
     
+    private String jongoName;
+    
     private JDBCDriver driver;
     private String jdbcUrl;
     private String jdbcUsername;
@@ -68,6 +70,7 @@ public class JongoConfiguration {
             instance.adminIp = prop.getProperty("jongo.admin.ip");
             instance.adminEnabled = Boolean.valueOf(prop.getProperty("jongo.admin.enabled"));
             instance.appsEnabled = Boolean.valueOf(prop.getProperty("jongo.allow.apps"));
+            instance.jongoName = prop.getProperty("jongo.name");
             
             if(demo){
                 l.debug("Loading demo configuration with memory databases");
@@ -172,5 +175,13 @@ public class JongoConfiguration {
     
     public boolean isDemoModeActive(){
         return demo;
+    }
+
+    public String getJongoName() {
+        return jongoName;
+    }
+    
+    public String getJongoServletAddress() {
+        return "/" + jongoName + "/*";
     }
 }

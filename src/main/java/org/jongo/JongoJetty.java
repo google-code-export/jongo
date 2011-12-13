@@ -55,7 +55,7 @@ public class JongoJetty{
         ServletHolder sh = new ServletHolder(ServletContainer.class);
         sh.setInitParameter("com.sun.jersey.config.property.resourceConfigClass", "com.sun.jersey.api.core.PackagesResourceConfig");
         sh.setInitParameter("com.sun.jersey.config.property.packages", "org.jongo.rest");
-        mainContext.addServlet(sh, "/jongo/*");
+        mainContext.addServlet(sh, configuration.getJongoServletAddress());
         
         List<Context> contextsList = new ArrayList<Context>();
         
