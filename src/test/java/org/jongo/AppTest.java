@@ -64,16 +64,16 @@ public class AppTest {
     @Test
     public void testErrors(){
         doTestResponse(client.doGET("user/999?format=xml"), Response.Status.OK, 0); // this user shouldn't exist. But we don't return an error!
-        // let's try an update7insert with invalid data
+        // let's try an update/insert with invalid data
         doTestResponse(client.doPUT("comments/0?format=xml", "{\"comment\":\"this should fail!\""), Response.Status.BAD_REQUEST, 0);
         doTestResponse(client.doPUT("pictures/0?format=xml", "{}"), Response.Status.BAD_REQUEST, 0);
         doTestResponse(client.doPUT("pictures/0?format=xml", ""), Response.Status.BAD_REQUEST, 0);
         doTestResponse(client.doPOST("pictures?format=xml", "{}"), Response.Status.BAD_REQUEST, 0);
         doTestResponse(client.doPOST("pictures?format=xml", ""), Response.Status.BAD_REQUEST, 0);
         doTestResponse(client.doPOST("pictures?format=xml", new ArrayList<NameValuePair>()), Response.Status.BAD_REQUEST, 0);
-        // in the demo, by default, comments is not writtable
-        doTestResponse(client.doPOST("comments?format=xml", "{\"comment\":\"this should fail!\",\"cid\":1}"), Response.Status.FORBIDDEN, 0);
-        doTestResponse(client.doPUT("comments/0?format=xml", "{\"comment\":\"this should fail!\"}"), Response.Status.FORBIDDEN, 0);
+        // in the demo, by default, maker is not writtable
+        doTestResponse(client.doPOST("maker?format=xml", "{\"maker\":\"this should fail!\",\"id\":1}"), Response.Status.FORBIDDEN, 0);
+        doTestResponse(client.doPUT("maker/0?format=xml", "{\"maker\":\"this should fail!\"}"), Response.Status.FORBIDDEN, 0);
         // table is not in Jongo
         doTestResponse(client.doPOST("notInJongo?format=xml", "{\"comment\":\"this should fail!\",\"cid\":1}"), Response.Status.NOT_FOUND, 0);
         doTestResponse(client.doPUT("notInJongo/0?format=xml", "{\"comment\":\"this should fail!\"}"), Response.Status.NOT_FOUND, 0);
