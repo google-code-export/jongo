@@ -48,4 +48,11 @@ public class OracleConnection extends AbstractJDBCConnection implements JongoJDB
             l.error("Unable to load driver. Add the Oracle JDBC Connector jar to the lib folder");
         }
     }
+
+    @Override
+    public String getFirstRowQuery(String table) {
+        return "SELECT * FROM " + table + " WHERE rownum = 0";
+    }
+    
+    
 }
