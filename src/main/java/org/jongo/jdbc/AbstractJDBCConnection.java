@@ -39,6 +39,50 @@ public class AbstractJDBCConnection {
         return query.toString();
     }
     
+    public String getSelectAllFromTableQuery(final String table, LimitParam limit, OrderParam order){
+//        final StringBuilder query = new StringBuilder("SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY ");
+//        query.append(order.getColumn());
+//        query.append(" ");
+//        query.append(order.getDirection());
+//        query.append(" )AS ROW_NUMBER, ");
+//        query.append(table);
+//        query.append(" .* FROM ");
+//        query.append(table);
+//        query.append(" ) k WHERE ROW_NUMBER <=");
+//        query.append(limit.getLimit());
+//        query.append(" AND ROW_NUMBER >=  ");
+//        query.append(limit.getStart());
+//        return query.toString();
+        final StringBuilder query = new StringBuilder("SELECT * FROM ");
+        query.append(table);
+        query.append(" ORDER BY ");
+        query.append(order.getColumn());
+        query.append(" ");
+        query.append(order.getDirection());
+        query.append(" LIMIT ");
+        query.append(limit.getLimit());
+        query.append(" OFFSET ");
+        query.append(limit.getStart());
+        return query.toString();
+    }
+    
+    public String getSelectAllFromTableQuery(final String table, final String idCol, LimitParam limit, OrderParam order){
+        final StringBuilder query = new StringBuilder("SELECT * FROM ");
+        query.append(table);
+        query.append(" WHERE ");
+        query.append(idCol);
+        query.append(" = ?");
+        query.append(" ORDER BY ");
+        query.append(order.getColumn());
+        query.append(" ");
+        query.append(order.getDirection());
+        query.append(" LIMIT ");
+        query.append(limit.getLimit());
+        query.append(" OFFSET ");
+        query.append(limit.getStart());
+        return query.toString();
+    }
+    
     public String getSelectAllFromTableQuery(final String table, final String idCol){
         final StringBuilder query = new StringBuilder("SELECT * FROM ");
         query.append(table);

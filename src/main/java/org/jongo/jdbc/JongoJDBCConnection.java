@@ -31,7 +31,11 @@ public interface JongoJDBCConnection {
     
     public String getSelectAllFromTableQuery(final String table);
     
+    public String getSelectAllFromTableQuery(final String table, LimitParam limit, OrderParam order);
+    
     public String getSelectAllFromTableQuery(final String table, final String idCol);
+    
+    public String getSelectAllFromTableQuery(final String table, final String idCol, LimitParam limit, OrderParam order);
     
     public String getInsertQuery(final String table, final MultivaluedMap<String,String> params);
     

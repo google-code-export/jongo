@@ -120,7 +120,7 @@ public class JDBCExecutor {
         try {
             int ret = run.update(query, JongoUtils.parseValues(params));
             if(ret != 0){
-                results = get(table, id);
+                results = get(table, id, new LimitParam(), new OrderParam());
             }
         } catch (SQLException ex) {
             throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
@@ -128,7 +128,7 @@ public class JDBCExecutor {
         return results;
     }
     
-    public static List<RowResponse> get(final String table, final String id) throws JongoJDBCException {
+    public static List<RowResponse> get(final String table, final String id, final LimitParam limit, final OrderParam order) throws JongoJDBCException {
         JongoTable result = isReadable(table);
         JongoJDBCConnection conn = JDBCConnectionFactory.getJongoJDBCConnection();
         QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource());
@@ -136,7 +136,7 @@ public class JDBCExecutor {
         List<RowResponse> response = null;
         
         if(StringUtils.isBlank(id)){
-            String query = conn.getSelectAllFromTableQuery(table);
+            String query = conn.getSelectAllFromTableQuery(table, limit, order);
             l.debug(query);
         
             ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(true);
@@ -146,7 +146,7 @@ public class JDBCExecutor {
                 throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
             }
         }else{
-            String query = conn.getSelectAllFromTableQuery(table, result.getCustomId());
+            String query = conn.getSelectAllFromTableQuery(table, result.getCustomId(), limit, order);
             l.debug(query);
         
             ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(false);
