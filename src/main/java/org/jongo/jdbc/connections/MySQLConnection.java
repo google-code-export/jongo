@@ -21,6 +21,8 @@ package org.jongo.jdbc.connections;
 import org.jongo.enums.JDBCDriver;
 import org.jongo.jdbc.AbstractJDBCConnection;
 import org.jongo.jdbc.JongoJDBCConnection;
+import org.jongo.jdbc.LimitParam;
+import org.jongo.jdbc.OrderParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,5 +59,21 @@ public class MySQLConnection extends AbstractJDBCConnection implements JongoJDBC
     @Override
     public String getFirstRowQuery(String table) {
         return "SELECT * FROM " + table + " LIMIT 1";
+    }
+    
+    @Override
+    public String getSelectAllFromTableQuery(final String table, LimitParam limit, OrderParam order){
+        final StringBuilder query = new StringBuilder("SELECT * FROM ");
+        query.append(table);
+        if(order != null){
+            query.append(" ORDER BY ");
+            query.append(order.getColumn());
+            query.append(" ");
+            query.append(order.getDirection());
+        }
+        if(limit != null)
+            query.append(" LIMIT ? OFFSET ?");
+        
+        return query.toString();
     }
 }

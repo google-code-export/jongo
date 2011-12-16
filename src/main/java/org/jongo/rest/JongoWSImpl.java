@@ -30,14 +30,18 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.JongoUtils;
 import org.jongo.exceptions.JongoBadRequestException;
 import org.jongo.jdbc.DynamicFinder;
 import org.jongo.jdbc.JDBCExecutor;
+import org.jongo.jdbc.LimitParam;
+import org.jongo.jdbc.OrderParam;
 import org.jongo.jdbc.exceptions.JongoJDBCException;
 import org.jongo.rest.xstream.JongoError;
 import org.jongo.rest.xstream.JongoResponse;
@@ -59,24 +63,28 @@ public class JongoWSImpl implements JongoWS {
     @Path("{table}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
-    public Response get(@PathParam("table") String table, @DefaultValue("json") @QueryParam("format") String format) {
-        return get(table, format, null);
+    public Response get(@PathParam("table") String table, @DefaultValue("json") @QueryParam("format") String format, @Context UriInfo ui) {
+        return get(table, format, null, ui);
     }
     
     @GET
     @Path("{table}/{id}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
-    public Response get(@PathParam("table") String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") String id ) {
+    public Response get(@PathParam("table") String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") String id, @Context UriInfo ui) {
         l.debug("Geting resource from " + table + " with id " + id);
         Response response = null;
         List<RowResponse> results = null;
+        
+        MultivaluedMap<String, String> pathParams = ui.getQueryParameters();
+        LimitParam limit = LimitParam.valueOf(pathParams);
+        OrderParam order = OrderParam.valueOf(pathParams);
         
         try{
             if(!StringUtils.isBlank(id) && id.equalsIgnoreCase("meta")){
                 results = JDBCExecutor.getTableMetaData(table);
             }else{
-                results = JDBCExecutor.get(table, id);
+                results = JDBCExecutor.get(table, id, limit, order);
             }
         } catch (JongoJDBCException ex) {
             l.info("Received a JongoJDBCException " + ex.getMessage());
