@@ -72,7 +72,8 @@ public class AdminJDBCExecutor {
         
         if(result == null){
             l.debug("Table " + table + " is not in JongoTables. Access Denied");
-            throw JongoJDBCExceptionFactory.getException("Table " + table + " is not in JongoTables. Access Denied", JongoJDBCException.ILLEGAL_ACCESS_CODE);
+            l.debug("Table " + table + " is not readable. Access Denied");
+            throw JongoJDBCExceptionFactory.getException("Cant read table " + table + ". Access Denied", JongoJDBCException.ILLEGAL_READ_CODE);
         }
 
         if(result != null && StringUtils.isEmpty(result.getCustomId())){
