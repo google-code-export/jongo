@@ -19,7 +19,7 @@
 package org.jongo.domain;
 
 /**
- *
+ * Represents a JongoQuery object to be used as a model for the administration database.
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public class JongoQuery {
@@ -70,8 +70,12 @@ public class JongoQuery {
         this.query = query;
     }
     
+    /**
+     * Returns a query without break lines which could be inserted by the administration console
+     * @return the query from the database without break lines.
+     */
     public String getCleanQuery() {
-        // the query comes with \n for break lines, so we have to remote them.
+        // the query comes with \n for break lines, so we have to remove them.
         return this.query.replace("\\n", " ");
     }
     
