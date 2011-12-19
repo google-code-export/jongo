@@ -123,6 +123,8 @@ public class JDBCExecutor {
         JongoTable result = isReadable(table);
         List<RowResponse> response = null;
         
+        if(order.getColumn() == null) order.setColumn(result.getCustomId());
+        
         if(StringUtils.isBlank(id)){
             String query = conn.getSelectAllFromTableQuery(table, limit, order);
             l.debug(query);
