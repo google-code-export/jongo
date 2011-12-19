@@ -75,8 +75,8 @@ public class AppTest {
         doTestResponse(client.doPOST("maker?format=xml", "{\"maker\":\"this should fail!\",\"id\":1}"), Response.Status.FORBIDDEN, 0);
         doTestResponse(client.doPUT("maker/0?format=xml", "{\"maker\":\"this should fail!\"}"), Response.Status.FORBIDDEN, 0);
         // table is not in Jongo
-        doTestResponse(client.doPOST("notInJongo?format=xml", "{\"comment\":\"this should fail!\",\"cid\":1}"), Response.Status.NOT_FOUND, 0);
-        doTestResponse(client.doPUT("notInJongo/0?format=xml", "{\"comment\":\"this should fail!\"}"), Response.Status.NOT_FOUND, 0);
+        doTestResponse(client.doPOST("notInJongo?format=xml", "{\"comment\":\"this should fail!\",\"cid\":1}"), Response.Status.FORBIDDEN, 0);
+        doTestResponse(client.doPUT("notInJongo/0?format=xml", "{\"comment\":\"this should fail!\"}"), Response.Status.FORBIDDEN, 0);
     }
     
     @Test
@@ -89,6 +89,36 @@ public class AppTest {
         doTestResponse(client.doGET("user/dynamic/findAllByCreditGreaterThanEquals?value=0&format=xml"), Response.Status.OK, 2);
         doTestResponse(client.doGET("user/dynamic/findAllByCreditLessThan?value=0&format=xml"), Response.Status.NOT_FOUND, 0);
         doTestResponse(client.doGET("user/dynamic/findAllByCreditLessThanEquals?value=0&format=xml"), Response.Status.OK, 1);
+    }
+    
+    @Test
+    public void testPaging(){
+        doTestPagingResponse(client.doGET("maker_stats?format=xml"), Response.Status.OK, 25, "id", "0", "24");
+        doTestPagingResponse(client.doGET("maker_stats?format=xml&limit=notAllowed"), Response.Status.OK, 25, "id", "0", "24");
+        doTestPagingResponse(client.doGET("maker_stats?format=xml&offset=50"), Response.Status.OK, 25, "id", "0", "24");
+        doTestPagingResponse(client.doGET("maker_stats?format=xml&limit=50"), Response.Status.OK, 50, "id", "0", "49");
+        doTestPagingResponse(client.doGET("maker_stats?format=xml&limit=50&offset=50"), Response.Status.OK, 50, "id", "50", "99");
+        doTestResponse(client.doGET("maker_stats?format=xml&limit=50&offset=15550"), Response.Status.OK, 0);
+    }
+    
+    @Test
+    public void testOrdering(){
+        doTestPagingResponse(client.doGET("car?format=xml"), Response.Status.OK, 3, "model", "C2", "X5");
+        doTestPagingResponse(client.doGET("car?format=xml&sort=year"), Response.Status.OK, 3, "model", "C2", "X5");
+        doTestPagingResponse(client.doGET("car?format=xml&sort=year&dir=ASC"), Response.Status.OK, 3, "model", "C2", "X5");
+        doTestPagingResponse(client.doGET("car?format=xml&sort=year&dir=DESC"), Response.Status.OK, 3, "model", "X5", "C2");
+        doTestPagingResponse(client.doGET("car?format=xml&sort=maker&dir=ASC"), Response.Status.OK, 3, "maker", "BMW", "FIAT");
+        doTestPagingResponse(client.doGET("car?format=xml&sort=maker&dir=ASC"), Response.Status.OK, 3, "model", "X5", "500");
+        doTestPagingResponse(client.doGET("car?format=xml&sort=maker&dir=DESC"), Response.Status.OK, 3, "maker", "FIAT", "BMW");
+        doTestPagingResponse(client.doGET("car?format=xml&sort=maker&dir=DESC"), Response.Status.OK, 3, "model", "500", "X5");
+        doTestPagingResponse(client.doGET("car?format=xml&sort=maker&dir=ASC&limit=1"), Response.Status.OK, 1, "model", "X5", "X5");
+        doTestPagingResponse(client.doGET("car?format=xml&sort=maker&dir=DESC&limit=2"), Response.Status.OK, 2, "model", "500", "C2");
+        doTestPagingResponse(client.doGET("car?format=xml&sort=maker&dir=DESC&limit=2&offset=1"), Response.Status.OK, 2, "model", "C2", "X5");
+    }
+    
+    @Test
+    public void testComplexQueries(){
+        doTestResponse(client.doGET("query/yearSummary?format=xml"), Response.Status.OK, 12);
     }
     
     public List<UserMock> getTestValues(){
@@ -117,5 +147,22 @@ public class AppTest {
             assertFalse(e.isSuccess());
         }
         return users;
+    }
+    
+    private void doTestPagingResponse(JongoResponse r, Response.Status expectedStatus, int expectedCount, String col, String first, String last){
+        assertNotNull(r);
+        assertEquals(r.getStatus(), expectedStatus);
+        if(r instanceof JongoSuccess){
+            JongoSuccess s = (JongoSuccess)r;
+            List<RowResponse> rows = s.getRows();
+            int lastIndex = s.getRows().size() - 1;
+            assertTrue(s.isSuccess());
+            assertEquals(rows.size(), expectedCount);
+            assertEquals(first, rows.get(0).getColumns().get(col));
+            assertEquals(last, rows.get(lastIndex).getColumns().get(col));
+        }else{
+            JongoError e = (JongoError)r;
+            assertFalse(e.isSuccess());
+        }
     }
 }
