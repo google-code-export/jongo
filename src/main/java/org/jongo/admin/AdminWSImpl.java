@@ -18,10 +18,6 @@
 
 package org.jongo.admin;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -42,7 +38,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.jongo.JongoConfiguration;
 import org.jongo.JongoUtils;
-import org.jongo.jdbc.JDBCExecutor;
+import org.jongo.jdbc.AdminJDBCExecutor;
 import org.jongo.jdbc.exceptions.JongoJDBCException;
 import org.jongo.rest.xstream.JongoError;
 import org.jongo.rest.xstream.JongoResponse;
@@ -59,7 +55,6 @@ import org.slf4j.LoggerFactory;
 public class AdminWSImpl implements AdminWS {
     
     private static final Logger l = LoggerFactory.getLogger(AdminWSImpl.class);
-    
     private static final String E403 = "<html><head></head><body>403</body></html>";
 
     @Override
@@ -166,10 +161,10 @@ public class AdminWSImpl implements AdminWS {
         try {
             if("all".equalsIgnoreCase(resource)){
                 query = "SELECT * FROM " + table;
-                results = JDBCExecutor.adminFind(table, query);
+                results = AdminJDBCExecutor.find(table, query);
             }else{
                 query = "SELECT * FROM " + table + " WHERE id = ?";
-                results = JDBCExecutor.adminFind(table, query, JongoUtils.parseValue(resource));
+                results = AdminJDBCExecutor.find(table, query, JongoUtils.parseValue(resource));
             }
         } catch (JongoJDBCException ex) {
             l.info(ex.getMessage());
@@ -192,7 +187,7 @@ public class AdminWSImpl implements AdminWS {
     private Response insertJongoResource(String table, MultivaluedMap<String, String> formParams, String format){
         int result = 0;
         try {
-            result = JDBCExecutor.adminInsert(table, formParams);
+            result = AdminJDBCExecutor.insert(table, formParams);
         } catch (JongoJDBCException ex) {
             l.info(ex.getMessage());
             return ex.getResponse(format);
@@ -218,7 +213,7 @@ public class AdminWSImpl implements AdminWS {
 
         int result;
         try {
-            result = JDBCExecutor.adminUpdate(table, id, queryParams);
+            result = AdminJDBCExecutor.update(table, id, queryParams);
         } catch (JongoJDBCException ex) {
             l.info(ex.getMessage());
             return ex.getResponse(format);
@@ -242,7 +237,7 @@ public class AdminWSImpl implements AdminWS {
     private Response deleteJongoResource(String table, String id, String format){
         int result = 0;
         try {
-            result = JDBCExecutor.adminDelete(table, id);
+            result = AdminJDBCExecutor.delete(table, id);
         } catch (JongoJDBCException ex) {
             l.info(ex.getMessage());
             return ex.getResponse(format);
@@ -267,30 +262,4 @@ public class AdminWSImpl implements AdminWS {
         JongoConfiguration conf = JongoConfiguration.instanceOf();
         return (request.getRemoteAddr().equalsIgnoreCase("0:0:0:0:0:0:0:1") || request.getRemoteAddr().equalsIgnoreCase(conf.getAdminIp()));
     }
-    
-    private Response readFileAndWriteToResponse(final String filePath, final String media){
-        InputStream is = AdminWSImpl.class.getClass().getResourceAsStream("/org/jongo/admin" + filePath);
-        StringBuilder b = new StringBuilder();
-        BufferedReader r = null;
-        
-        String str = null;
-        try{
-            r = new BufferedReader(new InputStreamReader(is));
-            while((str = r.readLine()) != null){
-                b.append(str);
-                b.append("\n");
-            }
-            return Response.status(Response.Status.OK).entity(b.toString()).type(media).build();
-        }catch(IOException e){
-            b = new StringBuilder("<html><head></head><body><h1>500</h1><p>");
-            b.append(e.getMessage());
-            b.append("</p></body></html>");
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(b.toString()).type(media).build();
-        }finally{
-            if(r != null){ try { r.close(); } catch(Exception e){}}
-            if(is != null){ try { is.close(); } catch(Exception e){}}
-        }
-    }
-
-    
 }

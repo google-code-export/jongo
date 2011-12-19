@@ -21,8 +21,8 @@ package org.jongo;
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
+import org.jongo.jdbc.AdminJDBCExecutor;
 import org.jongo.jdbc.JDBCConnectionFactory;
-import org.jongo.jdbc.JDBCExecutor;
 import org.jongo.jdbc.JongoJDBCConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,9 +78,10 @@ public class Jongo {
         
         JongoJDBCConnection conn = null;
         try{
-            conn = JDBCConnectionFactory.getJongoJDBCConnection();
-            conn = JDBCConnectionFactory.getJongoAdminJDBCConnection();
-            JDBCExecutor.createJongoTablesAndData();
+            l.info("Initializing JDBC Connections");
+            JDBCConnectionFactory.getJongoJDBCConnection();
+            JDBCConnectionFactory.getJongoAdminJDBCConnection();
+            AdminJDBCExecutor.createJongoTablesAndData();
         }catch(Exception e){
             l.error("Failed to generate Jongo Tables and default configuration.");
             l.error(e.getMessage());
