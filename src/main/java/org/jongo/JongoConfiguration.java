@@ -41,6 +41,7 @@ public class JongoConfiguration {
     private int port;
     
     private String jongoName;
+    private Integer limit;
     
     private JDBCDriver driver;
     private String jdbcUrl;
@@ -71,6 +72,7 @@ public class JongoConfiguration {
             instance.adminEnabled = Boolean.valueOf(prop.getProperty("jongo.admin.enabled"));
             instance.appsEnabled = Boolean.valueOf(prop.getProperty("jongo.allow.apps"));
             instance.jongoName = prop.getProperty("jongo.name");
+            instance.limit = Integer.valueOf(prop.getProperty("jongo.default.limit"));
             
             if(demo){
                 l.debug("Loading demo configuration with memory databases");
@@ -215,5 +217,9 @@ public class JongoConfiguration {
     
     public String getJongoServletAddress() {
         return "/" + jongoName + "/*";
+    }
+
+    public Integer getLimit() {
+        return limit;
     }
 }
