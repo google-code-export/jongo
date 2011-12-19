@@ -401,7 +401,7 @@ public class JongoWSImpl implements JongoWS {
         }
         
         if(response == null){
-            JongoResponse r = new JongoSuccess(null, results);
+            JongoResponse r = new JongoSuccess(query, results);
             response =  r.getResponse(format);
         }
         
