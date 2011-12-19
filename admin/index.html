@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Jongo Administration Console</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
+        <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+        <script type="text/javascript" src="js/jongo.js"></script>
+        <script type="text/javascript" src="js/jongo-table.js"></script>
+        <script type="text/javascript" src="js/jongo-query.js"></script>
+        <link type="text/css" rel="stylesheet" href="css/humanity/jquery-ui-1.8.16.custom.css"/>
+        <link type="text/css" rel="stylesheet" href="css/jongo.css"/>
+
+        <script>
+            $(document).ready(function(){
+                $( "#tabs" ).tabs();
+                $("#loading-bar-container").dialog({
+                    height: 100,
+                    width:500,
+                    modal: true,
+                    title: 'loading',
+                    autoOpen:true
+                });
+                $("#myProgressBar").progressbar({value:0});
+                var tables = getJongoTables();
+                $("#myProgressBar").progressbar({value:30});
+                var queries = getJongoQueries();
+                $("#myProgressBar").progressbar({value:60});
+                drawJongoTables('#jtables', tables);
+                drawJongoQueries('#jqueries', queries);
+                drawJongoPlaygroundTablesCombo('#tables-combobox', tables);
+                $("#myProgressBar").progressbar({value:90});
+                $( '.jquery-button' ).button();
+                $("#myProgressBar").progressbar({value:100});
+                $("#loading-bar-container").dialog( "close" );
+            });
+        </script>
+
+    </head>
+    <body>
+        <div class="jongoTabs">
+            <div id="tabs">
+                <ul>
+                    <li><a href="#tabs-1">Jongo Tables</a></li>
+                    <li><a href="#tabs-2">Jongo Complex Queries</a></li>
+                    <li><a href="#tabs-3">Jongo Playground</a></li>
+                </ul>
+                <div id="tabs-1">
+                    <div class="tableContainer">
+                        <div id="jtables" class="jongo"></div>
+                    </div>
+                    <input type="submit" class="jquery-button" value="Add" onclick="addTableDialog('#add-table-dialog'); return false;"/>
+                </div>
+                <div id="tabs-2">
+<!--                    <h2>New Complex Query</h2>
+                    <form>
+                    <table>
+                        <tr>
+                            <td><label for="queryName">Name</label></td>
+                            <td><label for="queryDescription">Description</label></td>
+                        </tr>
+                        <tr>
+                            <td><input class="jongo-field" type="text" style="width: 90%;" id="queryName" /></td>
+                            <td><input class="jongo-field" type="text" style="width: 100%;" size="50" id="queryDescription" /></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><label for="queryText">Query</label></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <textarea class="jongo-text-area" rows="10" id="queryText"></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <input class="jquery-button" type="submit" value="Save" onclick="addQuery(); return false;"/>
+                            </td>
+                        </tr>
+                    </table>
+                    </form>-->
+                    <div id="jqueries"></div>
+                    <input type="submit" class="jquery-button" value="Add" onclick="addQueryDialog('#add-table-dialog'); return false;"/>
+                </div>
+                <div id="tabs-3">
+                    <div id="jongo-play-form">
+                        <form>
+                            <select id="tables-combobox"></select>
+                            <input class="jquery-button" type="submit" value="Load" onclick="loadTable('#tables-combobox', '#jongo-play-results'); return false;"/>
+                        </form>
+                        
+                    </div>
+                    <div id="jongo-play-results"></div>
+                </div>
+            </div>
+        </div>
+        <div id="errorDialog">
+            <span id="errorDialogMessage"></span>
+        </div>
+        <div id="confirmDialog">
+            <span id="confirmDialogMessage"></span>
+        </div>
+        <div id="loading-bar-container">
+            <div id='myProgressBar'></div>
+        </div>
+        <div id="add-table-dialog">
+<!--            <form>
+                <p>
+                    <input class="jongo-field" id="tableName" value="" type="text"/>
+                    <label class="low-contrast-label" for="tableName">Name</label>
+                </p>
+                <p>
+                    <input class="jongo-field" id="tableCustomId" value="id" type="text"/>
+                    <label class="low-contrast-label" for="tableCustomId">Custom ID</label>
+                </p>
+                <span id="jongoPermissions">
+                    <input type="checkbox" id="read" name="radio" /><label for="read">Read</label>
+                    <input type="checkbox" id="write" name="radio" /><label for="write">Write</label>
+                </span>
+            </form>-->
+        </div>
+    </body>
+</html>
