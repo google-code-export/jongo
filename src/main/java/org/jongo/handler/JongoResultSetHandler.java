@@ -21,12 +21,12 @@ package org.jongo.handler;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.dbutils.ResultSetHandler;
-import org.hsqldb.types.Types;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Handles a ResultSet and convert it to a List of RowResponse
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public class JongoResultSetHandler implements ResultSetHandler<List<RowResponse>> {
@@ -52,6 +52,12 @@ public class JongoResultSetHandler implements ResultSetHandler<List<RowResponse>
         this.all = all;
     }
 
+    /**
+     * Method in charge of the conversion
+     * @param rs the ResultSet
+     * @return a List of RowResponse
+     * @throws SQLException
+     */
     @Override
     public List<RowResponse> handle(ResultSet rs) throws SQLException {
         List<RowResponse> results = new ArrayList<RowResponse>();
@@ -69,6 +75,11 @@ public class JongoResultSetHandler implements ResultSetHandler<List<RowResponse>
         return results;
     }
     
+    /**
+     * Converts a ResultSet to a Map
+     * @param resultSet a ResultSet
+     * @return a Map with the column names as keys and the values. null if something goes wrong.
+     */
     public static Map<String, String> resultSetToMap(ResultSet resultSet) {
         Map<String, String> map = new HashMap<String, String>();
         try{
