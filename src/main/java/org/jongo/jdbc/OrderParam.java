@@ -29,11 +29,11 @@ public class OrderParam {
     public static final String ASC = "ASC";
     public static final String DESC = "DESC";
     
-    private final String column;
-    private final String direction;
+    private String column;
+    private String direction;
     
     public OrderParam(){
-        this.column = "id";
+        this.column = null;
         this.direction = ASC;
     }
     
@@ -86,6 +86,14 @@ public class OrderParam {
         }
         
         return instance;
+    }
+
+    public void setColumn(String column) {
+        this.column = column;
+    }
+
+    public void setDirection(String direction) {
+        this.direction = direction;
     }
     
     @Override
