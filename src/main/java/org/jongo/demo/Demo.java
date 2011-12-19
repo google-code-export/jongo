@@ -122,7 +122,7 @@ public class Demo {
             adminRun.update("INSERT INTO JongoTable ( name, customId, permits ) VALUES ( ?, ?, ? )", "pictures", "id", 3);
             adminRun.update("INSERT INTO JongoTable ( name, customId, permits ) VALUES ( ?, ?, ? )", "sales_stats", "id", 1);
             adminRun.update("INSERT INTO JongoTable ( name, customId, permits ) VALUES ( ?, ?, ? )", "maker_stats", "id", 1);
-            adminRun.update("INSERT INTO JongoQuery ( name, query, description ) VALUES ( ?, ?, ? )", "allDataForCar", "SELECT * FROM car LEFT JOIN maker ON maker.id = car.maker", "Returns all data for a car");
+            adminRun.update("INSERT INTO JongoQuery ( name, query, description ) VALUES ( ?, ?, ? )", "yearSummary", "SELECT year FROM maker_stats GROUP BY year", "Returns all years we have data for");
             
         } catch (SQLException ex) {
             l.error("Failed to create demo tables " + ex.getMessage());
