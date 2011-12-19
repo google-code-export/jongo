@@ -19,17 +19,23 @@ package org.jongo.jdbc;
 
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang.StringUtils;
+import org.jongo.JongoConfiguration;
 
 /**
- *
+ * An object to represent the two limit parameters (limit & offset) which are then translated to
+ * their correct form in SQL. If no limit parameter is given, the default is loaded from
+ * the configuration. The default value for the offset or start is 0.
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public class LimitParam {
+    
+    private static final JongoConfiguration configuration = JongoConfiguration.instanceOf();
+    
     private final Integer limit;
     private final Integer start;
     
     public LimitParam(){
-        this.limit = 25;
+        this.limit = configuration.getLimit();
         this.start = 0;
     }
     
@@ -51,15 +57,21 @@ public class LimitParam {
         return start;
     }
     
-    public static LimitParam valueOf(final MultivaluedMap<String, String> formParams){
+    /**
+     * From the received parameters, try to obtain a LimitParam object. By default, the LimitParam
+     * always has a limit of 25 and an offset (start) in 0.
+     * @param pathParams
+     * @return 
+     */
+    public static LimitParam valueOf(final MultivaluedMap<String, String> pathParams){
         Integer l = null;
-        if(StringUtils.isNumeric(formParams.getFirst("limit"))){
-            l = Integer.valueOf(formParams.getFirst("limit"));
+        if(StringUtils.isNumeric(pathParams.getFirst("limit"))){
+            l = Integer.valueOf(pathParams.getFirst("limit"));
         }
         
         Integer o = null;
-        if(StringUtils.isNumeric(formParams.getFirst("offset"))){
-            o = Integer.valueOf(formParams.getFirst("offset"));
+        if(StringUtils.isNumeric(pathParams.getFirst("offset"))){
+            o = Integer.valueOf(pathParams.getFirst("offset"));
         }
         
         LimitParam instance = null;
