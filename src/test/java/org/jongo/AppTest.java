@@ -124,7 +124,8 @@ public class AppTest {
     @Test
     public void testSQLInject(){
         doTestResponse(client.doPUT("user/0?format=xml", "{\"name\":\"anything' OR 'x'='x'\"}"), Response.Status.OK, 1);
-        doTestResponse(client.doGET("user/name/bar%20AND%20age=30?format=xml"), Response.Status.NOT_FOUND, 0);
+        doTestResponse(client.doGET("user/name/bar%20AND%20age%3D30?format=xml"), Response.Status.NOT_FOUND, 0);
+        doTestResponse(client.doGET("user/name/bar%3B%20DROP%20TABLE%20user%3B%20--?format=xml"), Response.Status.NOT_FOUND, 0);
     }
     
     public List<UserMock> getTestValues(){
