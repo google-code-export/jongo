@@ -45,29 +45,8 @@ import org.slf4j.LoggerFactory;
 public class AdminJDBCExecutor {
     private static final Logger l = LoggerFactory.getLogger(JDBCExecutor.class);
     private static final JongoConfiguration configuration = JongoConfiguration.instanceOf();
-    private static final JongoJDBCConnection connection = JDBCConnectionFactory.getJongoAdminJDBCConnection();
-    private static final QueryRunner runner = new QueryRunner(JDBCConnectionFactory.getAdminDataSource());
-    
-    private static <T> T queryRunnerWrapper(final String query, final ResultSetHandler<T> resultSet, final Object... params) throws JongoJDBCException{
-        T response = null;
-        if(resultSet == null){
-            l.debug("Executing update [" + query + " ] params: " + params);
-            try {
-                int results = runner.update(query, params);
-                response = (T)new Integer(results);
-            } catch (SQLException ex) {
-                throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
-            }
-        }else{
-            l.debug("Executing query [" + query + " ] params: " + params);
-            try {
-                response = runner.query(query, resultSet, params);
-            } catch (SQLException ex) {
-                throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
-            }
-        }
-        return response;
-    }
+    private static final JongoJDBCConnection conn = JDBCConnectionFactory.getJongoAdminJDBCConnection();
+    private static final QueryRunner run = new QueryRunner(JDBCConnectionFactory.getAdminDataSource());
     
     /**
      * Shutdown the connection with the Administration database.
@@ -84,7 +63,12 @@ public class AdminJDBCExecutor {
     
     public static JongoTable getJongoTable(final String table) throws JongoJDBCException{
         ResultSetHandler<JongoTable> rh = new JongoTableResultSetHandler();
-        JongoTable result = queryRunnerWrapper(JongoTable.GET, rh, table);
+        JongoTable result = null;
+        try {
+            result = run.query(JongoTable.GET, rh, table);
+        } catch (SQLException ex) {
+            l.debug(ex.getMessage());
+        }
         
         if(result == null){
             l.debug("Table " + table + " is not in JongoTables. Access Denied");
@@ -100,20 +84,30 @@ public class AdminJDBCExecutor {
     
     public static JongoQuery getJongoQuery(final String name) throws JongoJDBCException{
         ResultSetHandler<JongoQuery> rh = new JongoQueryResultSetHandler();
-        return queryRunnerWrapper(JongoQuery.GET, rh, name);
+        JongoQuery result = null;
+        try {
+            result = run.query(JongoQuery.GET, rh, name);
+        } catch (SQLException ex) {
+            l.debug(ex.getMessage());
+        }
+        
+        return result;
     }
     
-    public static void createJongoTablesAndData() throws JongoJDBCException{
+    public static void createJongoTablesAndData() throws SQLException{
         ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(false);
         String query = "SELECT * FROM JongoTable";
-        List<RowResponse> results = queryRunnerWrapper(query, res);
+        List<RowResponse> results = null;
+        try {
+            results = run.query(query, res);
+        } catch (SQLException ex) {}
         
         if(results != null){
             l.info("No need to create admin tables");
         }else{
             l.info("Creating Jongo Tables");
-            queryRunnerWrapper(JongoUtils.createJongoTableQuery, null);
-            queryRunnerWrapper(JongoUtils.createJongoQueryTableQuery, null);
+            update(JongoUtils.createJongoTableQuery);
+            update(JongoUtils.createJongoQueryTableQuery);
         }
         
         if(configuration.isDemoModeActive()){
@@ -121,22 +115,43 @@ public class AdminJDBCExecutor {
         }
     }
     
-    public static Integer insert(final String table, MultivaluedMap<String, String> formParams) throws JongoJDBCException {
+    private static int update(final String query, final Object... params) throws SQLException {
+        l.debug(query + " params: " + JongoUtils.varargToString(params));
+        return run.update(query, params);
+    }
+    
+    public static int insert(final String table, MultivaluedMap<String, String> formParams) throws JongoJDBCException {
+        l.debug("Inserting in admin " + table);
+        
         List<String> params = new ArrayList<String>(formParams.size());
         for(String k : formParams.keySet()){
             params.add(formParams.getFirst(k));
         }
         
-        String query = connection.getInsertQuery(table, formParams);
-        return queryRunnerWrapper(query, null, params);
+        String query = conn.getInsertQuery(table, formParams);
+        l.debug(query);
+        
+        try {
+            return run.update(query, JongoUtils.parseValues(params));
+        } catch (SQLException ex) {
+            throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
+        }
     }
     
     public static List<RowResponse> find(final String table, final String query, Object... params) throws JongoJDBCException {
+        l.debug(query + " params: " + JongoUtils.varargToString(params));
         ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(true);
-        return queryRunnerWrapper(query, res, params);
+        try {
+            List<RowResponse> results = run.query(query, res, params);
+            return results;
+        } catch (SQLException ex) {
+            throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
+        }
     }
     
-    public static Integer update(final String table, final String id, MultivaluedMap<String, String> formParams) throws JongoJDBCException {
+    public static int update(final String table, final String id, MultivaluedMap<String, String> formParams) throws JongoJDBCException {
+        l.debug("Updating admin table " + table);
+        
         List<String> params = new ArrayList<String>(formParams.size());
         
         for(String k : formParams.keySet()){
@@ -144,12 +159,25 @@ public class AdminJDBCExecutor {
         }
         params.add(id);
         
-        String query = connection.getUpdateQuery(table, "id", formParams);
-        return queryRunnerWrapper(query, null, params);
+        String query = conn.getUpdateQuery(table, "id", formParams);
+        l.debug(query);
+        try {
+            return run.update(query, JongoUtils.parseValues(params));
+        } catch (SQLException ex) {
+            throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
+        }
     }
     
-    public static Integer delete(final String table, final String id) throws JongoJDBCException {
-        String query = connection.getDeleteQuery(table, "id");
-        return queryRunnerWrapper(query, null, id);
+    public static int delete(final String table, final String id) throws JongoJDBCException {
+        l.debug("Deleting admin " + table);
+        
+        String query = conn.getDeleteQuery(table, "id");
+        l.debug(query);
+        
+        try {
+            return run.update(query, JongoUtils.parseValue(id));
+        } catch (SQLException ex) {
+            throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
+        }
     }
 }
