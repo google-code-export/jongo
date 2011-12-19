@@ -18,6 +18,7 @@
 
 package org.jongo;
 
+import org.jongo.jdbc.AdminJDBCExecutor;
 import org.jongo.jdbc.JDBCExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,5 +39,6 @@ public class JongoShutdown extends Thread{
     public void run(){
         l.info("Shutting down Jongo");
         JDBCExecutor.shutdown();
+        AdminJDBCExecutor.shutdown();
     }
 }
