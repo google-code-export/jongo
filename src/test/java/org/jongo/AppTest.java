@@ -121,6 +121,12 @@ public class AppTest {
         doTestResponse(client.doGET("query/yearSummary?format=xml"), Response.Status.OK, 12);
     }
     
+    @Test
+    public void testSQLInject(){
+        doTestResponse(client.doPUT("user/0?format=xml", "{\"name\":\"anything' OR 'x'='x'\"}"), Response.Status.OK, 1);
+        doTestResponse(client.doGET("user/name/bar%20AND%20age=30?format=xml"), Response.Status.NOT_FOUND, 0);
+    }
+    
     public List<UserMock> getTestValues(){
         List<UserMock> u1 = new ArrayList<UserMock>();
         u1.add(UserMock.getRandomInstance());
