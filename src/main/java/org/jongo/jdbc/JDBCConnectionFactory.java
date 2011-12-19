@@ -18,6 +18,7 @@
 
 package org.jongo.jdbc;
 
+import java.util.logging.Level;
 import org.jongo.jdbc.connections.MySQLConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -98,20 +99,46 @@ public class JDBCConnectionFactory {
     }
 
     public static DataSource getDataSource() {
+        boolean loadConnection = false;
         if (datasource == null) {
+            loadConnection = true;
+        }else{
+            try {
+                loadConnection = datasource.getConnection().isClosed();
+            } catch (SQLException ex) {
+                l.warn("Failed to check if connection is closed");
+                loadConnection = false;
+            }
+        }
+        
+        if(loadConnection){
             JongoJDBCConnection conn = getJongoJDBCConnection(configuration.getDriver(), configuration.getJdbcUrl(), configuration.getJdbcUsername(), configuration.getJdbcPassword());
             conn.loadDriver();
             datasource = setupDataSource(conn);
         }
+        
         return datasource;
     }
 
     public static DataSource getAdminDataSource() {
+        boolean loadConnection = false;
         if (adminDatasource == null) {
+            loadConnection = true;
+        }else{
+            try {
+                loadConnection = adminDatasource.getConnection().isClosed();
+            } catch (SQLException ex) {
+                l.warn("Failed to check if admin connection is closed");
+                loadConnection = false;
+            }
+        }
+        
+        if(loadConnection){
             JongoJDBCConnection conn = getJongoJDBCConnection(configuration.getAdminDriver(), configuration.getJdbcAdminUrl(), configuration.getJdbcAdminUsername(), configuration.getJdbcAdminPassword());
             conn.loadDriver();
             adminDatasource = setupDataSource(conn);
         }
+        
         return adminDatasource;
     }
 
