@@ -1,0 +1,4 @@
+glob:target/*
+glob:apps/cidb/extjs/*
+glob:logs/*
+glob:nb*
