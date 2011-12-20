@@ -20,6 +20,7 @@ package org.jongo.rest;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -37,6 +38,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.JongoUtils;
+import org.jongo.Usage;
 import org.jongo.exceptions.JongoBadRequestException;
 import org.jongo.jdbc.DynamicFinder;
 import org.jongo.jdbc.JDBCExecutor;
@@ -58,6 +60,7 @@ import org.slf4j.LoggerFactory;
 public class JongoWSImpl implements JongoWS {
     
     private static final Logger l = LoggerFactory.getLogger(JongoWSImpl.class);
+    private static final Usage u = Usage.getInstance();
     
     @GET
     @Path("{table}")
@@ -73,6 +76,9 @@ public class JongoWSImpl implements JongoWS {
     @Override
     public Response get(@PathParam("table") String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") String id, @Context UriInfo ui) {
         l.debug("Geting resource from " + table + " with id " + id);
+        
+        final Long start = System.nanoTime();
+        
         Response response = null;
         List<RowResponse> results = null;
         
@@ -105,7 +111,7 @@ public class JongoWSImpl implements JongoWS {
             response = r.getResponse(format);
         }
         
-        l.debug(response.getEntity().toString());
+        u.addRead(perf("Time taken to perform a read", start), response.getStatus());
         return response;
         
     }
@@ -117,6 +123,9 @@ public class JongoWSImpl implements JongoWS {
     @Override
     public Response insert(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, final String jsonRequest) {
         l.debug("Insert new " + table + " with JSON values: " + jsonRequest);
+        
+        final Long start = System.nanoTime();
+        
         Response response = null;
         int result = 0;
         try {
@@ -146,7 +155,7 @@ public class JongoWSImpl implements JongoWS {
             response =  r.getResponse(format);
         }
         
-        l.debug(response.getEntity().toString());
+        u.addCreate(perf("Time taken to perform a create", start), response.getStatus());
         return response;
     }
     
@@ -157,6 +166,8 @@ public class JongoWSImpl implements JongoWS {
     @Override
     public Response insert(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, final MultivaluedMap<String, String> formParams) {
         l.debug("Insert new " + table + " with values: " + formParams);
+        
+        final Long start = System.nanoTime();
         
         Response response = null;
         if(formParams.size() == 0)
@@ -186,7 +197,8 @@ public class JongoWSImpl implements JongoWS {
             JongoResponse r = new JongoSuccess(null, results, Response.Status.CREATED);
             response = r.getResponse(format);
         }
-        l.debug(response.getEntity().toString());
+        
+        u.addCreate(perf("Time taken to perform a create", start), response.getStatus());
         return response;
     }
 
@@ -197,6 +209,9 @@ public class JongoWSImpl implements JongoWS {
     @Override
     public Response update(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") final String id, final String jsonRequest) {
         l.debug("Update record " + id + " in table " + table + " with values: " + jsonRequest);
+        
+        final Long start = System.nanoTime();
+        
         Response response = null;
         List<RowResponse> results = null;
         try {
@@ -224,7 +239,7 @@ public class JongoWSImpl implements JongoWS {
             response = r.getResponse(format);
         }
         
-        l.debug(response.getEntity().toString());
+        u.addUpdate(perf("Time taken to perform a update", start), response.getStatus());
         return response;
     }
     
@@ -234,6 +249,9 @@ public class JongoWSImpl implements JongoWS {
     @Override
     public Response delete(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") final String id) {
         l.debug("Delete record " + id + " from table " + table);
+        
+        final Long start = System.nanoTime();
+        
         Response response = null;
         int result = 0;
         try {
@@ -259,7 +277,7 @@ public class JongoWSImpl implements JongoWS {
             response = r.getResponse(format);
         }
         
-        l.debug(response.getEntity().toString());
+        u.addDelete(perf("Time taken to perform a delete", start), response.getStatus());
         return response;
     }
     
@@ -269,6 +287,9 @@ public class JongoWSImpl implements JongoWS {
     @Override
     public Response find(@PathParam("table") String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("column") final String col, @PathParam("value") final String val) {
         l.debug("Geting resource from " + table + " with " + col + " value " + val);
+        
+        final Long start = System.nanoTime();
+        
         Response response = null;
         List<RowResponse> results = null;
         try {
@@ -292,7 +313,7 @@ public class JongoWSImpl implements JongoWS {
             response =  r.getResponse(format);
         }
         
-        l.debug(response.getEntity().toString());
+        u.addRead(perf("Time taken to perform a read", start), response.getStatus());
         return response;
     }
     
@@ -302,6 +323,9 @@ public class JongoWSImpl implements JongoWS {
     @Override
     public Response findBy(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("query") String query, @QueryParam("value") String value, @QueryParam("values")  List<String> values) {
         l.debug("Find resource from " + table + " with " + query);
+        
+        final Long start = System.nanoTime();
+        
         Response response = null;
         List<RowResponse> results = null;
         if(query == null){
@@ -372,7 +396,7 @@ public class JongoWSImpl implements JongoWS {
             response =  r.getResponse(format);
         }
         
-        l.debug(response.getEntity().toString());
+        u.addDynamic(perf("Time taken to perform a dynamic finder", start), response.getStatus());
         return response;
     }
 
@@ -382,6 +406,9 @@ public class JongoWSImpl implements JongoWS {
     @Override
     public Response query(@PathParam("query") String query, @DefaultValue("json") @QueryParam("format") String format, @QueryParam("args") List<String> arguments) {
         l.debug("Executing Complex Query " + query);
+        
+        final Long start = System.nanoTime();
+        
         Response response = null;
         List<RowResponse> results = null;
         try {
@@ -405,10 +432,18 @@ public class JongoWSImpl implements JongoWS {
             response =  r.getResponse(format);
         }
         
-        l.debug(response.getEntity().toString());
+        u.addQuery(perf("Time taken to execute a query", start), response.getStatus());
         return response;
         
     }
     
-    
+    private Long perf(final String message, final Long start){
+        final Long dur = System.nanoTime() - start;
+        StringBuilder b = new StringBuilder(message);
+        b.append(" ");
+        b.append(TimeUnit.NANOSECONDS.toMillis(dur));
+        b.append("ms");
+        l.debug(b.toString());
+        return dur;
+    }
 }
