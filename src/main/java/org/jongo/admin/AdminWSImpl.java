@@ -38,6 +38,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.jongo.JongoConfiguration;
 import org.jongo.JongoUtils;
+import org.jongo.Usage;
 import org.jongo.jdbc.AdminJDBCExecutor;
 import org.jongo.jdbc.exceptions.JongoJDBCException;
 import org.jongo.rest.xstream.JongoError;
@@ -262,4 +263,13 @@ public class AdminWSImpl implements AdminWS {
         JongoConfiguration conf = JongoConfiguration.instanceOf();
         return (request.getRemoteAddr().equalsIgnoreCase("0:0:0:0:0:0:0:1") || request.getRemoteAddr().equalsIgnoreCase(conf.getAdminIp()));
     }
+
+    @Override
+    @GET @Path("stats") @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public Response getJongoStatistics(@DefaultValue("json") @QueryParam("format") String format) {
+        Usage u = Usage.getInstance();
+        return u.getResponse(format);
+    }
+    
+    
 }

@@ -36,4 +36,5 @@ public interface AdminWS {
     public Response insertJongoQuery(final HttpServletRequest request, final String format, final MultivaluedMap<String, String> formParams);
     public Response updateJongoQuery(final HttpServletRequest request, final String format, final String id, final UriInfo ui);
     public Response deleteJongoQuery(final HttpServletRequest request, final String format, final String id);
+    public Response getJongoStatistics(final String format);
 }
