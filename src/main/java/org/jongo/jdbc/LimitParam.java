@@ -25,6 +25,8 @@ import org.jongo.JongoConfiguration;
  * An object to represent the two limit parameters (limit & offset) which are then translated to
  * their correct form in SQL. If no limit parameter is given, the default is loaded from
  * the configuration. The default value for the offset or start is 0.
+ * The limit value has a maximum which is set by the configuration. If the given limit value
+ * is greater than this maximum, we override the given limit.
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public class LimitParam {
@@ -40,12 +42,12 @@ public class LimitParam {
     }
     
     public LimitParam(Integer limit){
-        this.limit = limit;
+        this.limit = getMaxLimit(limit);
         this.start = 0;
     }
     
     public LimitParam(Integer limit, Integer start){
-        this.limit = limit;
+        this.limit = getMaxLimit(limit);
         this.start = start;
     }
 
@@ -55,6 +57,13 @@ public class LimitParam {
 
     public Integer getStart() {
         return start;
+    }
+    
+    private Integer getMaxLimit(Integer limit){
+        if(limit >= configuration.getMaxLimit()){
+            limit = configuration.getMaxLimit();
+        }
+        return limit;
     }
     
     /**
