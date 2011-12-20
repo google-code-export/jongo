@@ -42,6 +42,7 @@ public class JongoConfiguration {
     
     private String jongoName;
     private Integer limit;
+    private Integer maxLimit;
     
     private JDBCDriver driver;
     private String jdbcUrl;
@@ -73,6 +74,7 @@ public class JongoConfiguration {
             instance.appsEnabled = Boolean.valueOf(prop.getProperty("jongo.allow.apps"));
             instance.jongoName = prop.getProperty("jongo.name");
             instance.limit = Integer.valueOf(prop.getProperty("jongo.default.limit"));
+            instance.maxLimit = Integer.valueOf(prop.getProperty("jongo.default.max.limit"));
             
             if(demo){
                 l.debug("Loading demo configuration with memory databases");
@@ -221,5 +223,9 @@ public class JongoConfiguration {
 
     public Integer getLimit() {
         return limit;
+    }
+
+    public Integer getMaxLimit() {
+        return maxLimit;
     }
 }
