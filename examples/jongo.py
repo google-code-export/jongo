@@ -25,13 +25,13 @@
 import json
 import httplib, urllib
 
-class Response:
+class Response(object):
     def __init__(self):
         self.raw = ""
         self.success = False
         self.count = 0
         self.code = 0 
-        self.response = []
+        self.data = []
         self.error = ""
         self.message = ""
 
@@ -39,7 +39,6 @@ class Response:
         return '{response}'
 
     def callback(self, buf):
-        #print buf
         self.raw = json.loads(buf)
         self.code = self.raw['code']
         self.count = self.raw['count']
@@ -51,21 +50,19 @@ class Response:
     def process_success(self):
         self.success = True
         for i in self.raw['response']:
-            self.response.append(i)
+            self.data.append(i)
 
     def process_failure(self):
         self.success = False
         self.error = self.raw['error']
         self.message = self.raw['message']
 
-
-class Request:
+class Request(object):
     def __init__(self, url, path, method='GET', params={}):
         self.url = url
         self.path = path
         self.method = method
         self.response = Response()
-        #self.params = urllib.urlencode(params)
         self.params = json.dumps(params)
         self.headers = {"Content-type": "application/json"}
 
@@ -74,28 +71,114 @@ class Request:
         conn.request(self.method, self.path, self.params, self.headers)
         self.response.callback(conn.getresponse().read())
 
-r = Request('localhost:8080','/jongo/car')
-r.perform()
-print "The GET request was %s success " % r.response.success
+class JongoStore(object):
+    def __init__(self, url=None, model=None, autoLoad=False, autoSync=False, data=None):
+        self.url = url
+        self.model = model
+        self.autoLoad = autoLoad
+        self.autoSync = autoSync
+        self.data = data
 
-r = Request('localhost:8080','/jongo/car', 'POST', {'model':'K1', 'maker':'KIA', 'transmission':"Manual", 'newvalue':"23.00", 'fuel':"Diesel",'year':2011})
-r.perform()
-print "The POST request was %s success " % r.response.success
+        if autoLoad:
+            self.load()
 
-r = Request('localhost:8080','/jongo/car')
-r.perform()
-print "The GET request was %s success " % r.response.success
+    def load(self):
+        self.data = []
+        model_class = self.get_model()
+        model_instance = model_class() 
+        request = Request(self.url, model_instance.path)
+        request.perform()
+        if request.response.success:
+            for response in request.response.data:
+                model_instance = model_class()
+                model_instance.map_response_data(response)
+                self.data.append(model_instance)
 
-ids = []
-for i in r.response.response:
-    ids.append(i['cid'])
+    def sync(self):
+        pass
 
-next_id = '/jongo/car/%d' % max(ids)
+    def get_model(self):
+        parts = self.model.split('.')
+        module = ".".join(parts[:-1])
+        m = __import__( module )
+        for comp in parts[1:]:
+            m = getattr(m, comp)     
+        return m
 
-r = Request('localhost:8080', next_id, 'PUT', {'model':'K11'})
-r.perform()
-print "The PUT request was %s success " % r.response.success
+class JongoModel(object):
+    def __init__(self, path=None, id=None, idCol='id', ghost=False, dirty=False):
+        self.path = path
+        self.id = id
+        self.idCol = idCol
+        self.ghost = ghost
+        self.dirty = dirty
 
-r = Request('localhost:8080', next_id, 'DELETE')
-r.perform()
-print "The DELETE request was %s success " % r.response.success
+    def create(self):
+        pass
+
+    def read(self):
+        pass
+
+    def update(self):
+        pass
+
+    def delete(self):
+        pass
+
+    def map_response_data(self, data):
+        for attr, value in self.__dict__.iteritems():
+            if attr in data:
+                self.__dict__[attr] = data[attr]
+                #setattr(self.__class__, attr, data[attr])
+
+    def __str__(self):
+        me = []
+        for attr, value in self.__dict__.iteritems():
+            me.append("%s:%s" % (attr, value))
+        return " ".join(me)
+
+class User(JongoModel):
+    def __init__(self, id=None, name=None, age=None):
+        JongoModel.__init__(self)
+        self.id = id
+        self.name = name
+        self.age = age
+        self.path = "/jongo/user"
+
+class UserStore(JongoStore):
+    def __init__(self):
+        JongoStore.__init__(self)
+        self.url = "localhost:8080"
+        self.model = "jongo.User"
+
+if __name__ == '__main__':
+    store = UserStore()
+    store.load()
+    for user in store.data:
+        print user
+
+#    r = Request('localhost:8080','/jongo/car')
+#    r.perform()
+#    print "The GET request was %s success " % r.response.success
+#
+#    r = Request('localhost:8080','/jongo/car', 'POST', {'model':'K1', 'maker':'KIA', 'transmission':"Manual", 'newvalue':"23.00", 'fuel':"Diesel",'year':2011})
+#    r.perform()
+#    print "The POST request was %s success " % r.response.success
+#
+#    r = Request('localhost:8080','/jongo/car')
+#    r.perform()
+#    print "The GET request was %s success " % r.response.success
+#
+#    ids = []
+#    for i in r.response.response:
+#        ids.append(i['cid'])
+#
+#    next_id = '/jongo/car/%d' % max(ids)
+#
+#    r = Request('localhost:8080', next_id, 'PUT', {'model':'K11'})
+#    r.perform()
+#    print "The PUT request was %s success " % r.response.success
+#
+#    r = Request('localhost:8080', next_id, 'DELETE')
+#    r.perform()
+#    print "The DELETE request was %s success " % r.response.success
