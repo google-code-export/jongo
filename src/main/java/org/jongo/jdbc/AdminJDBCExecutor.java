@@ -97,7 +97,7 @@ public class AdminJDBCExecutor {
     
     public static void createJongoTablesAndData() throws SQLException{
         ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(false);
-        String query = "SELECT * FROM JongoTable";
+        String query = conn.getSelectAllFromTableQuery("JongoTable");
         List<RowResponse> results = null;
         try {
             results = run.query(query, res);
@@ -109,6 +109,7 @@ public class AdminJDBCExecutor {
             l.info("Creating Jongo Tables");
             update(JongoUtils.createJongoTableQuery);
             update(JongoUtils.createJongoQueryTableQuery);
+            update(JongoQuery.CREATE, "jongoTest", "", "This is the holder for adminconsole test button");
         }
         
         if(configuration.isDemoModeActive()){
@@ -139,11 +140,24 @@ public class AdminJDBCExecutor {
         }
     }
     
-    public static List<RowResponse> find(final String table, final String query, Object... params) throws JongoJDBCException {
+    public static List<RowResponse> find(final String table, Object... params) throws JongoJDBCException {
+        String query = conn.getSelectAllFromTableQuery(table, "id");
         l.debug(query + " params: " + JongoUtils.varargToString(params));
         ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(true);
         try {
             List<RowResponse> results = run.query(query, res, params);
+            return results;
+        } catch (SQLException ex) {
+            throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
+        }
+    }
+    
+    public static List<RowResponse> findAll(final String table) throws JongoJDBCException {
+        String query = conn.getSelectAllFromTableQuery(table);
+        l.debug(query);
+        ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(true);
+        try {
+            List<RowResponse> results = run.query(query, res);
             return results;
         } catch (SQLException ex) {
             throw JongoJDBCExceptionFactory.getException(ex.getMessage(), ex);
