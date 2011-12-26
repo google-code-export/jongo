@@ -121,7 +121,7 @@ public class Usage  implements JongoResponse{
         b.append(",\"count\":");b.append(1);
         b.append(",\"resource\":\"");b.append(getResource());
         b.append("\",\"code\":");b.append(getStatus().getStatusCode());
-        b.append(",\"response\":[");
+        b.append(",\"response\":{");
         b.append("\"total\":");b.append(total);
         b.append(",\"success\":");b.append(success);
         b.append(",\"fail\":");b.append(fail);
@@ -135,7 +135,7 @@ public class Usage  implements JongoResponse{
         b.append(",\"deleteTime\":");b.append(deleteTime);
         b.append(",\"dynamic\":");b.append(dynamic);
         b.append(",\"query\":");b.append(query);
-        b.append("]}");
+        b.append("}}");
         return b.toString();
     }
     
