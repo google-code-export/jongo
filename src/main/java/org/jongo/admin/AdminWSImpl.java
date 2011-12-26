@@ -36,6 +36,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import org.apache.commons.lang.StringUtils;
 import org.jongo.JongoConfiguration;
 import org.jongo.JongoUtils;
 import org.jongo.Usage;
@@ -58,6 +59,12 @@ public class AdminWSImpl implements AdminWS {
     private static final Logger l = LoggerFactory.getLogger(AdminWSImpl.class);
     private static final String E403 = "<html><head></head><body>403</body></html>";
 
+    @Override
+    @GET @Path("table") @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public Response getJongoTable(@Context  HttpServletRequest request, @DefaultValue("json") @QueryParam("format") String format) {
+            return getJongoTable(null, request, format);
+    }
+    
     @Override
     @GET @Path("table/{resource}") @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     public Response getJongoTable(@PathParam("resource") String resourceId, @Context  HttpServletRequest request, @DefaultValue("json") @QueryParam("format") String format) {
@@ -105,6 +112,13 @@ public class AdminWSImpl implements AdminWS {
         }else{
             return deleteJongoResource("JongoTable", id, format);
         }
+    }
+    
+    @Override
+    @GET @Path("query")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    public Response getJongoQuery(@Context  HttpServletRequest request, @DefaultValue("json") @QueryParam("format") String format) {
+        return getJongoQuery(null, request, format);
     }
     
     @Override
@@ -157,15 +171,12 @@ public class AdminWSImpl implements AdminWS {
     }
     
     private Response getJongoResource(String resource, String table, String format){
-        String query = null;
         List<RowResponse> results = null;
         try {
-            if("all".equalsIgnoreCase(resource)){
-                query = "SELECT * FROM " + table;
-                results = AdminJDBCExecutor.find(table, query);
-            }else{
-                query = "SELECT * FROM " + table + " WHERE id = ?";
-                results = AdminJDBCExecutor.find(table, query, JongoUtils.parseValue(resource));
+            if(StringUtils.isBlank(resource)){
+                results = AdminJDBCExecutor.findAll(table);
+            }else if(StringUtils.isNumeric(resource)) {
+                results = AdminJDBCExecutor.find(table,  JongoUtils.parseValue(resource));
             }
         } catch (JongoJDBCException ex) {
             l.info(ex.getMessage());
@@ -177,7 +188,7 @@ public class AdminWSImpl implements AdminWS {
         }
         
         if(results == null || results.isEmpty()){
-            JongoResponse error = new JongoError(null, Response.Status.NOT_FOUND, "No results for " + query);
+            JongoResponse error = new JongoError(null, Response.Status.NOT_FOUND, "No results");
             return error.getResponse(format);
         }
         
