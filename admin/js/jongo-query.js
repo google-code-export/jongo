@@ -1,8 +1,26 @@
+/**
+ * Copyright (C) 2011, 2012 Alejandro Ayuso
+ *
+ * This file is part of Jongo.
+ * Jongo is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ * 
+ * Jongo is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Jongo.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 function getJongoQueries(){
     debug('Obtaining Jongo Queries');
     var queries = new Array();
     $.ajax({
-        url: '/adminws/query/all',
+        url: '/adminws/query',
         async: false,
         dataType: 'json',
         success: function(data){
@@ -16,6 +34,8 @@ function drawJongoQueries(component, queries){
     if(queries == null){
         queries = getJongoQueries();
     }
+    // remove the first which is the jongoTest query and we don't want to see it'
+    queries.shift();
     $(component).accordion("destroy");
     var items = new Array();
     $.each(queries, function(){
@@ -161,13 +181,74 @@ function addQueryDialog(componentName){
         width: 500,
         title: 'Add Query',
         buttons: {
-            Ok: function() {
+            Test: function() {
+                testQuery();
+            },
+            Save: function() {
                 $( this ).dialog( "close" );
                 addQuery();
             },
             Cancel: function() {
                 $( this ).dialog( "close" );
             }
+        }
+    });
+}
+
+function testQuery(){
+    var data = {};
+    data['name'] = "jongoTest";
+    var queryText = $("#queryText").val();
+    data['query'] = queryText.replace(/(\r\n|\n|\r)/gm,"\\n"); // chrome doesn't like line breaks in json
+    
+    var ret = $.ajax({
+        type: 'PUT',
+        contentType: "application/json",
+        url: '/adminws/query/0',
+        data: JSON.stringify(data),
+        dataType: 'json',
+        success: function(a,b,c) {
+            debug("Alright! Updated the query")
+            $.get('/jongo/query/jongoTest', function(data) {
+                debug("Query executed correctly")
+                var response = data.response
+                var output = new Array();
+                var first = response[0]
+                output.push('<table class="meta-data-table ui-corner-all"><tr>')
+                for( var k in first ){
+                    output.push('<th>')
+                    output.push(k)
+                    output.push('</th>')
+                }
+                output.push('</tr>')
+                $.each(response, function(){
+                    output.push('<tr>');
+                    for( var k in this){
+                        var obj = this[k]
+                        output.push('<td>');
+                        output.push(obj);
+                        output.push('</td>');
+                    }
+                    output.push('</tr>');
+                })
+                output.push('</table>');
+
+                $("#errorDialogMessage").html(output.join(''));
+                $("#errorDialog").dialog({
+                    title: 'test data',
+                    width: 600,
+                    buttons: {
+                        Ok: function() {
+                            $( this ).dialog( "close" );
+                        }
+                    }
+                })
+            }, 'json');
+            
+        },
+        error: function(error){
+            var jongoError = JSON.parse(error.responseText);
+            showJQueryDialog("Error " + error.status, jongoError.response.message);
         }
     });
 }
