@@ -50,6 +50,7 @@ class CarStore(jongo.JongoStore):
     def __init__(self):
         jongo.JongoStore.__init__(self)
         self.model = Car
+        self.proxy = jongo.Proxy("localhost:8080","/jongo/car", Car)
 
 if __name__ == '__main__':
     store = UserStore()
@@ -62,6 +63,9 @@ if __name__ == '__main__':
     u1 = User(None, 'kkk', 16)
     store.add(u1)
 
+    u1 = store.getAt(store.count() - 1)
+    assert u1.ghost == True
+    assert u1.dirty == False
     print "Before sync, the user instance is a ghost. This means it doesn't have a value in the db"
     for user in store.data:
         print user
@@ -73,7 +77,6 @@ if __name__ == '__main__':
 
     print "Get the last user, probably the one we created"
     u1 = store.getAt(store.count() - 1)
-    print u1
 
     print "Let's change its name"
     u1.name = "ttt"
@@ -101,9 +104,8 @@ if __name__ == '__main__':
         print user
 
 
-    print "Now with the cars which have a custom id"
+    print "Now with the cars which have a custom id which is mapped to our column ID"
     carstore = CarStore()
-    carstore.proxy = jongo.Proxy("localhost:8080","/jongo/car", Car)
     carstore.load()
     for car in carstore.data:
         print car
@@ -114,6 +116,25 @@ if __name__ == '__main__':
     for car in carstore.data:
         print car
 
+    carstore.sync()
+    for car in carstore.data:
+        print car
+
+    c1 = carstore.getAt(carstore.count() - 1) 
+    c1.model = "206"
+    c1.maker = "PPegoushn"
+    carstore.update(c1)
+    for car in carstore.data:
+        print car
+    carstore.sync()
+    for car in carstore.data:
+        print car
+
+    # We need to refresh the object since it has changed after the sync
+    c1 = carstore.getAt(carstore.count() - 1) 
+    carstore.remove(c1)
+    for car in carstore.data:
+        print car
     carstore.sync()
     for car in carstore.data:
         print car
