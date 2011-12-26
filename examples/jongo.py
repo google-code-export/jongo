@@ -185,7 +185,7 @@ class JongoStore(object):
 
     def update(self, model_instance):
         if model_instance in self.data:
-            model_instance.ghost = False
+            #model_instance.ghost = False
             model_instance.dirty = True
             i = self.data.index(model_instance)
             self.data[i] = model_instance
