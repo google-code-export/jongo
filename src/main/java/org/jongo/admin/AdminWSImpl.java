@@ -35,7 +35,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.JongoConfiguration;
 import org.jongo.JongoUtils;
@@ -90,13 +89,14 @@ public class AdminWSImpl implements AdminWS {
     
     @Override
     @PUT @Path("table/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    public Response updateJongoTable(@Context HttpServletRequest request, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") final String id, @Context final UriInfo ui) {
+    public Response updateJongoTable(@Context HttpServletRequest request, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") final String id, final String jsonParams) {
         if(!isAdminRequest(request)){
             l.debug("Admin console connection from " + request.getRemoteAddr() + " forbidden. Only admin IPs are allowed");
             return Response.status(Response.Status.FORBIDDEN).entity(E403).type(MediaType.TEXT_HTML).build();
         }else{
-            return updateJongoResource("JongoTable", id, ui, format);
+            return updateJongoResource("JongoTable", id, jsonParams, format);
         }
     }
     
@@ -160,13 +160,14 @@ public class AdminWSImpl implements AdminWS {
 
     @Override
     @PUT @Path("query/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    public Response updateJongoQuery(@Context HttpServletRequest request, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") final String id, @Context final UriInfo ui) {
+    public Response updateJongoQuery(@Context HttpServletRequest request, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") final String id, final String jsonParams) {
         if(!isAdminRequest(request)){
             l.debug("Admin console connection from " + request.getRemoteAddr() + " forbidden. Only admin IPs are allowed");
             return Response.status(Response.Status.FORBIDDEN).entity(E403).type(MediaType.TEXT_HTML).build();
         }else{
-            return updateJongoResource("JongoQuery", id, ui, format);
+            return updateJongoResource("JongoQuery", id, jsonParams, format);
         }
     }
     
@@ -220,11 +221,10 @@ public class AdminWSImpl implements AdminWS {
         return r.getResponse(format);
     }
     
-    private Response updateJongoResource(String table, String id, UriInfo ui, String format){
-        MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
-
+    private Response updateJongoResource(String table, String id, String jsonParams, String format){
         int result;
         try {
+            MultivaluedMap<String, String> queryParams = JongoUtils.getParamsFromJSON(jsonParams);
             result = AdminJDBCExecutor.update(table, id, queryParams);
         } catch (JongoJDBCException ex) {
             l.info(ex.getMessage());
