@@ -37,10 +37,9 @@ class UserStore(jongo.JongoStore):
         self.model = User
 
 class Car(jongo.JongoModel):
-    def __init__(self, id=None, cid=None, model=None, maker=None, fuel=None, transmission=None):
+    def __init__(self, id=None, model=None, maker=None, fuel=None, transmission=None):
         jongo.JongoModel.__init__(self)
-        self.id = cid
-        self.cid = cid
+        self.id = id
         self.idCol = "cid"
         self.model = model
         self.maker = maker
@@ -64,11 +63,6 @@ if __name__ == '__main__':
     store.add(u1)
 
     print "Before sync, the user instance is a ghost. This means it doesn't have a value in the db"
-    for user in store.data:
-        print user
-
-    print "Now we do the sync and the user should not be a ghost any more"
-    store.sync()
     for user in store.data:
         print user
 
@@ -114,3 +108,12 @@ if __name__ == '__main__':
     for car in carstore.data:
         print car
 
+    c1 = Car(None, "206cc", "Peugeot", "Gasoline", "Manual")
+    carstore.add(c1)
+
+    for car in carstore.data:
+        print car
+
+    carstore.sync()
+    for car in carstore.data:
+        print car

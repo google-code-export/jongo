@@ -19,8 +19,9 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-# An example Python script which uses json, httplib and urllib to do some
-# operations on Jongo running in demo mode
+# An API to abstract the use of jongo from a Python application. It uses
+# pretty standard libraries in Python 2.7 so it should work with any
+# version of Python from 2.5 to 2.7
 
 import json
 import httplib, urllib
@@ -233,7 +234,7 @@ class JongoStore(object):
         self.load()
 
 class JongoModel(object):
-    def __init__(self, proxy=None, id=None, idCol='id', ghost=False, dirty=False, dead=False):
+    def __init__(self, proxy=None, id=None, idCol=None, ghost=False, dirty=False, dead=False):
         self.proxy = proxy
         self.id = id
         self.idCol = idCol
@@ -270,8 +271,8 @@ class JongoModel(object):
             raise ProxyError("No proxy configured for this model")
 
     def map_response_data(self, data):
-        #if self.idCol:
-        #    me[self.idCol] = self.id
+        if self.idCol:
+            self.id = data[self.idCol]
         for attr, value in self.__dict__.iteritems():
             if attr in data:
                 self.__dict__[attr] = data[attr]
