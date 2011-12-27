@@ -99,7 +99,7 @@ class Request(object):
 
     def perform(self):
         conn = httplib.HTTPConnection(self.url)
-        print "%s\t%s\t\t\t\t %s" % (self.method, self.path, self.params)
+        # print "%s\t%s\t\t\t\t %s" % (self.method, self.path, self.params)
         conn.request(self.method, self.path, self.params, self.headers)
         self.response.callback(conn.getresponse().read())
 
@@ -232,14 +232,8 @@ class JongoStore(object):
     def count(self):
         return len(self.data)
 
-    def filter(self, attr, value):
-        new_data = []
-        for i in self.data:
-            if i.__dict__[attr] == value:
-                new_data.append(i)
-
-        if len(new_data) > 0:
-            self.data = new_data
+    def filter(self, f):
+        return filter(f, self.data)
 
     def load(self):
         self.data = self.proxy.read_all()
