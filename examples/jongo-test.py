@@ -37,7 +37,7 @@ class UserStore(jongo.JongoStore):
         self.model = User
 
 class Car(jongo.JongoModel):
-    def __init__(self, id=None, model=None, maker=None, fuel=None, transmission=None):
+    def __init__(self, id=None, model=None, maker=None, fuel=None, transmission=None, year=None):
         jongo.JongoModel.__init__(self)
         self.id = id
         self.idCol = "cid"
@@ -45,6 +45,7 @@ class Car(jongo.JongoModel):
         self.maker = maker
         self.fuel = fuel
         self.transmission = transmission
+        self.year = year
 
 class CarStore(jongo.JongoStore):
     def __init__(self):
@@ -120,7 +121,7 @@ if __name__ == '__main__':
     carstore.load()
     assert carstore.count() == 3
 
-    c1 = Car(None, "206cc", "Peugeot", "Gasoline", "Manual")
+    c1 = Car(None, "206cc", "Peugeot", "Gasoline", "Manual", 2005)
     carstore.add(c1)
     carstore.sync()
     assert carstore.count() == 4
@@ -155,6 +156,13 @@ if __name__ == '__main__':
     c1 = carstore.get_at(0) 
     assert carstore.count() == 3
     assert c1.model == 'C2'
+    
+    #cars = carstore.filter('model','C2')
+    #assert len(cars) == 1
+    cars = carstore.filter(lambda x: x.model == 'C2')
+    assert len(cars) == 1
+    cars = carstore.filter(lambda x: x.year > 2007 and x.year <= 2010)
+    assert len(cars) == 2
 
     # lets test the paging thing
 
