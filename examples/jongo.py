@@ -112,6 +112,15 @@ class Page(object):
         me = { "limit":self.size, "offset":(self.index * self.size) }
         return urllib.urlencode(me)
 
+class Sort(object):
+    def __init__(self, column='id', direction='ASC'):
+        self.column = column
+        self.direction = direction
+
+    def get_path_params(self):
+        me = { "sort":self.column, "dir":self.direction }
+        return urllib.urlencode(me)
+
 class ProxyError(Exception):
     def __init__(self, message):
         self.message = message
@@ -125,6 +134,7 @@ class Proxy(object):
         self.path = path
         self.model = model
         self.page = Page(pageSize)
+        self.sort = None
 
     def create(self, model_instance):
         request = Request(self.url, self.path, 'POST', model_instance.toJSON())
@@ -132,9 +142,11 @@ class Proxy(object):
         if not request.response.success:
             raise ProxyError(request.response.error)
 
-    def readAll(self):
+    def read_all(self):
         data = []
         path = "%s?%s" % (self.path, self.page.get_path_params())
+        if self.sort:
+            path = "%s?%s&%s" % (self.path, self.page.get_path_params(), self.sort.get_path_params())
         request = Request(self.url, path)
         request.perform()
         if request.response.success:
@@ -207,10 +219,10 @@ class JongoStore(object):
         else:
             raise ValueError("The given model is not in the store")
 
-    def getAt(self, index):
+    def get_at(self, index):
         return self.data[index]
 
-    def getById(self, id):
+    def get_by_id(self, id):
         ret = None
         for i in self.data:
             if i.id == id:
@@ -230,7 +242,7 @@ class JongoStore(object):
             self.data = new_data
 
     def load(self):
-        self.data = self.proxy.readAll()
+        self.data = self.proxy.read_all()
 
     def sync(self):
         for instance in self.data:
@@ -249,15 +261,26 @@ class JongoStore(object):
                 self.load()
         return self.proxy.page.index
 
-    def nextPage(self):
+    def next_page(self):
         index = self.proxy.page.index + 1
         return self.page(index)
 
-    def prevPage(self):
+    def prev_page(self):
         index = self.proxy.page.index
         if index >= 0:
             index -= 1
         return self.page(index)
+
+    def unsort(self):
+        self.proxy.sort = None
+        if self.autoLoad:
+            self.load()
+
+    def sort(self, column, direction):
+        self.proxy.sort = Sort(column, direction)
+        if self.autoLoad:
+            self.load()
+
 
 class JongoModel(object):
     def __init__(self, proxy=None, id=None, idCol=None, ghost=False, dirty=False, dead=False):

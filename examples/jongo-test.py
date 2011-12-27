@@ -77,14 +77,14 @@ if __name__ == '__main__':
     store.add(u1)
     assert store.count() == 3
 
-    u1 = store.getAt(store.count() - 1)
+    u1 = store.get_at(store.count() - 1)
     # "Before sync, the user instance is a ghost. This means it doesn't have a value in the db"
     assert u1.ghost == True
     assert u1.dirty == False
 
     # "Now we do the sync and the user should not be a ghost any more"
     store.sync()
-    u1 = store.getAt(store.count() - 1)
+    u1 = store.get_at(store.count() - 1)
     assert u1.ghost == False
     assert u1.dirty == False
 
@@ -93,26 +93,26 @@ if __name__ == '__main__':
     store.update(u1)
 
     # "Before calling sync, the user should be dirty"
-    u1 = store.getAt(store.count() - 1)
+    u1 = store.get_at(store.count() - 1)
     assert u1.ghost == False
     assert u1.dirty == True
 
     # "After sync, we have the user with the new name and it's not dirty"
     store.sync()
-    u1 = store.getAt(store.count() - 1)
+    u1 = store.get_at(store.count() - 1)
     assert u1.ghost == False
     assert u1.dirty == False
 
     # "To delete a user, we don't remove it from the store. It will be marked as dead"
     store.remove(u1)
-    u1 = store.getAt(store.count() - 1)
+    u1 = store.get_at(store.count() - 1)
     assert u1.ghost == False
     assert u1.dirty == False
     assert u1.dead == True
 
     # "When the sync is performed, the element is removed from the db and from the store"
     store.sync()
-    u2 = store.getAt(store.count() - 1)
+    u2 = store.get_at(store.count() - 1)
     assert u1.id != u2.id
 
     # "Now with the cars which have a custom id which is mapped to our column ID"
@@ -125,17 +125,36 @@ if __name__ == '__main__':
     carstore.sync()
     assert carstore.count() == 4
 
-    c1 = carstore.getAt(carstore.count() - 1) 
+    c1 = carstore.get_at(carstore.count() - 1) 
     c1.model = "206"
     c1.maker = "PPegoushn"
     carstore.update(c1)
     carstore.sync()
     assert carstore.count() == 4
-    c1 = carstore.getAt(carstore.count() - 1) 
+    c1 = carstore.get_at(carstore.count() - 1) 
     carstore.remove(c1)
     assert carstore.count() == 4
     carstore.sync()
     assert carstore.count() == 3
+
+    # lets test the sorting
+    carstore.sort('model','DESC')
+    carstore.load()
+    c1 = carstore.get_at(0) 
+    assert carstore.count() == 3
+    assert c1.model == 'X5'
+
+    carstore.sort('model','ASC')
+    carstore.load()
+    c1 = carstore.get_at(0) 
+    assert carstore.count() == 3
+    assert c1.model == 500
+
+    carstore.unsort()
+    carstore.load()
+    c1 = carstore.get_at(0) 
+    assert carstore.count() == 3
+    assert c1.model == 'C2'
 
     # lets test the paging thing
 
@@ -143,29 +162,29 @@ if __name__ == '__main__':
     mds.load()
     assert mds.count() == 50
 
-    d1 = mds.getAt(0)
+    d1 = mds.get_at(0)
     assert d1.id == 0
     assert mds.page() == 0
 
     mds.page(5)
     mds.load()
 
-    d1 = mds.getAt(0)
+    d1 = mds.get_at(0)
     assert mds.count() == 50
     assert d1.id == 250
     assert mds.page() == 5
 
-    mds.nextPage()
+    mds.next_page()
     mds.load()
-    d1 = mds.getAt(0)
+    d1 = mds.get_at(0)
     assert mds.count() == 50
     assert d1.id == 300
     assert mds.page() == 6
 
-    mds.prevPage()
-    mds.prevPage()
+    mds.prev_page()
+    mds.prev_page()
     mds.load()
-    d1 = mds.getAt(0)
+    d1 = mds.get_at(0)
     assert mds.count() == 50
     assert d1.id == 200
     assert mds.page() == 4
