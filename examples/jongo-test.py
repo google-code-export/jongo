@@ -52,89 +52,123 @@ class CarStore(jongo.JongoStore):
         self.model = Car
         self.proxy = jongo.Proxy("localhost:8080","/jongo/car", Car)
 
+class MakerData(jongo.JongoModel):
+    def __init__(self, id=None, maker=None, year=None, month=None, sales=None):
+        jongo.JongoModel.__init__(self)
+        self.id = id
+        self.maker = maker
+        self.year = year
+        self.month = month
+        self.sales = sales
+
+class MakerDataStore(jongo.JongoStore):
+    def __init__(self):
+        jongo.JongoStore.__init__(self)
+        self.model = MakerData
+        self.proxy = jongo.Proxy("localhost:8080","/jongo/maker_stats", MakerData, 50)
+
 if __name__ == '__main__':
     store = UserStore()
     store.proxy = jongo.Proxy("localhost:8080","/jongo/user", User)
     store.load()
-    for user in store.data:
-        print user.toJSON()
+    assert store.count() == 2
 
-    print "Create a user"
     u1 = User(None, 'kkk', 16)
     store.add(u1)
+    assert store.count() == 3
 
     u1 = store.getAt(store.count() - 1)
+    # "Before sync, the user instance is a ghost. This means it doesn't have a value in the db"
     assert u1.ghost == True
     assert u1.dirty == False
-    print "Before sync, the user instance is a ghost. This means it doesn't have a value in the db"
-    for user in store.data:
-        print user
 
-    print "Now we do the sync and the user should not be a ghost any more"
+    # "Now we do the sync and the user should not be a ghost any more"
     store.sync()
-    for user in store.data:
-        print user
-
-    print "Get the last user, probably the one we created"
     u1 = store.getAt(store.count() - 1)
+    assert u1.ghost == False
+    assert u1.dirty == False
 
-    print "Let's change its name"
+    # "Let's change its name"
     u1.name = "ttt"
     store.update(u1)
 
-    print "Before calling sync, the user should be dirty"
-    for user in store.data:
-        print user
-
-    print "After sync, we have the user with the new name and it's not dirty"
-    store.sync()
-    for user in store.data:
-        print user
-
+    # "Before calling sync, the user should be dirty"
     u1 = store.getAt(store.count() - 1)
-    print u1
-    print "To delete a user, we don't remove it from the store. It will be marked as dead"
-    store.remove(u1)
-    for user in store.data:
-        print user
+    assert u1.ghost == False
+    assert u1.dirty == True
 
-    print "When the sync is performed, the element is removed from the db and from the store"
+    # "After sync, we have the user with the new name and it's not dirty"
     store.sync()
-    for user in store.data:
-        print user
+    u1 = store.getAt(store.count() - 1)
+    assert u1.ghost == False
+    assert u1.dirty == False
 
+    # "To delete a user, we don't remove it from the store. It will be marked as dead"
+    store.remove(u1)
+    u1 = store.getAt(store.count() - 1)
+    assert u1.ghost == False
+    assert u1.dirty == False
+    assert u1.dead == True
 
-    print "Now with the cars which have a custom id which is mapped to our column ID"
+    # "When the sync is performed, the element is removed from the db and from the store"
+    store.sync()
+    u2 = store.getAt(store.count() - 1)
+    assert u1.id != u2.id
+
+    # "Now with the cars which have a custom id which is mapped to our column ID"
     carstore = CarStore()
     carstore.load()
-    for car in carstore.data:
-        print car
+    assert carstore.count() == 3
 
     c1 = Car(None, "206cc", "Peugeot", "Gasoline", "Manual")
     carstore.add(c1)
-
-    for car in carstore.data:
-        print car
-
     carstore.sync()
-    for car in carstore.data:
-        print car
+    assert carstore.count() == 4
 
     c1 = carstore.getAt(carstore.count() - 1) 
     c1.model = "206"
     c1.maker = "PPegoushn"
     carstore.update(c1)
-    for car in carstore.data:
-        print car
     carstore.sync()
-    for car in carstore.data:
-        print car
-
-    # We need to refresh the object since it has changed after the sync
+    assert carstore.count() == 4
     c1 = carstore.getAt(carstore.count() - 1) 
     carstore.remove(c1)
-    for car in carstore.data:
-        print car
+    assert carstore.count() == 4
     carstore.sync()
-    for car in carstore.data:
-        print car
+    assert carstore.count() == 3
+
+    # lets test the paging thing
+
+    mds = MakerDataStore()
+    mds.load()
+    assert mds.count() == 50
+
+    d1 = mds.getAt(0)
+    assert d1.id == 0
+    assert mds.page() == 0
+
+    mds.page(5)
+    mds.load()
+
+    d1 = mds.getAt(0)
+    assert mds.count() == 50
+    assert d1.id == 250
+    assert mds.page() == 5
+
+    mds.nextPage()
+    mds.load()
+    d1 = mds.getAt(0)
+    assert mds.count() == 50
+    assert d1.id == 300
+    assert mds.page() == 6
+
+    mds.prevPage()
+    mds.prevPage()
+    mds.load()
+    d1 = mds.getAt(0)
+    assert mds.count() == 50
+    assert d1.id == 200
+    assert mds.page() == 4
+
+
+    print "All tests passed!"
