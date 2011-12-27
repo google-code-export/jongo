@@ -99,8 +99,18 @@ class Request(object):
 
     def perform(self):
         conn = httplib.HTTPConnection(self.url)
+        print "%s\t%s\t\t\t\t %s" % (self.method, self.path, self.params)
         conn.request(self.method, self.path, self.params, self.headers)
         self.response.callback(conn.getresponse().read())
+
+class Page(object):
+    def __init__(self, size=25):
+        self.index = 0
+        self.size = size
+
+    def get_path_params(self):
+        me = { "limit":self.size, "offset":(self.index * self.size) }
+        return urllib.urlencode(me)
 
 class ProxyError(Exception):
     def __init__(self, message):
@@ -110,10 +120,11 @@ class ProxyError(Exception):
         return repr(self.message)
 
 class Proxy(object):
-    def __init__(self, url, path, model):
+    def __init__(self, url, path, model, pageSize=25):
         self.url = url
         self.path = path
         self.model = model
+        self.page = Page(pageSize)
 
     def create(self, model_instance):
         request = Request(self.url, self.path, 'POST', model_instance.toJSON())
@@ -123,7 +134,8 @@ class Proxy(object):
 
     def readAll(self):
         data = []
-        request = Request(self.url, self.path)
+        path = "%s?%s" % (self.path, self.page.get_path_params())
+        request = Request(self.url, path)
         request.perform()
         if request.response.success:
             for response in request.response.data:
@@ -159,14 +171,12 @@ class Proxy(object):
             raise ProxyError(request.response.error)
 
 class JongoStore(object):
-    def __init__(self, proxy=None, model=None, autoLoad=False, autoSync=False, data=None, pageSize=25):
+    def __init__(self, proxy=None, model=None, autoLoad=False, autoSync=False, data=None):
         self.proxy = proxy
         self.model = model
         self.autoLoad = autoLoad
         self.autoSync = autoSync
         self.data = data
-        self.pageSize = pageSize
-        self.page = 0
 
         if autoLoad:
             self.load()
@@ -174,21 +184,26 @@ class JongoStore(object):
     def add(self, model_instance):
         model_instance.set('ghost', True)
         self.data.append(model_instance)
+        if self.autoSync:
+            self.sync()
 
     def remove(self, model_instance):
         if model_instance in self.data:
             i = self.data.index(model_instance)
             model_instance.dead = True
             self.data[i] = model_instance
+            if self.autoSync:
+                self.sync()
         else:
             raise ValueError("The given model is not in the store")
 
     def update(self, model_instance):
         if model_instance in self.data:
-            #model_instance.ghost = False
             model_instance.dirty = True
             i = self.data.index(model_instance)
             self.data[i] = model_instance
+            if self.autoSync:
+                self.sync()
         else:
             raise ValueError("The given model is not in the store")
 
@@ -204,12 +219,6 @@ class JongoStore(object):
 
     def count(self):
         return len(self.data)
-
-    def _get_limit(self):
-        pass 
-
-    def _get_offset(self):
-        pass
 
     def filter(self, attr, value):
         new_data = []
@@ -232,6 +241,23 @@ class JongoStore(object):
             elif instance.dead:
                 self.proxy.delete(instance)
         self.load()
+
+    def page(self, index=None):
+        if index:
+            self.proxy.page.index = index
+            if self.autoLoad:
+                self.load()
+        return self.proxy.page.index
+
+    def nextPage(self):
+        index = self.proxy.page.index + 1
+        return self.page(index)
+
+    def prevPage(self):
+        index = self.proxy.page.index
+        if index >= 0:
+            index -= 1
+        return self.page(index)
 
 class JongoModel(object):
     def __init__(self, proxy=None, id=None, idCol=None, ghost=False, dirty=False, dead=False):
