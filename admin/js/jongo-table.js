@@ -41,7 +41,7 @@ function drawJongoTables(componentName, tables) {
         ids.push(this.id);
         items.push('<div class="jongo-form-row" id="tableRow_')
         items.push(this.id);
-        items.push('"><form><input class="jongo-field" type="text" readonly="readonly" id="tableId');
+        items.push('"><form class="ui-form"><input class="ui-widget ui-state-disabled ui-corner-all" type="text" readonly="readonly" id="tableId');
         items.push(this.id);
         items.push('" value="');
         items.push(this.id);
@@ -98,7 +98,7 @@ function addTableDialog(componentName){
     $(componentName).html('');
 
     var output = new Array();
-    output.push('<form><p>');
+    output.push('<form class="ui-form"><p>');
     output.push('<input class="jongo-field" id="tableName" value="" type="text"/>');
     output.push('<label class="low-contrast-label" for="tableName">Name</label>');
     output.push('</p><p>');
