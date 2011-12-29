@@ -35,7 +35,7 @@ function drawJongoStats(component){
     var container = $(component);
     $(container).html('');
     var output = new Array();
-    output.push('<table class="meta-data-table ui-corner-all"><tr><th>Concept</th><th>Value</th><tr>')
+    output.push('<table class="meta-data-table ui-corner-all" style="margin-bottom: 10px"><tr><th>Concept</th><th>Value</th><tr>')
     output.push('<tr><td>Total Served Requests</td><td>');
     output.push(stats.total);
     output.push('</td><tr><tr><td>Succesful Requests</td><td>');

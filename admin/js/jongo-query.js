@@ -47,9 +47,9 @@ function drawJongoQueries(component, queries){
         items.push(this.id);
         items.push('"><p>');
         items.push(this.description);
-        items.push('</p><p><textarea class="jongo-text-area" rows="10" readonly="true">');
+        items.push('</p><p><form class="ui-form"><textarea class="jongo-text-area" rows="10" readonly="true">');
         items.push(this.query);
-        items.push('</textarea></p><form>');
+        items.push('</textarea></p>');
         items.push('<input type="hidden" value="');
         items.push(this.name);
         items.push('" id="query');
@@ -163,7 +163,7 @@ function addQueryDialog(componentName){
 
     var output = new Array();
     
-    output.push('<form><table><tr>');
+    output.push('<form class="ui-form"><table><tr>');
     output.push('<td><label for="queryName">Name</label></td>');
     output.push('<td><label for="queryDescription">Description</label></td>');
     output.push('</tr><tr>');
