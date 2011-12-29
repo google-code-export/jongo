@@ -194,7 +194,7 @@ class JongoStore(object):
             self.load()
 
     def add(self, model_instance):
-        model_instance.set('ghost', True)
+        model_instance.ghost = True
         self.data.append(model_instance)
         if self.autoSync:
             self.sync()
@@ -275,10 +275,8 @@ class JongoStore(object):
         if self.autoLoad:
             self.load()
 
-
 class JongoModel(object):
-    def __init__(self, proxy=None, id=None, idCol=None, ghost=False, dirty=False, dead=False):
-        self.proxy = proxy
+    def __init__(self, id=None, idCol=None, ghost=False, dirty=False, dead=False):
         self.id = id
         self.idCol = idCol
         self.ghost = ghost
@@ -286,39 +284,20 @@ class JongoModel(object):
         self.dead = dead
 
     def _get_unmappable_values(self):
-        unmap = [ "proxy", "id", "idCol", "ghost", "dirty", "dead", self.idCol ] 
+        unmap = [ "proxy", "id", "idCol", "ghost", "dirty", "dead" ] 
         return unmap
 
     def set(self, attr, value):
         if attr not in self._get_unmappable_values():
             self.dirty = True
-        self.__dict__[attr] = value 
-
-    def get(self, attr):
-        return self.__dict__[attr]
-
-    def create(self):
-        if not proxy:
-            raise ProxyError("No proxy configured for this model")
-
-    def read(self, id):
-        if not proxy:
-            raise ProxyError("No proxy configured for this model")
-
-    def update(self, id, params):
-        if not proxy:
-            raise ProxyError("No proxy configured for this model")
-
-    def delete(self, id):
-        if not proxy:
-            raise ProxyError("No proxy configured for this model")
+        object.__setattr__(self, attr, value)
 
     def map_response_data(self, data):
         if self.idCol:
             self.id = data[self.idCol]
         for attr, value in self.__dict__.iteritems():
             if attr in data:
-                self.__dict__[attr] = data[attr]
+                object.__setattr__(self, attr, data[attr])
     
     def toJSON(self):
         me = {}

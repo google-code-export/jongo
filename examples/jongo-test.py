@@ -90,7 +90,8 @@ if __name__ == '__main__':
     assert u1.dirty == False
 
     # "Let's change its name"
-    u1.name = "ttt"
+    u1.set("name", "ttt")
+    assert u1.dirty == True
     store.update(u1)
 
     # "Before calling sync, the user should be dirty"
@@ -196,6 +197,5 @@ if __name__ == '__main__':
     assert mds.count() == 50
     assert d1.id == 200
     assert mds.page() == 4
-
 
     print "All tests passed!"
