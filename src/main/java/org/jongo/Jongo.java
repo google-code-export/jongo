@@ -18,9 +18,11 @@
 
 package org.jongo;
 
+import org.jongo.config.JongoConfiguration;
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
+import org.jongo.demo.Demo;
 import org.jongo.jdbc.AdminJDBCExecutor;
 import org.jongo.jdbc.JDBCConnectionFactory;
 import org.jongo.jdbc.JongoJDBCConnection;
@@ -75,13 +77,16 @@ public class Jongo {
             System.exit(1);
         }
         
-        
+        return configuration;
+    }
+    
+    public static void loadDatabases(final JongoConfiguration conf){
         JongoJDBCConnection conn = null;
         try{
             l.info("Initializing JDBC Connections");
-            conn = JDBCConnectionFactory.getJongoJDBCConnection();
             conn = JDBCConnectionFactory.getJongoAdminJDBCConnection();
             AdminJDBCExecutor.createJongoTablesAndData();
+            Demo.generateDemoDatabases(conf.getDatabases());
         }catch(Exception e){
             l.error("Failed to generate Jongo Tables and default configuration.");
             l.error(e.getMessage());
@@ -92,7 +97,5 @@ public class Jongo {
             l.error("Failed to load database. Quitting.");
             System.exit(1);
         }
-        
-        return configuration;
     }
 }
