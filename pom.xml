@@ -4,7 +4,7 @@
 
     <groupId>jongo</groupId>
     <artifactId>jongo</artifactId>
-    <version>0.2</version>
+    <version>0.1.1</version>
     <packaging>jar</packaging>
 
     <name>jongo</name>
