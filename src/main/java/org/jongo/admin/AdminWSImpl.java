@@ -36,7 +36,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
-import org.jongo.JongoConfiguration;
+import org.jongo.config.JongoConfiguration;
 import org.jongo.JongoUtils;
 import org.jongo.Usage;
 import org.jongo.jdbc.AdminJDBCExecutor;
