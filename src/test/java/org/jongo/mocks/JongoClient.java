@@ -37,7 +37,7 @@ import org.jongo.rest.xstream.JongoSuccess;
  */
 public class JongoClient {
     
-    private static final String jongoUrl = "http://localhost:8080/jongo/";
+    private static final String jongoUrl = "http://localhost:8080/demo1/";
     
     public JongoResponse doGET(final String url){
         return doRequest(url, "GET");
