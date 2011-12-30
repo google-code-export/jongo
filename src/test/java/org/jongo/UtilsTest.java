@@ -27,6 +27,7 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
 import org.jongo.jdbc.connections.HSQLConnection;
+import org.junit.Before;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
@@ -36,6 +37,11 @@ import org.junit.Test;
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public class UtilsTest {
+    
+    @Before
+    public void setUp(){
+        System.setProperty("environment","demo");
+    }
     
     @Test
     public void testIsDate() throws ParseException{
@@ -121,6 +127,6 @@ public class UtilsTest {
         LimitParam l = new LimitParam();
         OrderParam o = new OrderParam();
         HSQLConnection c = new HSQLConnection("jdbc", "k", "k");
-        System.out.println(c.getSelectAllFromTableQuery("table", l, o));
+        assertEquals(c.getSelectAllFromTableQuery("table", l, o), "SELECT * FROM table ORDER BY id ASC LIMIT 25 OFFSET 0");
     }
 }
