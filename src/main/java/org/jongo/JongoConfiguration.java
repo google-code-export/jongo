@@ -21,6 +21,7 @@ package org.jongo;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import org.apache.commons.lang.StringUtils;
 import org.jongo.demo.Demo;
 import org.jongo.enums.JDBCDriver;
 import org.slf4j.Logger;
@@ -129,27 +130,27 @@ public class JongoConfiguration {
     
     private boolean isValid(){
         boolean ret = true;
-        if(jongoName == null){
+        if(StringUtils.isBlank(jongoName)){
             l.warn("Invalid jongo.name value. Check your configuration.");
             ret = false;
         }
         
-        if(jdbcUrl == null){
+        if(StringUtils.isBlank(jdbcUrl)){
             l.warn("Invalid jongo.jdbc.url value. Check your configuration.");
             ret = false;
         }
         
-        if(jdbcUsername == null){
+        if(StringUtils.isBlank(jdbcUsername)){
             l.warn("Invalid jongo.jdbc.username value. Check your configuration.");
             ret = false;
         }
         
-        if(jdbcPassword == null){
+        if(StringUtils.isBlank(jdbcPassword)){
             l.warn("Invalid jongo.jdbc.password value. Check your configuration.");
             ret = false;
         }
         
-         if(jdbcAdminUrl == null){
+         if(StringUtils.isBlank(jdbcAdminUrl)){
             l.warn("Invalid jongo.jdbc.password value. Check your configuration.");
             ret = false;
         }
