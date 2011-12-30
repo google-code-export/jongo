@@ -61,8 +61,8 @@ public class JongoTable {
         this.permits = Permission.valueOf(permits);
     }
     
-    public static final String CREATE = "INSERT INTO JongoTable ( database, table, customId, permits ) VALUES ( ?, ?, ?, ? )";
-    public static final String GET = "SELECT * FROM JongoTable WHERE table = ? AND database = ?";
+    public static final String CREATE = "INSERT INTO JongoTable ( database, name, customId, permits ) VALUES ( ?, ?, ?, ? )";
+    public static final String GET = "SELECT * FROM JongoTable WHERE name = ? AND database = ?";
     
     public String getCustomId() {
         return customId;
