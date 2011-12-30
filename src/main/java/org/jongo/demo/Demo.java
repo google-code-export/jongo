@@ -20,6 +20,8 @@ package org.jongo.demo;
 
 import java.sql.SQLException;
 import org.apache.commons.dbutils.QueryRunner;
+import org.jongo.domain.JongoQuery;
+import org.jongo.domain.JongoTable;
 import org.jongo.enums.JDBCDriver;
 import org.jongo.jdbc.JDBCConnectionFactory;
 import org.slf4j.Logger;
@@ -62,9 +64,9 @@ public class Demo {
             }
             
             final String insertCar = "INSERT INTO car (maker, model, year, fuel, transmission, currentMarketValue, newValue) VALUES (?,?,?,?,?,?,?)";
-            run.update(insertCar, "CITROEN", "C2", "2008", "Gasoline", "Manual", 9000, 13000);
-            run.update(insertCar, "FIAT", "500", "2010", "Manual", 19000, 23.000);
-            run.update(insertCar, "BMW", "X5", "2011", "Diesel", "Automatic", 59000, 77000);
+            run.update(insertCar, "CITROEN", "C2", 2008, "Gasoline", "Manual", 9000, 13000);
+            run.update(insertCar, "FIAT", "500", 2010, "Gasoline","Manual", 19000, 23.000);
+            run.update(insertCar, "BMW", "X5", 2011, "Diesel", "Automatic", 59000, 77000);
             
             final String insertComment = "INSERT INTO comments (car_id, comment) VALUES (?,?)";
             run.update(insertComment, 0, "The Citroen C2 is a small car with a great attitude"); 
@@ -97,15 +99,14 @@ public class Demo {
             }
             
             l.info("Inserting tables in JongoAdmin");
-            final String insertTable = "INSERT INTO JongoTable ( name, customId, permits ) VALUES ( ?, ?, ? )";
-            adminRun.update(insertTable, "user", "id", 3);
-            adminRun.update(insertTable, "car", "cid", 3);
-            adminRun.update(insertTable, "comments", "id", 3);
-            adminRun.update(insertTable, "maker", "id", 1);
-            adminRun.update(insertTable, "pictures", "id", 3);
-            adminRun.update(insertTable, "sales_stats", "id", 1);
-            adminRun.update(insertTable, "maker_stats", "id", 1);
-            adminRun.update(insertTable, "yearSummary", "SELECT year FROM maker_stats GROUP BY year", "Returns all years we have data for");
+            adminRun.update(JongoTable.CREATE, "user", "id", 3);
+            adminRun.update(JongoTable.CREATE, "car", "cid", 3);
+            adminRun.update(JongoTable.CREATE, "comments", "id", 3);
+            adminRun.update(JongoTable.CREATE, "maker", "id", 1);
+            adminRun.update(JongoTable.CREATE, "pictures", "id", 3);
+            adminRun.update(JongoTable.CREATE, "sales_stats", "id", 1);
+            adminRun.update(JongoTable.CREATE, "maker_stats", "id", 1);
+            adminRun.update(JongoQuery.CREATE, "yearSummary", "SELECT year FROM maker_stats GROUP BY year", "Returns all years we have data for");
             
         } catch (SQLException ex) {
             l.error("Failed to create demo tables " + ex.getMessage());
