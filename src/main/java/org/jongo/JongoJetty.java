@@ -18,6 +18,7 @@
 
 package org.jongo;
 
+import org.jongo.config.JongoConfiguration;
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +47,7 @@ public class JongoJetty{
         Runtime.getRuntime().addShutdownHook(new JongoShutdown());
         
         JongoConfiguration configuration = Jongo.loadConfiguration();
+        Jongo.loadDatabases(configuration);
         
         l.debug("Creating Contexts for Jetty");
         ContextHandlerCollection contexts = new ContextHandlerCollection();
@@ -55,7 +57,8 @@ public class JongoJetty{
         ServletHolder sh = new ServletHolder(ServletContainer.class);
         sh.setInitParameter("com.sun.jersey.config.property.resourceConfigClass", "com.sun.jersey.api.core.PackagesResourceConfig");
         sh.setInitParameter("com.sun.jersey.config.property.packages", "org.jongo.rest");
-        mainContext.addServlet(sh, configuration.getJongoServletAddress());
+        mainContext.addServlet(sh, "/demo1/*");
+        mainContext.addServlet(sh, "/demo2/*");
         
         List<Context> contextsList = new ArrayList<Context>();
         
