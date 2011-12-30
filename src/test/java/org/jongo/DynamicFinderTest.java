@@ -238,7 +238,7 @@ public class DynamicFinderTest {
             DynamicFinder d = DynamicFinder.valueOf("sometable", dynamicQuery);
             assertTrue(d.getSql().equalsIgnoreCase(query));
         } catch (JongoBadRequestException ex) {
-            System.out.print(ex.getMessage());
+//            System.out.print(ex.getMessage());
         }
     }
     
@@ -277,7 +277,7 @@ public class DynamicFinderTest {
             b.append(result);
             b.append("\";\n");
             b.append("doTest(dynamicQuery, query);\n}");
-            System.out.println(b.toString());
+//            System.out.println(b.toString());
         }
         
     }
