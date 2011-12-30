@@ -61,6 +61,12 @@ public class OrderParam {
         }
         this.column = StringUtils.deleteWhitespace(col);
     }
+    
+    public String getNotNullColumn() {
+        if(column == null)
+            return "id";
+        return column;
+    }
 
     public String getColumn() {
         return column;
@@ -99,7 +105,7 @@ public class OrderParam {
     @Override
     public String toString(){
         StringBuilder b = new StringBuilder("{OrderParam:{column:\"");
-        b.append(column);
+        b.append(getNotNullColumn());
         b.append("\", direction:\"");
         b.append(direction);
         b.append("\"}}");
