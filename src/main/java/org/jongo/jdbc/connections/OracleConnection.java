@@ -18,7 +18,7 @@
 
 package org.jongo.jdbc.connections;
 
-import org.jongo.enums.JDBCDriver;
+import org.jongo.config.DatabaseConfiguration;
 import org.jongo.jdbc.AbstractJDBCConnection;
 import org.jongo.jdbc.JongoJDBCConnection;
 import org.slf4j.Logger;
@@ -32,11 +32,11 @@ public class OracleConnection extends AbstractJDBCConnection implements JongoJDB
     
     private static final Logger l = LoggerFactory.getLogger(OracleConnection.class);
     
-    public OracleConnection(final String url, final String user, final String password) {
-        this.url = url;
-        this.username = user;
-        this.password = password;
-        this.driver = JDBCDriver.ORACLE;
+    public OracleConnection(final DatabaseConfiguration conf){
+        this.url = conf.getUrl();
+        this.username = conf.getUser();
+        this.password = conf.getPassword();
+        this.driver = conf.getDriver();
     }
     
     @Override
