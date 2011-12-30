@@ -24,9 +24,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.lang.StringUtils;
-import org.jongo.JongoConfiguration;
 import org.jongo.JongoUtils;
-import org.jongo.demo.Demo;
 import org.jongo.domain.JongoQuery;
 import org.jongo.domain.JongoTable;
 import org.jongo.handler.JongoQueryResultSetHandler;
@@ -44,7 +42,6 @@ import org.slf4j.LoggerFactory;
  */
 public class AdminJDBCExecutor {
     private static final Logger l = LoggerFactory.getLogger(JDBCExecutor.class);
-    private static final JongoConfiguration configuration = JongoConfiguration.instanceOf();
     private static final JongoJDBCConnection conn = JDBCConnectionFactory.getJongoAdminJDBCConnection();
     private static final QueryRunner run = new QueryRunner(JDBCConnectionFactory.getAdminDataSource());
     
@@ -61,19 +58,19 @@ public class AdminJDBCExecutor {
         }
     }
     
-    public static JongoTable getJongoTable(final String table) throws JongoJDBCException{
+    public static JongoTable getJongoTable(final String database, final String table) throws JongoJDBCException{
         ResultSetHandler<JongoTable> rh = new JongoTableResultSetHandler();
         JongoTable result = null;
         try {
-            result = run.query(JongoTable.GET, rh, table);
+            result = run.query(JongoTable.GET, rh, table, database);
         } catch (SQLException ex) {
             l.debug(ex.getMessage());
         }
         
         if(result == null){
-            l.debug("Table " + table + " is not in JongoTables. Access Denied");
-            l.debug("Table " + table + " is not readable. Access Denied");
-            throw JongoJDBCExceptionFactory.getException("Cant read table " + table + ". Access Denied", JongoJDBCException.ILLEGAL_READ_CODE);
+            l.debug("Table " + database + "." + table + " is not in JongoTables. Access Denied");
+            l.debug("Table " + database + "." + table + " is not readable. Access Denied");
+            throw JongoJDBCExceptionFactory.getException(database, "Cant read table " + database + "." + table + ". Access Denied", JongoJDBCException.ILLEGAL_READ_CODE);
         }
 
         if(result != null && StringUtils.isEmpty(result.getCustomId())){
@@ -107,13 +104,9 @@ public class AdminJDBCExecutor {
             l.info("No need to create admin tables");
         }else{
             l.info("Creating Jongo Tables");
-            update(JongoUtils.createJongoTableQuery);
-            update(JongoUtils.createJongoQueryTableQuery);
+            update(JongoUtils.getCreateJongoTableQuery());
+            update(JongoUtils.getCreateJongoQueryTableQuery());
             update(JongoQuery.CREATE, "jongoTest", "", "This is the holder for adminconsole test button");
-        }
-        
-        if(configuration.isDemoModeActive()){
-            Demo.generateDemoDatabase();
         }
     }
     
