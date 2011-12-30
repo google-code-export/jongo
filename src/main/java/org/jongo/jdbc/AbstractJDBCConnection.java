@@ -56,7 +56,7 @@ public class AbstractJDBCConnection {
         final StringBuilder query = new StringBuilder("SELECT * FROM ");
         query.append(table);
         query.append(" ORDER BY ");
-        query.append(order.getColumn());
+        query.append(order.getNotNullColumn());
         query.append(" ");
         query.append(order.getDirection());
         query.append(" LIMIT ");
