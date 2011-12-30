@@ -24,7 +24,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.jongo.domain.JongoTable;
 
 /**
- *
+ * Handle a ResultSet from the JongoTable table.
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public class JongoTableResultSetHandler implements ResultSetHandler<JongoTable>{
@@ -33,10 +33,11 @@ public class JongoTableResultSetHandler implements ResultSetHandler<JongoTable>{
     public JongoTable handle(ResultSet rs) throws SQLException {
         rs.next();
         final int id = rs.getInt("id");
-        final String name = rs.getString("name");
+        final String database = rs.getString("database");
+        final String table = rs.getString("name");
         final String customId = rs.getString("customId");
         final int p = rs.getInt("permits");
-        return new JongoTable(id, name, customId, p);
+        return new JongoTable(id, database, table, customId, p);
     }
     
 }
