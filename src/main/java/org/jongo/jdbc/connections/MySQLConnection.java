@@ -18,7 +18,7 @@
 
 package org.jongo.jdbc.connections;
 
-import org.jongo.enums.JDBCDriver;
+import org.jongo.config.DatabaseConfiguration;
 import org.jongo.jdbc.AbstractJDBCConnection;
 import org.jongo.jdbc.JongoJDBCConnection;
 import org.jongo.jdbc.LimitParam;
@@ -34,11 +34,11 @@ public class MySQLConnection extends AbstractJDBCConnection implements JongoJDBC
     
     private static final Logger l = LoggerFactory.getLogger(MySQLConnection.class);
 
-    public MySQLConnection(final String url, final String user, final String password){
-        this.url = url;
-        this.username = user;
-        this.password = password;
-        this.driver = JDBCDriver.MySQL;
+    public MySQLConnection(final DatabaseConfiguration conf){
+        this.url = conf.getUrl();
+        this.username = conf.getUser();
+        this.password = conf.getPassword();
+        this.driver = conf.getDriver();
     }
 
     @Override
