@@ -31,12 +31,12 @@ public interface JongoWS {
     
     public Response get(final String table, final String format, final UriInfo ui);
     public Response get(final String table, final String format, final String id, final UriInfo ui);
-    public Response find(final String table, final String format, final String col, final String val);
-    public Response findBy(final String table, final String format, final String query, final String value, final List<String> values);
-    public Response insert(final String table, final String format, final String jsonRequest);
-    public Response insert(final String table, final String format, final MultivaluedMap<String, String> formParams);
-    public Response update(final String table, final String format, final String id, final String jsonRequest);
-    public Response delete(final String table, final String format, final String id);
-    public Response query(final String query, final String format, final List<String> arguments);
+    public Response find(final String table, final String format, final String col, final String val, final UriInfo ui);
+    public Response findBy(final String table, final String format, final String query, final String value, final List<String> values, final UriInfo ui);
+    public Response insert(final String table, final String format, final String jsonRequest, final UriInfo ui);
+    public Response insert(final String table, final String format, final MultivaluedMap<String, String> formParams, final UriInfo ui);
+    public Response update(final String table, final String format, final String id, final String jsonRequest, final UriInfo ui);
+    public Response delete(final String table, final String format, final String id, final UriInfo ui);
+    public Response query(final String query, final String format, final List<String> arguments, final UriInfo ui);
     
 }
