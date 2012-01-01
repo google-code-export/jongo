@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import org.apache.commons.lang.StringUtils;
 import org.jongo.demo.Demo;
 import org.jongo.enums.JDBCDriver;
 import org.slf4j.Logger;
@@ -133,7 +134,11 @@ public class JongoConfiguration {
         final String [] names = prop.getProperty(p_name_jongo_database_list).split(",");
         for(String name : names){
             name = name.trim();
-            databases.put(name, generateDatabaseConfiguration(prop, name));
+            if(StringUtils.isAlphanumeric(name)){
+                databases.put(name, generateDatabaseConfiguration(prop, name));
+            }else{
+                l.warn("Database name " + name + " is invalid. Continuing without it.");
+            }
         }
         return databases;
     }
