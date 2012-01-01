@@ -24,9 +24,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Level;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.demo.Demo;
 import org.jongo.enums.JDBCDriver;
+import org.jongo.exceptions.StartupException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,7 +92,11 @@ public class JongoConfiguration {
                 instance.databases = Demo.getDemoDatabasesConfiguration();
             }else{
                 instance.admin = DatabaseConfiguration.instanceForAdminInFile();
-                instance.databases = getDatabaseConfigurations(prop);
+                try {
+                    instance.databases = getDatabaseConfigurations(prop);
+                } catch (StartupException ex) {
+                    l.error(ex.getLocalizedMessage());
+                }
             }
             
             if(!instance.isValid()) instance = null;
@@ -129,9 +135,13 @@ public class JongoConfiguration {
         return prop;
     }
     
-    private static Map<String, DatabaseConfiguration> getDatabaseConfigurations(final Properties prop){
+    private static Map<String, DatabaseConfiguration> getDatabaseConfigurations(final Properties prop) throws StartupException{
         Map<String, DatabaseConfiguration> databases = new HashMap<String, DatabaseConfiguration>();
-        final String [] names = prop.getProperty(p_name_jongo_database_list).split(",");
+        String databaseList = prop.getProperty(p_name_jongo_database_list);
+        if(databaseList == null){
+            throw new StartupException("Failed to read list of databases " + p_name_jongo_database_list, demo);
+        }
+        final String [] names = databaseList.split(",");
         for(String name : names){
             name = name.trim();
             if(StringUtils.isAlphanumeric(name)){
@@ -155,6 +165,11 @@ public class JongoConfiguration {
     
     private boolean isValid(){
         boolean ret = true;
+        
+        if(instance.databases == null){
+            ret = false;
+        }
+        
         return ret;
     }
 
