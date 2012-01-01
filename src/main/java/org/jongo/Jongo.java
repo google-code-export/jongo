@@ -40,7 +40,7 @@ public class Jongo {
     public static void main(String[] args){
         l.info("Starting Jongo in Test Mode");
         
-        JongoConfiguration configuration = loadConfiguration();
+        JongoConfiguration configuration = JongoUtils.loadConfiguration();
         
         StringBuilder url = new StringBuilder("http://");
         url.append(configuration.getIp());
@@ -60,41 +60,6 @@ public class Jongo {
         } catch (IllegalArgumentException ex) {
             l.error("Invalid URL. Fix your configuration. Quitting");
             l.error(ex.getMessage());
-            System.exit(1);
-        }
-    }
-    
-    public static JongoConfiguration loadConfiguration(){
-        JongoConfiguration configuration = null;
-        try{
-            configuration = JongoConfiguration.instanceOf();
-        }catch(IllegalArgumentException e){
-            l.error(e.getMessage());
-        }
-        
-        if(configuration == null){
-            l.error("Failed to load configuration. Quitting.");
-            System.exit(1);
-        }
-        
-        return configuration;
-    }
-    
-    public static void loadDatabases(final JongoConfiguration conf){
-        JongoJDBCConnection conn = null;
-        try{
-            l.info("Initializing JDBC Connections");
-            conn = JDBCConnectionFactory.getJongoAdminJDBCConnection();
-            AdminJDBCExecutor.createJongoTablesAndData();
-            Demo.generateDemoDatabases(conf.getDatabases());
-        }catch(Exception e){
-            l.error("Failed to generate Jongo Tables and default configuration.");
-            l.error(e.getMessage());
-            System.exit(1);
-        }
-        
-        if(conn == null){
-            l.error("Failed to load database. Quitting.");
             System.exit(1);
         }
     }
