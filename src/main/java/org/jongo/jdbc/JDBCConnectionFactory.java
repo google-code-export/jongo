@@ -23,6 +23,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp.ConnectionFactory;
 import org.apache.commons.dbcp.DriverManagerConnectionFactory;
@@ -45,30 +46,50 @@ public class JDBCConnectionFactory {
 
     private static final Logger l = LoggerFactory.getLogger(JDBCConnectionFactory.class);
     private static final JongoConfiguration configuration = JongoConfiguration.instanceOf();
-    private static final Map<String, JongoJDBCConnection> connections = new HashMap<String, JongoJDBCConnection>();
-    private static final Map<String, DataSource> datasources = new HashMap<String,DataSource>();
-    private static JongoJDBCConnection adminConnection = null;
-    private static DataSource adminDatasource = null;
+    private static final String JONGO_ADMIN = "jongoAdmin";
+
+    private final Map<String, GenericObjectPool> connectionPool = new HashMap<String,GenericObjectPool>();
     
-    public static JongoJDBCConnection getJongoJDBCConnection(final String database) {
-        JongoJDBCConnection connection = connections.get(database);
-        if(connection == null){
-            connection = getJongoJDBCConnection(configuration.getDatabaseConfiguration(database));
-            connections.put(database, connection);
+    private static JDBCConnectionFactory instance = null;
+    
+    private JDBCConnectionFactory(){}
+    
+    private static JDBCConnectionFactory instanceOf(){
+        if(instance == null){
+            instance = new JDBCConnectionFactory();
+            Set<String> databases = configuration.getDatabases();
+            for(String dbname : databases){
+                l.debug("Registering Connection Pool for " + dbname);
+                DatabaseConfiguration dbcfg = configuration.getDatabaseConfiguration(dbname);
+                GenericObjectPool pool = new GenericObjectPool(null, 5);
+                ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(dbcfg.getUrl(), dbcfg.getUser(), dbcfg.getPassword());
+                PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, pool, null, null, false, true);
+                instance.connectionPool.put(dbname, pool);
+            }
+            
+            l.debug("Registering Connection Pool for admin database");
+            DatabaseConfiguration dbcfg = configuration.getAdminDatabaseConfiguration();
+            GenericObjectPool pool = new GenericObjectPool(null, 5);
+            ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(dbcfg.getUrl(), dbcfg.getUser(), dbcfg.getPassword());
+            PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, pool, null, null, false, true);
+            instance.connectionPool.put(JONGO_ADMIN, pool);
         }
-        return connection;
+        return instance;
     }
-
+    
     public static JongoJDBCConnection getJongoAdminJDBCConnection() {
-        if(adminConnection == null){
-            adminConnection = getJongoJDBCConnection(configuration.getAdminDatabaseConfiguration());
-        }
-        return adminConnection;
+        JDBCConnectionFactory me = JDBCConnectionFactory.instanceOf();
+        JongoJDBCConnection cx = me.getJongoJDBCConnection(configuration.getAdminDatabaseConfiguration());
+        return cx;
+    }
+    
+    public static JongoJDBCConnection getJongoJDBCConnection(final String database){
+        JDBCConnectionFactory me = JDBCConnectionFactory.instanceOf();
+        return me.getJongoJDBCConnection(configuration.getDatabaseConfiguration(database));
     }
 
-    public static JongoJDBCConnection getJongoJDBCConnection(final DatabaseConfiguration conf) {
+    public JongoJDBCConnection getJongoJDBCConnection(final DatabaseConfiguration conf) {
         JongoJDBCConnection cx = null;
-        conf.toString();
         switch (conf.getDriver()) {
             case MySQL:
                 l.debug("New MySQL Connection to " + conf.toString());
@@ -102,66 +123,24 @@ public class JDBCConnectionFactory {
     }
 
     public static DataSource getDataSource(final String database) {
-//        boolean loadConnection = false;
-//        DataSource datasource = datasources.get(database);
-//        if (datasource == null) {
-//            loadConnection = true;
-//        }else{
-//            try {
-//                loadConnection = datasource.getConnection().isClosed();
-//            } catch (SQLException ex) {
-//                l.warn("Failed to check if connection is closed");
-//                loadConnection = false;
-//            }
-//        }
-//        
-//        if(loadConnection){
-//            JongoJDBCConnection conn = getJongoJDBCConnection(configuration.getDatabaseConfiguration(database));
-//            conn.loadDriver();
-//            datasource = setupDataSource(conn);
-//            datasources.put(database, datasource);
-//        }
-        
-        JongoJDBCConnection conn = getJongoJDBCConnection(configuration.getDatabaseConfiguration(database));
-        conn.loadDriver();
-        
-        return setupDataSource(conn);
+        JDBCConnectionFactory me = JDBCConnectionFactory.instanceOf();
+        PoolingDataSource dataSource = new PoolingDataSource(me.connectionPool.get(database));
+        return dataSource;
     }
 
     public static DataSource getAdminDataSource() {
-//        boolean loadConnection = false;
-//        if (adminDatasource == null) {
-//            loadConnection = true;
-//        }else{
-//            try {
-//                loadConnection = adminDatasource.getConnection().isClosed();
-//            } catch (SQLException ex) {
-//                l.warn("Failed to check if admin connection is closed");
-//                loadConnection = false;
-//            }
-//        }
-//        
-//        if(loadConnection){
-//            JongoJDBCConnection conn = getJongoAdminJDBCConnection();
-//            conn.loadDriver();
-//            adminDatasource = setupDataSource(conn);
-//        }
-        JongoJDBCConnection conn = getJongoAdminJDBCConnection();
-        conn.loadDriver();
-        return setupDataSource(conn);
-    }
-
-    public static DataSource setupDataSource(final JongoJDBCConnection conn) {
-        l.debug("Setting up Pooling Data Source");
-        GenericObjectPool connectionPool = new GenericObjectPool(null);
-        ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(conn.getUrl(), conn.getUsername(), conn.getPassword());
-        PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, connectionPool, null, null, false, true);
-        PoolingDataSource dataSource = new PoolingDataSource(connectionPool);
+        JDBCConnectionFactory me = JDBCConnectionFactory.instanceOf();
+        PoolingDataSource dataSource = new PoolingDataSource(me.connectionPool.get(JONGO_ADMIN));
         return dataSource;
     }
     
     public static QueryRunner getQueryRunner(final String database){
         DataSource ds = getDataSource(database);
+        return new QueryRunner(ds);
+    }
+    
+    public static QueryRunner getAdminQueryRunner(){
+        DataSource ds = getDataSource(JONGO_ADMIN);
         return new QueryRunner(ds);
     }
 }
