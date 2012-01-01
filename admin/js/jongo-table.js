@@ -46,7 +46,11 @@ function drawJongoTables(componentName, tables) {
         items.push('" value="');
         items.push(this.id);
         items.push('"/>');
-        items.push('<input class="jongo-field" type="text" id="tableName');
+        items.push('<input class="ui-widget ui-state-disabled ui-corner-all" readonly="readonly" type="text" id="databaseName');
+        items.push(this.id);
+        items.push('" value="');
+        items.push(this.database);
+        items.push('"/><input class="ui-widget ui-state-disabled ui-corner-all" readonly="readonly" type="text" id="tableName');
         items.push(this.id);
         items.push('" value="');
         items.push(this.name);
@@ -57,6 +61,8 @@ function drawJongoTables(componentName, tables) {
         items.push('"/>');
         items.push(getPermissionsComboBox(this.id, this.permits));
         items.push('<input type="submit" class="jquery-button" value="Show" onclick="showTable(\'');
+        items.push(this.database);
+        items.push('\',\'');
         items.push(this.name);
         items.push('\'); return false;"/>');
         items.push('<input type="submit" class="jquery-button" value="Update" onclick="editTable(');
@@ -78,13 +84,14 @@ function drawJongoTables(componentName, tables) {
 function addTable(){
     var data = {}
     data['name'] = $("#tableName").val()
+    data['database'] = $("#databaseName").val()
     data['customId'] = $("#tableCustomId").val()
     data['permits'] = getPermissionValue(null);
     
     var ret = $.post('/adminws/table', data, function() {}, 'json');
     
     ret.success(function(){
-        showJQueryDialog("Successfully added new table", data['name']);
+        showJQueryDialog("Successfully added new table", data['database'] + "." + data['name']);
         drawJongoTables('#jtables');
     })
     
@@ -99,8 +106,11 @@ function addTableDialog(componentName){
 
     var output = new Array();
     output.push('<form class="ui-form"><p>');
+    output.push('<input class="jongo-field" id="databaseName" value="" type="text"/>');
+    output.push('<label class="low-contrast-label" for="databaseName">Database</label>');
+    output.push('</p><p>');
     output.push('<input class="jongo-field" id="tableName" value="" type="text"/>');
-    output.push('<label class="low-contrast-label" for="tableName">Name</label>');
+    output.push('<label class="low-contrast-label" for="tableName">Table</label>');
     output.push('</p><p>');
     output.push('<input class="jongo-field" id="tableCustomId" value="id" type="text"/>');
     output.push('<label class="low-contrast-label" for="tableCustomId">Custom ID</label>');
@@ -130,6 +140,7 @@ function addTableDialog(componentName){
 function editTable(id){
     var data = {}
     var tableName = $("#tableName" + id).val()
+    var database = $("#databaseName" + id).val()
     data['name'] = tableName;
     data['customId'] = $("#tableCustomId" + id).val();
     data['permits'] = getPermissionValue(id)
@@ -144,7 +155,7 @@ function editTable(id){
     });
     
     ret.success(function(){
-        showJQueryDialog("Successfully edited table", tableName);
+        showJQueryDialog("Successfully edited table", database + "." + tableName);
         drawJongoTables('#jtables');
     });
     
@@ -191,10 +202,10 @@ function deleteTable(id){
     });
 }
 
-function showTable(tableName){
+function showTable(database, tableName){
     var tableMetaData = null;
     $.ajax({
-        url: '/jongo/' + tableName + '/meta',
+        url: '/' + database + '/' + tableName + '/meta',
         async: false,
         dataType: 'json',
         success: function(data){
