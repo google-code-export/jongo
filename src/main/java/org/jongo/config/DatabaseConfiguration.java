@@ -44,6 +44,16 @@ public class DatabaseConfiguration {
         this.password = password;
         this.url = url;
     }
+    
+    public static DatabaseConfiguration instanceForAdminInMemory(){
+        DatabaseConfiguration c = new DatabaseConfiguration("jongoAdmin", JDBCDriver.HSQLDB, "jongoAdmin", "jongoAdmin", "jdbc:hsqldb:mem:adminDemo");
+        return c;
+    }
+    
+    public static DatabaseConfiguration instanceForAdminInFile(){
+        DatabaseConfiguration c = new DatabaseConfiguration("jongoAdmin", JDBCDriver.HSQLDB, "jongoAdmin", "jongoAdmin", "jdbc:hsqldb:file:data/jongoAdmin");
+        return c;
+    }
 
     public JDBCDriver getDriver() {
         return driver;
