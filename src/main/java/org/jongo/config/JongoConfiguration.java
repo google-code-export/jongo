@@ -37,6 +37,19 @@ public class JongoConfiguration {
     
     private static final Logger l = LoggerFactory.getLogger(JongoConfiguration.class);
     
+    private static final String p_name_jongo_ip = "jongo.ip";
+    private static final String p_name_jongo_port = "jongo.port";
+    private static final String p_name_jongo_admin_enabled = "jongo.admin.enabled";
+    private static final String p_name_jongo_admin_ip = "jongo.admin.ip";
+    private static final String p_name_jongo_allow_apps = "jongo.allow.apps";
+    private static final String p_name_jongo_default_limit = "jongo.default.limit";
+    private static final String p_name_jongo_max_limit = "jongo.default.max.limit";
+    private static final String p_name_jongo_database_list = "jongo.database.list";
+    private static final String p_prefix_db_driver = ".jdbc.driver";
+    private static final String p_prefix_db_username = ".jdbc.username";
+    private static final String p_prefix_db_password = ".jdbc.password";
+    private static final String p_prefix_db_url = ".jdbc.url";
+    
     private static final String propertiesFileName = "/org/jongo/jongo.properties";
     private static JongoConfiguration instance;
     
@@ -62,21 +75,21 @@ public class JongoConfiguration {
         if(instance == null){
             instance = new JongoConfiguration();
             Properties prop = loadProperties();
-            instance.ip = prop.getProperty("jongo.ip");
-            instance.port = Integer.valueOf(prop.getProperty("jongo.port"));
-            instance.adminIp = prop.getProperty("jongo.admin.ip");
-            instance.adminEnabled = Boolean.valueOf(prop.getProperty("jongo.admin.enabled"));
-            instance.appsEnabled = Boolean.valueOf(prop.getProperty("jongo.allow.apps"));
-            instance.limit = Integer.valueOf(prop.getProperty("jongo.default.limit"));
-            instance.maxLimit = Integer.valueOf(prop.getProperty("jongo.default.max.limit"));
+            instance.ip = prop.getProperty(p_name_jongo_ip);
+            instance.port = Integer.valueOf(prop.getProperty(p_name_jongo_port));
+            instance.adminIp = prop.getProperty(p_name_jongo_admin_ip);
+            instance.adminEnabled = Boolean.valueOf(prop.getProperty(p_name_jongo_admin_enabled));
+            instance.appsEnabled = Boolean.valueOf(prop.getProperty(p_name_jongo_allow_apps));
+            instance.limit = Integer.valueOf(prop.getProperty(p_name_jongo_default_limit));
+            instance.maxLimit = Integer.valueOf(prop.getProperty(p_name_jongo_max_limit));
             
             if(demo){
                 l.debug("Loading demo configuration with memory databases");
-                instance.admin = new DatabaseConfiguration("jongoAdmin", JDBCDriver.HSQLDB, "jongoAdmin", "jongoAdmin", "jdbc:hsqldb:mem:adminDemo");
+                instance.admin = DatabaseConfiguration.instanceForAdminInMemory();
                 instance.databases = Demo.getDemoDatabasesConfiguration();
             }else{
+                instance.admin = DatabaseConfiguration.instanceForAdminInFile();
                 instance.databases = getDatabaseConfigurations(prop);
-                instance.admin = new DatabaseConfiguration("jongoAdmin", JDBCDriver.HSQLDB, "jongoAdmin", "jongoAdmin", "jdbc:hsqldb:file:data/jongoAdmin");
             }
             
             if(!instance.isValid()) instance = null;
@@ -117,8 +130,22 @@ public class JongoConfiguration {
     
     private static Map<String, DatabaseConfiguration> getDatabaseConfigurations(final Properties prop){
         Map<String, DatabaseConfiguration> databases = new HashMap<String, DatabaseConfiguration>();
-        final String [] names = prop.getProperty("jongo.databases").split(",");
+        final String [] names = prop.getProperty(p_name_jongo_database_list).split(",");
+        for(String name : names){
+            name = name.trim();
+            databases.put(name, generateDatabaseConfiguration(prop, name));
+        }
         return databases;
+    }
+    
+    private static DatabaseConfiguration generateDatabaseConfiguration(final Properties prop, final String name){
+        l.debug("Generating configuration options for database " + name);
+        JDBCDriver driver = JDBCDriver.driverOf(prop.getProperty(name + p_prefix_db_driver));
+        String username = prop.getProperty(name + p_prefix_db_username);
+        String password = prop.getProperty(name + p_prefix_db_password);
+        String url = prop.getProperty(name + p_prefix_db_url);
+        DatabaseConfiguration c = new DatabaseConfiguration(name, driver, username, password, url);
+        return c;
     }
     
     private boolean isValid(){
