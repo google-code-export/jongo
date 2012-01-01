@@ -30,7 +30,6 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.jongo.config.JongoConfiguration;
-import org.jongo.demo.Demo;
 import org.jongo.exceptions.JongoBadRequestException;
 import org.jongo.exceptions.StartupException;
 import org.jongo.jdbc.AdminJDBCExecutor;
