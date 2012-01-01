@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 public class AdminJDBCExecutor {
     private static final Logger l = LoggerFactory.getLogger(JDBCExecutor.class);
     private static final JongoJDBCConnection conn = JDBCConnectionFactory.getJongoAdminJDBCConnection();
-    private static final QueryRunner run = new QueryRunner(JDBCConnectionFactory.getAdminDataSource());
+    private static final QueryRunner run = JDBCConnectionFactory.getAdminQueryRunner();
     
     /**
      * Shutdown the connection with the Administration database.
