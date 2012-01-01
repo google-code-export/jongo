@@ -46,8 +46,8 @@ public class JongoJetty{
         l.debug("Registering the shutdown hook");
         Runtime.getRuntime().addShutdownHook(new JongoShutdown());
         
-        JongoConfiguration configuration = Jongo.loadConfiguration();
-        Jongo.loadDatabases(configuration);
+        JongoConfiguration configuration = JongoUtils.loadConfiguration();
+        JongoUtils.loadDatabases(configuration);
         
         l.debug("Creating Contexts for Jetty");
         ContextHandlerCollection contexts = new ContextHandlerCollection();
