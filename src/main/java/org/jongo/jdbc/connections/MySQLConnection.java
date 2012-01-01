@@ -71,8 +71,12 @@ public class MySQLConnection extends AbstractJDBCConnection implements JongoJDBC
             query.append(" ");
             query.append(order.getDirection());
         }
-        if(limit != null)
-            query.append(" LIMIT ? OFFSET ?");
+        if(limit != null){
+            query.append(" LIMIT ");
+            query.append(limit.getLimit());
+            query.append(" OFFSET ");
+            query.append(limit.getStart());
+        }
         
         return query.toString();
     }
