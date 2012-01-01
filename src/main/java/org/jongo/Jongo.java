@@ -22,10 +22,7 @@ import org.jongo.config.JongoConfiguration;
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
-import org.jongo.demo.Demo;
-import org.jongo.jdbc.AdminJDBCExecutor;
-import org.jongo.jdbc.JDBCConnectionFactory;
-import org.jongo.jdbc.JongoJDBCConnection;
+import org.jongo.exceptions.StartupException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +34,7 @@ public class Jongo {
 
     private static final Logger l = LoggerFactory.getLogger(Jongo.class);
     
-    public static void main(String[] args){
+    public static void main(String[] args) throws StartupException{
         l.info("Starting Jongo in Test Mode");
         
         JongoConfiguration configuration = JongoUtils.loadConfiguration();
