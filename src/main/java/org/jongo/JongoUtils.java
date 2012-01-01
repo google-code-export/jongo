@@ -249,13 +249,12 @@ public class JongoUtils {
         return configuration;
     }
     
-    public static void loadDatabases(final JongoConfiguration conf) throws StartupException{
+    public static void loadAdminDatabase(final JongoConfiguration conf) throws StartupException{
+        l.info("Initializing JDBC Connections");
         JongoJDBCConnection conn = null;
         try{
-            l.info("Initializing JDBC Connections");
             conn = JDBCConnectionFactory.getJongoAdminJDBCConnection();
             AdminJDBCExecutor.createJongoTablesAndData();
-            Demo.generateDemoDatabases(conf.getDatabases());
         }catch(Exception e){
             l.error(e.getMessage());
             throw new StartupException("Failed to generate Jongo Tables and default configuration", true);
