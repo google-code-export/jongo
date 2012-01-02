@@ -83,11 +83,11 @@ public class AdminJDBCExecutor {
         return result;
     }
     
-    public static JongoQuery getJongoQuery(final String name) throws JongoJDBCException{
+    public static JongoQuery getJongoQuery(final String database, final String name) throws JongoJDBCException{
         ResultSetHandler<JongoQuery> rh = new JongoQueryResultSetHandler();
         JongoQuery result = null;
         try {
-            result = run.query(JongoQuery.GET, rh, name);
+            result = run.query(JongoQuery.GET, rh, name, database);
         } catch (SQLException ex) {
             l.debug(ex.getMessage());
         }
@@ -109,7 +109,7 @@ public class AdminJDBCExecutor {
             l.info("Creating Jongo Tables");
             update(JongoUtils.getCreateJongoTableQuery());
             update(JongoUtils.getCreateJongoQueryTableQuery());
-            update(JongoQuery.CREATE, "jongoTest", "", "This is the holder for adminconsole test button");
+            update(JongoQuery.CREATE, "jongoTest", "jongoTest", "", "This is the holder for adminconsole test button");
         }
     }
     

@@ -111,7 +111,7 @@ public class Demo {
             adminRun.update(JongoTable.CREATE, database, "pictures", "id", 3);
             adminRun.update(JongoTable.CREATE, database, "sales_stats", "id", 1);
             adminRun.update(JongoTable.CREATE, database, "maker_stats", "id", 1);
-            adminRun.update(JongoQuery.CREATE, "yearSummary", "SELECT year FROM maker_stats GROUP BY year", "Returns all years we have data for");
+            adminRun.update(JongoQuery.CREATE, database, "yearSummary", "SELECT year FROM maker_stats GROUP BY year", "Returns all years we have data for");
             
         } catch (SQLException ex) {
             l.error("Failed to create demo tables " + ex.getMessage());

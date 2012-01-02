@@ -28,11 +28,13 @@ public class JongoQuery {
     private String name;
     private String query;
     private String description;
+    private String database;
     
-    public static final String CREATE = "INSERT INTO JongoQuery ( name, query, description ) VALUES ( ?, ?, ? )";
-    public static final String GET = "SELECT * FROM JongoQuery WHERE name = ?";
+    public static final String CREATE = "INSERT INTO JongoQuery ( database, name, query, description ) VALUES ( ?, ?, ?, ? )";
+    public static final String GET = "SELECT * FROM JongoQuery WHERE name = ? AND database = ?";
 
-    public JongoQuery(String name, String query, String description) {
+    public JongoQuery(String database, String name, String query, String description) {
+        this.database = database;
         this.name = name;
         this.query = query;
         this.description = description;
@@ -78,5 +80,12 @@ public class JongoQuery {
         // the query comes with \n for break lines, so we have to remove them.
         return this.query.replace("\\n", " ");
     }
-    
+
+    public String getDatabase() {
+        return database;
+    }
+
+    public void setDatabase(String database) {
+        this.database = database;
+    }
 }

@@ -42,6 +42,8 @@ function drawJongoQueries(component, queries){
         items.push('<h3 id="h3_');
         items.push(this.id);
         items.push('"><a href="#">');
+        items.push(this.database);
+        items.push('.');
         items.push(this.name);
         items.push('</a></h3><div id="queryId_');
         items.push(this.id);
@@ -74,6 +76,8 @@ function addQueryToAccordion(component, id, name, description, query){
     items.push('<h3 id="h3_');
     items.push(id);
     items.push('"><a href="#">');
+    items.push(this.database);
+    items.push('.');
     items.push(name);
     items.push('</a></h3><div id="queryId_');
     items.push(id);
@@ -103,6 +107,8 @@ function addQueryToAccordion(component, id, name, description, query){
 
 function addQuery(){
     var data = {}
+    var database = $("#queryDatabase").val();
+    data['database'] = database;
     data['name'] = $("#queryName").val();
     data['description'] = $("#queryDescription").val();
     var queryText = $("#queryText").val()
@@ -164,13 +170,15 @@ function addQueryDialog(componentName){
     var output = new Array();
     
     output.push('<form class="ui-form"><table><tr>');
+    output.push('<td><label for="queryDatabase">Database</label></td>');
     output.push('<td><label for="queryName">Name</label></td>');
     output.push('<td><label for="queryDescription">Description</label></td>');
     output.push('</tr><tr>');
+    output.push('<td><input class="jongo-field" type="text" style="width: 90%;" id="queryDatabase" /></td>');
     output.push('<td><input class="jongo-field" type="text" style="width: 90%;" id="queryName" /></td>');
     output.push('<td><input class="jongo-field" type="text" style="width: 100%;" size="50" id="queryDescription" /></td>');
-    output.push('</tr><tr><td colspan="2"><label for="queryText">Query</label></td>');
-    output.push('</tr><tr><td colspan="2">');
+    output.push('</tr><tr><td colspan="3"><label for="queryText">Query</label></td>');
+    output.push('</tr><tr><td colspan="3">');
     output.push('<textarea class="jongo-text-area" rows="10" id="queryText"></textarea>');
     output.push('</td></tr></table></form>');
     
@@ -198,6 +206,8 @@ function addQueryDialog(componentName){
 function testQuery(){
     var data = {};
     data['name'] = "jongoTest";
+    var database = $("#queryDatabase").val();
+    data['database'] = database;
     var queryText = $("#queryText").val();
     data['query'] = queryText.replace(/(\r\n|\n|\r)/gm,"\\n"); // chrome doesn't like line breaks in json
     
@@ -209,7 +219,7 @@ function testQuery(){
         dataType: 'json',
         success: function(a,b,c) {
             debug("Alright! Updated the query")
-            $.get('/jongo/query/jongoTest', function(data) {
+            $.get('/' + database + '/query/jongoTest', function(data) {
                 debug("Query executed correctly")
                 var response = data.response
                 var output = new Array();

@@ -35,6 +35,7 @@ public class JongoQueryResultSetHandler  implements ResultSetHandler<JongoQuery>
         final String name = rs.getString("name");
         final String query = rs.getString("query");
         final String desc = rs.getString("description");
-        return new JongoQuery(name, query, desc);
+        final String database = rs.getString("database");
+        return new JongoQuery(database, name, query, desc);
     }
 }
