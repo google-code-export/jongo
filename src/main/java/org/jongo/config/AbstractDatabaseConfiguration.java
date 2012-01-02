@@ -15,23 +15,65 @@
  * You should have received a copy of the GNU General Public License
  * along with Jongo.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package org.jongo.jdbc;
+package org.jongo.config;
 
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang.StringUtils;
+import org.jongo.config.impl.HSQLDBConfiguration;
+import org.jongo.config.impl.MySQLConfiguration;
+import org.jongo.config.impl.OracleConfiguration;
 import org.jongo.enums.JDBCDriver;
+import org.jongo.jdbc.LimitParam;
+import org.jongo.jdbc.OrderParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
- *
+ * Abstract class with common methods to all DatabaseConfiguration objects. All
+ * queries which are SQL standard should be implemented here and only, database
+ * specific queries should be implemented by each separate object.
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
-public class AbstractJDBCConnection {
+public abstract class AbstractDatabaseConfiguration {
     
-    protected String url;
+    private static final Logger l = LoggerFactory.getLogger(AbstractDatabaseConfiguration.class);
+    
+    protected String name;
+    protected JDBCDriver driver;
     protected String username;
     protected String password;
-    protected JDBCDriver driver;
+    protected String url;
+
+    public static DatabaseConfiguration instanceForAdminInMemory(){
+        DatabaseConfiguration c = new HSQLDBConfiguration("jongoAdmin", "jongoAdmin", "jongoAdmin", "jdbc:hsqldb:mem:adminDemo");
+        return c;
+    }
+    
+    public static DatabaseConfiguration instanceForAdminInFile(){
+        DatabaseConfiguration c = new HSQLDBConfiguration("jongoAdmin", "jongoAdmin", "jongoAdmin", "jdbc:hsqldb:file:data/jongoAdmin");
+        return c;
+    }
+    
+    public static DatabaseConfiguration instanceOf(String name, JDBCDriver driver, String user, String password, String url){
+        DatabaseConfiguration c = null;
+        
+        switch(driver){
+            case HSQLDB:
+                c = new HSQLDBConfiguration(name, user, password, url);
+                break;
+            case MySQL:
+                c = new MySQLConfiguration(name, user, password, url);
+                break;
+            case ORACLE:
+                c = new OracleConfiguration(name, user, password, url);
+                break;
+            default:
+                throw new IllegalArgumentException("Not implemented yet");
+        }
+        
+        return c;
+    }
     
     public String getSelectAllFromTableQuery(final String table){
         final StringBuilder query = new StringBuilder("SELECT * FROM ");
@@ -40,19 +82,6 @@ public class AbstractJDBCConnection {
     }
     
     public String getSelectAllFromTableQuery(final String table, LimitParam limit, OrderParam order){
-//        final StringBuilder query = new StringBuilder("SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY ");
-//        query.append(order.getColumn());
-//        query.append(" ");
-//        query.append(order.getDirection());
-//        query.append(" )AS ROW_NUMBER, ");
-//        query.append(table);
-//        query.append(" .* FROM ");
-//        query.append(table);
-//        query.append(" ) k WHERE ROW_NUMBER <=");
-//        query.append(limit.getLimit());
-//        query.append(" AND ROW_NUMBER >=  ");
-//        query.append(limit.getStart());
-//        return query.toString();
         final StringBuilder query = new StringBuilder("SELECT * FROM ");
         query.append(table);
         query.append(" ORDER BY ");
@@ -134,9 +163,13 @@ public class AbstractJDBCConnection {
         query.append(" FETCH FIRST 1 ROW ONLY");
         return query.toString();
     }
-    
+
     public JDBCDriver getDriver() {
         return driver;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getPassword() {
@@ -150,4 +183,35 @@ public class AbstractJDBCConnection {
     public String getUsername() {
         return username;
     }
+    
+    public boolean isValid(){
+        if(StringUtils.isBlank(name)){
+            l.warn("Invalid database name. Check your configuration.");
+            return false;
+        }
+        
+        if(StringUtils.isBlank(username)){
+            l.warn("Invalid database user. Check your configuration.");
+            return false;
+        }
+        
+        if(StringUtils.isBlank(password)){
+            l.warn("Invalid database password. Check your configuration.");
+            return false;
+        }
+        
+        if(StringUtils.isBlank(url)){
+            l.warn("Invalid database url. Check your configuration.");
+            return false;
+        }
+        
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "DatabaseConfiguration{" + "name=" + name + ", driver=" + driver + ", user=" + username + ", password=" + password + ", url=" + url + '}';
+    }
+    
+    
 }

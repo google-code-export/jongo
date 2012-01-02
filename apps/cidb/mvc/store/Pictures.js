@@ -22,7 +22,7 @@ Ext.define('cidb.store.Pictures',{
     autoLoad: false,
     proxy:{
         type: 'rest',
-        url: '/jongo/pictures',
+        url: '/demo1/pictures',
         reader:{
             type: 'json',
             success: true,

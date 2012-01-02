@@ -18,19 +18,20 @@
 
 package org.jongo.jdbc;
 
-import org.jongo.jdbc.connections.MySQLConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp.ConnectionFactory;
 import org.apache.commons.dbcp.DriverManagerConnectionFactory;
 import org.apache.commons.dbcp.PoolableConnectionFactory;
 import org.apache.commons.dbcp.PoolingDataSource;
+import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.pool.impl.GenericObjectPool;
-import org.jongo.JongoConfiguration;
-import org.jongo.enums.JDBCDriver;
-import org.jongo.jdbc.connections.HSQLConnection;
-import org.jongo.jdbc.connections.OracleConnection;
+import org.jongo.config.DatabaseConfiguration;
+import org.jongo.config.JongoConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,50 +43,40 @@ public class JDBCConnectionFactory {
 
     private static final Logger l = LoggerFactory.getLogger(JDBCConnectionFactory.class);
     private static final JongoConfiguration configuration = JongoConfiguration.instanceOf();
-    private static JongoJDBCConnection connection = null;
-    private static JongoJDBCConnection adminConnection = null;
-    private static DataSource datasource = null;
-    private static DataSource adminDatasource = null;
+    private static final String JONGO_ADMIN = "jongoAdmin";
+
+    private final Map<String, GenericObjectPool> connectionPool = new HashMap<String,GenericObjectPool>();
     
-    public static JongoJDBCConnection getJongoJDBCConnection() {
-        if(connection == null){
-            connection = getJongoJDBCConnection(configuration.getDriver(), configuration.getJdbcUrl(), configuration.getJdbcUsername(), configuration.getJdbcPassword());
+    private static JDBCConnectionFactory instance = null;
+    
+    private JDBCConnectionFactory(){}
+    
+    private static JDBCConnectionFactory instanceOf(){
+        if(instance == null){
+            instance = new JDBCConnectionFactory();
+            Set<String> databases = configuration.getDatabases();
+            for(String dbname : databases){
+                l.debug("Registering Connection Pool for " + dbname);
+                DatabaseConfiguration dbcfg = configuration.getDatabaseConfiguration(dbname);
+                GenericObjectPool pool = new GenericObjectPool(null, 5);
+                ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(dbcfg.getUrl(), dbcfg.getUsername(), dbcfg.getPassword());
+                PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, pool, null, null, false, true);
+                instance.connectionPool.put(dbname, pool);
+            }
+            
+            l.debug("Registering Connection Pool for admin database");
+            DatabaseConfiguration dbcfg = configuration.getAdminDatabaseConfiguration();
+            GenericObjectPool pool = new GenericObjectPool(null, 5);
+            ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(dbcfg.getUrl(), dbcfg.getUsername(), dbcfg.getPassword());
+            PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, pool, null, null, false, true);
+            instance.connectionPool.put(JONGO_ADMIN, pool);
         }
-        return connection;
+        return instance;
     }
 
-    public static JongoJDBCConnection getJongoAdminJDBCConnection() {
-        if(adminConnection == null){
-            adminConnection = getJongoJDBCConnection(configuration.getAdminDriver(), configuration.getJdbcAdminUrl(), configuration.getJdbcAdminUsername(), configuration.getJdbcAdminPassword());
-        }
-        return adminConnection;
-    }
-
-    public static JongoJDBCConnection getJongoJDBCConnection(JDBCDriver driver, String url, String user, String pass) {
-        JongoJDBCConnection cx = null;
-        switch (driver) {
-            case MySQL:
-                l.debug("New MySQL Connection to " + url);
-                cx = new MySQLConnection(url, user, pass);
-                break;
-            case HSQLDB:
-                l.debug("New HSQLDB Connection to " + url);
-                cx = new HSQLConnection(url, user, pass);
-                break;
-            case ORACLE:
-                l.debug("New Oracle Connection to " + url);
-                cx = new OracleConnection(url, user, pass);
-                break;
-            default:
-                throw new IllegalArgumentException("Not implemented yet");
-        }
-
-        return cx;
-    }
-
-    public static Connection getConnection() throws SQLException {
+    public static Connection getConnection(final String database) throws SQLException {
         l.debug("Obtaining a connection from the datasource");
-        DataSource ds = getDataSource();
+        DataSource ds = getDataSource(database);
         return ds.getConnection();
     }
 
@@ -95,56 +86,25 @@ public class JDBCConnectionFactory {
         return ds.getConnection();
     }
 
-    public static DataSource getDataSource() {
-        boolean loadConnection = false;
-        if (datasource == null) {
-            loadConnection = true;
-        }else{
-            try {
-                loadConnection = datasource.getConnection().isClosed();
-            } catch (SQLException ex) {
-                l.warn("Failed to check if connection is closed");
-                loadConnection = false;
-            }
-        }
-        
-        if(loadConnection){
-            JongoJDBCConnection conn = getJongoJDBCConnection(configuration.getDriver(), configuration.getJdbcUrl(), configuration.getJdbcUsername(), configuration.getJdbcPassword());
-            conn.loadDriver();
-            datasource = setupDataSource(conn);
-        }
-        
-        return datasource;
+    public static DataSource getDataSource(final String database) {
+        JDBCConnectionFactory me = JDBCConnectionFactory.instanceOf();
+        PoolingDataSource dataSource = new PoolingDataSource(me.connectionPool.get(database));
+        return dataSource;
     }
 
     public static DataSource getAdminDataSource() {
-        boolean loadConnection = false;
-        if (adminDatasource == null) {
-            loadConnection = true;
-        }else{
-            try {
-                loadConnection = adminDatasource.getConnection().isClosed();
-            } catch (SQLException ex) {
-                l.warn("Failed to check if admin connection is closed");
-                loadConnection = false;
-            }
-        }
-        
-        if(loadConnection){
-            JongoJDBCConnection conn = getJongoJDBCConnection(configuration.getAdminDriver(), configuration.getJdbcAdminUrl(), configuration.getJdbcAdminUsername(), configuration.getJdbcAdminPassword());
-            conn.loadDriver();
-            adminDatasource = setupDataSource(conn);
-        }
-        
-        return adminDatasource;
-    }
-
-    public static DataSource setupDataSource(final JongoJDBCConnection conn) {
-        l.debug("Setting up Pooling Data Source");
-        GenericObjectPool connectionPool = new GenericObjectPool(null);
-        ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(conn.getUrl(), conn.getUsername(), conn.getPassword());
-        PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, connectionPool, null, null, false, true);
-        PoolingDataSource dataSource = new PoolingDataSource(connectionPool);
+        JDBCConnectionFactory me = JDBCConnectionFactory.instanceOf();
+        PoolingDataSource dataSource = new PoolingDataSource(me.connectionPool.get(JONGO_ADMIN));
         return dataSource;
+    }
+    
+    public static QueryRunner getQueryRunner(final String database){
+        DataSource ds = getDataSource(database);
+        return new QueryRunner(ds);
+    }
+    
+    public static QueryRunner getAdminQueryRunner(){
+        DataSource ds = getDataSource(JONGO_ADMIN);
+        return new QueryRunner(ds);
     }
 }

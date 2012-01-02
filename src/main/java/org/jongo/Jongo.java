@@ -18,12 +18,11 @@
 
 package org.jongo;
 
+import org.jongo.config.JongoConfiguration;
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
-import org.jongo.jdbc.AdminJDBCExecutor;
-import org.jongo.jdbc.JDBCConnectionFactory;
-import org.jongo.jdbc.JongoJDBCConnection;
+import org.jongo.exceptions.StartupException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,10 +34,10 @@ public class Jongo {
 
     private static final Logger l = LoggerFactory.getLogger(Jongo.class);
     
-    public static void main(String[] args){
+    public static void main(String[] args) throws StartupException{
         l.info("Starting Jongo in Test Mode");
         
-        JongoConfiguration configuration = loadConfiguration();
+        JongoConfiguration configuration = JongoUtils.loadConfiguration();
         
         StringBuilder url = new StringBuilder("http://");
         url.append(configuration.getIp());
@@ -60,39 +59,5 @@ public class Jongo {
             l.error(ex.getMessage());
             System.exit(1);
         }
-    }
-    
-    public static JongoConfiguration loadConfiguration(){
-        JongoConfiguration configuration = null;
-        try{
-            configuration = JongoConfiguration.instanceOf();
-        }catch(IllegalArgumentException e){
-            l.error(e.getMessage());
-        }
-        
-        if(configuration == null){
-            l.error("Failed to load configuration. Quitting.");
-            System.exit(1);
-        }
-        
-        
-        JongoJDBCConnection conn = null;
-        try{
-            l.info("Initializing JDBC Connections");
-            conn = JDBCConnectionFactory.getJongoJDBCConnection();
-            conn = JDBCConnectionFactory.getJongoAdminJDBCConnection();
-            AdminJDBCExecutor.createJongoTablesAndData();
-        }catch(Exception e){
-            l.error("Failed to generate Jongo Tables and default configuration.");
-            l.error(e.getMessage());
-            System.exit(1);
-        }
-        
-        if(conn == null){
-            l.error("Failed to load database. Quitting.");
-            System.exit(1);
-        }
-        
-        return configuration;
     }
 }

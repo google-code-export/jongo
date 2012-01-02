@@ -19,7 +19,7 @@ package org.jongo.jdbc;
 
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang.StringUtils;
-import org.jongo.JongoConfiguration;
+import org.jongo.config.JongoConfiguration;
 
 /**
  * An object to represent the two limit parameters (limit & offset) which are then translated to

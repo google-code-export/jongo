@@ -15,39 +15,42 @@
  * You should have received a copy of the GNU General Public License
  * along with Jongo.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.jongo.config.impl;
 
-package org.jongo.jdbc.connections;
-
+import org.jongo.config.AbstractDatabaseConfiguration;
+import org.jongo.config.DatabaseConfiguration;
 import org.jongo.enums.JDBCDriver;
-import org.jongo.jdbc.AbstractJDBCConnection;
-import org.jongo.jdbc.JongoJDBCConnection;
-import org.jongo.jdbc.LimitParam;
-import org.jongo.jdbc.OrderParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * MySQL DatabaseConfiguration implementation.
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
-public class MySQLConnection extends AbstractJDBCConnection implements JongoJDBCConnection {
+public class MySQLConfiguration extends AbstractDatabaseConfiguration implements DatabaseConfiguration {
     
-    private static final Logger l = LoggerFactory.getLogger(MySQLConnection.class);
-
-    public MySQLConnection(final String url, final String user, final String password){
-        this.url = url;
+    private static final Logger l = LoggerFactory.getLogger(MySQLConfiguration.class);
+    
+    private static boolean loaded = false;
+    
+    public MySQLConfiguration(String name, String user, String password, String url){
+        this.name = name;
+        this.driver = JDBCDriver.MySQL;
         this.username = user;
         this.password = password;
-        this.driver = JDBCDriver.MySQL;
+        this.url = url;
     }
-
+    
     @Override
     public void loadDriver() {
-        l.debug("Loading MySQL Driver " + this.driver.getName());
-        try {
-            Class.forName(this.driver.getName());
-        } catch (ClassNotFoundException ex) {
-            l.error("Unable to load driver. Add the MySQL Connector jar to the lib folder");
+        if(!loaded){
+            l.debug("Loading MySQL Driver " + this.driver.getName());
+            try {
+                Class.forName(this.driver.getName());
+                loaded = true;
+            } catch (ClassNotFoundException ex) {
+                l.error("Unable to load driver. Add the MySQL Connector jar to the lib folder");
+            }
         }
     }
     
@@ -59,21 +62,5 @@ public class MySQLConnection extends AbstractJDBCConnection implements JongoJDBC
     @Override
     public String getFirstRowQuery(String table) {
         return "SELECT * FROM " + table + " LIMIT 1";
-    }
-    
-    @Override
-    public String getSelectAllFromTableQuery(final String table, LimitParam limit, OrderParam order){
-        final StringBuilder query = new StringBuilder("SELECT * FROM ");
-        query.append(table);
-        if(order != null){
-            query.append(" ORDER BY ");
-            query.append(order.getColumn());
-            query.append(" ");
-            query.append(order.getDirection());
-        }
-        if(limit != null)
-            query.append(" LIMIT ? OFFSET ?");
-        
-        return query.toString();
     }
 }
