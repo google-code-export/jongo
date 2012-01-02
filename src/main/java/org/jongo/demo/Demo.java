@@ -178,7 +178,7 @@ public class Demo {
     public static Map<String, DatabaseConfiguration> getDemoDatabasesConfiguration(){
         Map<String, DatabaseConfiguration> demos = new HashMap<String, DatabaseConfiguration>();
         demos.put("demo1", AbstractDatabaseConfiguration.instanceOf("demo1", JDBCDriver.HSQLDB, "demo", "demo", "jdbc:hsqldb:mem:demo1"));
-        demos.put("demo2", AbstractDatabaseConfiguration.instanceOf("demo2", JDBCDriver.HSQLDB, "demo", "demo", "jdbc:hsqldb:mem:demo2"));
+//        demos.put("demo2", AbstractDatabaseConfiguration.instanceOf("demo2", JDBCDriver.HSQLDB, "demo", "demo", "jdbc:hsqldb:mem:demo2"));
         return demos;
     }
 }
