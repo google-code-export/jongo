@@ -20,11 +20,13 @@ package org.jongo.config.impl;
 import org.jongo.config.AbstractDatabaseConfiguration;
 import org.jongo.config.DatabaseConfiguration;
 import org.jongo.enums.JDBCDriver;
+import org.jongo.jdbc.LimitParam;
+import org.jongo.jdbc.OrderParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Oracle 8g and later DatabaseConfiguration implementation.
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public class OracleConfiguration extends AbstractDatabaseConfiguration implements DatabaseConfiguration {
@@ -57,6 +59,43 @@ public class OracleConfiguration extends AbstractDatabaseConfiguration implement
     @Override
     public String getFirstRowQuery(String table) {
         return "SELECT * FROM " + table + " WHERE rownum = 0";
+    }
+    
+    @Override
+    public String getSelectAllFromTableQuery(final String table, LimitParam limit, OrderParam order){
+        final StringBuilder query = new StringBuilder("SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY ");
+        query.append(order.getColumn());
+        query.append(" ");
+        query.append(order.getDirection());
+        query.append(" )AS ROW_NUMBER, ");
+        query.append(table);
+        query.append(" .* FROM ");
+        query.append(table);
+        query.append(" ) k WHERE ROW_NUMBER <=");
+        query.append(limit.getLimit());
+        query.append(" AND ROW_NUMBER >=  ");
+        query.append(limit.getStart());
+        return query.toString();
+    }
+    
+    @Override
+    public String getSelectAllFromTableQuery(final String table, final String idCol, LimitParam limit, OrderParam order){
+        final StringBuilder query = new StringBuilder("SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY ");
+        query.append(order.getColumn());
+        query.append(" ");
+        query.append(order.getDirection());
+        query.append(" )AS ROW_NUMBER, ");
+        query.append(table);
+        query.append(" .* FROM ");
+        query.append(table);
+        query.append(" WHERE ");
+        query.append(idCol);
+        
+        query.append("= ? ) k WHERE ROW_NUMBER <=");
+        query.append(limit.getLimit());
+        query.append(" AND ROW_NUMBER >=  ");
+        query.append(limit.getStart());
+        return query.toString();
     }
     
 }
