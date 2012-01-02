@@ -22,7 +22,7 @@ Ext.define('cidb.store.Brands',{
     autoLoad: true,
     proxy:{
         type: 'rest',
-        url: '/jongo/maker',
+        url: '/demo1/maker',
         reader:{
             type: 'json',
             success: true,
