@@ -30,7 +30,9 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Class to describe a database configuration object.
+ * Abstract class with common methods to all DatabaseConfiguration objects. All
+ * queries which are SQL standard should be implemented here and only, database
+ * specific queries should be implemented by each separate object.
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public abstract class AbstractDatabaseConfiguration {
@@ -80,19 +82,6 @@ public abstract class AbstractDatabaseConfiguration {
     }
     
     public String getSelectAllFromTableQuery(final String table, LimitParam limit, OrderParam order){
-//        final StringBuilder query = new StringBuilder("SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY ");
-//        query.append(order.getColumn());
-//        query.append(" ");
-//        query.append(order.getDirection());
-//        query.append(" )AS ROW_NUMBER, ");
-//        query.append(table);
-//        query.append(" .* FROM ");
-//        query.append(table);
-//        query.append(" ) k WHERE ROW_NUMBER <=");
-//        query.append(limit.getLimit());
-//        query.append(" AND ROW_NUMBER >=  ");
-//        query.append(limit.getStart());
-//        return query.toString();
         final StringBuilder query = new StringBuilder("SELECT * FROM ");
         query.append(table);
         query.append(" ORDER BY ");
