@@ -24,7 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Hypersonic, HyperSQL, HSQLDB or whatever is called today DatabaseConfiguration
+ * implementation.
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public class HSQLDBConfiguration extends AbstractDatabaseConfiguration implements DatabaseConfiguration {
