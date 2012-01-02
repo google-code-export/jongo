@@ -26,38 +26,43 @@ import org.jongo.enums.Permission;
  */
 public class JongoTable {
     private int id;
-    private String name;
+    private String database;
+    private String table;
     private String customId;
     private Permission permits;
 
-    public JongoTable(int id, String name, String customId, Permission permits) {
+    public JongoTable(int id, String database, String name, String customId, Permission permits) {
         this.id = id;
-        this.name = name;
+        this.database = database;
+        this.table = name;
         this.customId = customId;
         this.permits = permits;
     }
 
-    public JongoTable(String name, String customId, Permission permits) {
-        this.name = name;
+    public JongoTable(String database, String name, String customId, Permission permits) {
+        this.table = name;
+        this.database = database;
         this.customId = customId;
         this.permits = permits;
     }
     
-    public JongoTable(int id, String name, String customId, int permits) {
+    public JongoTable(int id, String database, String name, String customId, int permits) {
         this.id = id;
-        this.name = name;
+        this.database = database;
+        this.table = name;
         this.customId = customId;
         this.permits = Permission.valueOf(permits);
     }
     
-    public JongoTable(String name, String customId, int permits) {
-        this.name = name;
+    public JongoTable(String database, String name, String customId, int permits) {
+        this.table = name;
+        this.database = database;
         this.customId = customId;
         this.permits = Permission.valueOf(permits);
     }
     
-    public static final String CREATE = "INSERT INTO JongoTable ( name, customId, permits ) VALUES ( ?, ?, ? )";
-    public static final String GET = "SELECT * FROM JongoTable WHERE name = ?";
+    public static final String CREATE = "INSERT INTO JongoTable ( database, name, customId, permits ) VALUES ( ?, ?, ?, ? )";
+    public static final String GET = "SELECT * FROM JongoTable WHERE name = ? AND database = ?";
     
     public String getCustomId() {
         return customId;
@@ -75,12 +80,12 @@ public class JongoTable {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getTable() {
+        return table;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTable(String name) {
+        this.table = name;
     }
 
     public Permission getPermits() {
@@ -93,5 +98,13 @@ public class JongoTable {
     
     public void setPermits(Permission permits) {
         this.permits = permits;
+    }
+
+    public String getDatabase() {
+        return database;
+    }
+
+    public void setDatabase(String database) {
+        this.database = database;
     }
 }
