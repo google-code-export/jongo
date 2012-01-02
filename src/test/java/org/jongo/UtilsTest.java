@@ -24,11 +24,11 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.jongo.config.AbstractDatabaseConfiguration;
 import org.jongo.config.DatabaseConfiguration;
 import org.jongo.enums.JDBCDriver;
 import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
-import org.jongo.jdbc.connections.HSQLConnection;
 import org.junit.Before;
 import static org.junit.Assert.*;
 
@@ -128,7 +128,10 @@ public class UtilsTest {
     public void testSQL() throws Exception{
         LimitParam l = new LimitParam();
         OrderParam o = new OrderParam();
-        HSQLConnection c = new HSQLConnection(new DatabaseConfiguration("test1", JDBCDriver.HSQLDB, "k", "k", "jdbc"));
+        DatabaseConfiguration c = AbstractDatabaseConfiguration.instanceOf("test1", JDBCDriver.HSQLDB, "k", "k", "jdbc");
         assertEquals(c.getSelectAllFromTableQuery("table", l, o), "SELECT * FROM table ORDER BY id ASC LIMIT 25 OFFSET 0");
+        c = AbstractDatabaseConfiguration.instanceOf("test1", JDBCDriver.ORACLE, "k", "k", "jdbc");
+        assertEquals(c.getSelectAllFromTableQuery("t", l, o), "SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY null ASC )AS ROW_NUMBER, t .* FROM t ) k WHERE ROW_NUMBER <=25 AND ROW_NUMBER >=  0");
+        assertEquals(c.getSelectAllFromTableQuery("t", "id", l, o), "SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY null ASC )AS ROW_NUMBER, t .* FROM t WHERE id= ? ) k WHERE ROW_NUMBER <=25 AND ROW_NUMBER >=  0");
     }
 }
