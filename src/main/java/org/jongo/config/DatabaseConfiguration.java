@@ -23,24 +23,81 @@ import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
 
 /**
- *
+ * Interface for DatabaseConfiguration objects. Some of this methods are
+ * implemented by the AbstractDatabaseConfiguration class which is common
+ * to all implementations. Each implementation should override the
+ * appropriate methods which are specific of its database.
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public interface DatabaseConfiguration {
+    
+    /**
+     * Loads the corresponding JDBC driver of the database in the classpath.
+     */
     public void loadDriver();
     
+    /**
+     * Creates a query which returns all objects from a table
+     * @param table the name of the table to query
+     * @return the query String, i.e. SELECT * FROM foo
+     */
     public String getSelectAllFromTableQuery(final String table);
     
+    /**
+     * Creates a query which returns all objects from a table with the given
+     * limit and order parameters.
+     * @param table the name of the table to query
+     * @param limit the limit parameters
+     * @param order the order parameters
+     * @return the query String, i.e. SELECT * FROM foo ORDER BY id LIMIT 25 OFFSET 0
+     */
     public String getSelectAllFromTableQuery(final String table, LimitParam limit, OrderParam order);
     
+    /**
+     * Creates a parameterized query which returns all objects from a table
+     * using a custom column value.
+     * @param table the name of the table to query
+     * @param idCol the name of the column to use in the query
+     * @return the query String, i.e. SELECT * FROM foo WHERE bar = ?
+     */
     public String getSelectAllFromTableQuery(final String table, final String idCol);
     
+    /**
+     * Creates a parameterized query which returns all objects from a table with the given
+     * limit and order parameters using a custom column.
+     * @param table the name of the table to query
+     * @param idCol the name of the column to use in the query
+     * @param limit the limit parameters
+     * @param order the order parameters
+     * @return the query String, i.e. SELECT * FROM foo WHERE bar = ? ORDER BY id LIMIT 25 OFFSET 0
+     */
     public String getSelectAllFromTableQuery(final String table, final String idCol, LimitParam limit, OrderParam order);
     
+    /**
+     * Generates an INSERT parameterized query on the given table and with
+     * the given parameters
+     * @param table the name of the table where the insert is performed
+     * @param params the parameters to generate the parameterized query
+     * @return the parameterized query String, i.e. INSERT INTO foo (a,b,c,d) VALUES (?,?,?,?)
+     */
     public String getInsertQuery(final String table, final MultivaluedMap<String,String> params);
     
+    /**
+     * Generates an UPDATE parameterized query on the given table and key with
+     * the given parameters
+     * @param table the name of the table where the update is performed
+     * @param key the column to use in the where clause
+     * @param params the parameters to generate the parameterized query
+     * @return the parameterized query String, i.e. UPDATE foo SET (a=?,b=?,c=?,d=?) WHERE key = ?
+     */
     public String getUpdateQuery(final String table, final String key, final MultivaluedMap<String,String> params);
     
+    /**
+     * Generates a DELETE parameterized query on the given table and key
+     * @param table the name of the table where the update is performed
+     * @param key the column to use in the where clause
+     * @return the parameterized query String, i.e. DELETE FROM foo WHERE key = ?
+     */
     public String getDeleteQuery(final String table, final String key);
     
     public String getUrl();
