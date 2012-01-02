@@ -94,15 +94,15 @@ public class JongoResultSetHandler implements ResultSetHandler<List<RowResponse>
                 String v = resultSet.getString(i);
                 if(colType == Types.DATE){
                     v = new DateTime(resultSet.getDate(i)).toString(dateFTR);
-                    l.debug("Mapped DATE column " + colName + " with value : " + v);
+                    l.trace("Mapped DATE column " + colName + " with value : " + v);
                 }else if(colType == Types.TIMESTAMP){
                     v = new DateTime(resultSet.getTimestamp(i)).toString(dateTimeFTR);
-                    l.debug("Mapped TIMESTAMP column " + colName + " with value : " + v);
+                    l.trace("Mapped TIMESTAMP column " + colName + " with value : " + v);
                 }else if(colType == Types.TIME){
                     v = new DateTime(resultSet.getTimestamp(i)).toString(timeFTR);
-                    l.debug("Mapped TIME column " + colName + " with value : " + v);
+                    l.trace("Mapped TIME column " + colName + " with value : " + v);
                 }else{
-                    l.debug("Mapped " + meta.getColumnTypeName(i) + " column " + colName + " with value : " + v);
+                    l.trace("Mapped " + meta.getColumnTypeName(i) + " column " + colName + " with value : " + v);
                 }
                 map.put(colName, v);
             }
