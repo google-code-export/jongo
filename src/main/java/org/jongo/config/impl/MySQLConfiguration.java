@@ -20,13 +20,11 @@ package org.jongo.config.impl;
 import org.jongo.config.AbstractDatabaseConfiguration;
 import org.jongo.config.DatabaseConfiguration;
 import org.jongo.enums.JDBCDriver;
-import org.jongo.jdbc.LimitParam;
-import org.jongo.jdbc.OrderParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * MySQL DatabaseConfiguration implementation.
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public class MySQLConfiguration extends AbstractDatabaseConfiguration implements DatabaseConfiguration {
@@ -64,25 +62,5 @@ public class MySQLConfiguration extends AbstractDatabaseConfiguration implements
     @Override
     public String getFirstRowQuery(String table) {
         return "SELECT * FROM " + table + " LIMIT 1";
-    }
-    
-    @Override
-    public String getSelectAllFromTableQuery(final String table, LimitParam limit, OrderParam order){
-        final StringBuilder query = new StringBuilder("SELECT * FROM ");
-        query.append(table);
-        if(order != null){
-            query.append(" ORDER BY ");
-            query.append(order.getColumn());
-            query.append(" ");
-            query.append(order.getDirection());
-        }
-        if(limit != null){
-            query.append(" LIMIT ");
-            query.append(limit.getLimit());
-            query.append(" OFFSET ");
-            query.append(limit.getStart());
-        }
-        
-        return query.toString();
     }
 }
