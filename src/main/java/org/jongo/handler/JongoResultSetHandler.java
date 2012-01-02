@@ -85,7 +85,7 @@ public class JongoResultSetHandler implements ResultSetHandler<List<RowResponse>
         try{
             int columnCount = resultSet.getMetaData().getColumnCount();
 
-            l.debug("Mapping a result set with " + columnCount + " columns to a Map");
+            l.trace("Mapping a result set with " + columnCount + " columns to a Map");
 
             ResultSetMetaData meta = resultSet.getMetaData();
             for(int i = 1; i < columnCount + 1; i++){

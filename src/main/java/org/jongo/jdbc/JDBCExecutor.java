@@ -235,7 +235,7 @@ public class JDBCExecutor {
     public static List<RowResponse> executeQuery(final String database, final String queryName, final Object... params) throws JongoJDBCException {
         l.debug("Executing query " + queryName + " params: " + JongoUtils.varargToString(params));
         
-        JongoQuery query = AdminJDBCExecutor.getJongoQuery(queryName);
+        JongoQuery query = AdminJDBCExecutor.getJongoQuery(database, queryName);
         if(query == null){
             return null;
         }
