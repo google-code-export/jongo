@@ -22,7 +22,7 @@ Ext.define('cidb.store.Comments',{
     autoLoad: false,
     proxy:{
         type: 'rest',
-        url: '/jongo/comments',
+        url: '/demo1/comments',
         reader:{
             type: 'json',
             success: true,
