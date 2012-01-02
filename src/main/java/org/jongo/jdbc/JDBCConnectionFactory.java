@@ -18,7 +18,6 @@
 
 package org.jongo.jdbc;
 
-import org.jongo.jdbc.connections.MySQLConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -33,8 +32,6 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.jongo.config.DatabaseConfiguration;
 import org.jongo.config.JongoConfiguration;
-import org.jongo.jdbc.connections.HSQLConnection;
-import org.jongo.jdbc.connections.OracleConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +59,7 @@ public class JDBCConnectionFactory {
                 l.debug("Registering Connection Pool for " + dbname);
                 DatabaseConfiguration dbcfg = configuration.getDatabaseConfiguration(dbname);
                 GenericObjectPool pool = new GenericObjectPool(null, 5);
-                ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(dbcfg.getUrl(), dbcfg.getUser(), dbcfg.getPassword());
+                ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(dbcfg.getUrl(), dbcfg.getUsername(), dbcfg.getPassword());
                 PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, pool, null, null, false, true);
                 instance.connectionPool.put(dbname, pool);
             }
@@ -70,44 +67,11 @@ public class JDBCConnectionFactory {
             l.debug("Registering Connection Pool for admin database");
             DatabaseConfiguration dbcfg = configuration.getAdminDatabaseConfiguration();
             GenericObjectPool pool = new GenericObjectPool(null, 5);
-            ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(dbcfg.getUrl(), dbcfg.getUser(), dbcfg.getPassword());
+            ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(dbcfg.getUrl(), dbcfg.getUsername(), dbcfg.getPassword());
             PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, pool, null, null, false, true);
             instance.connectionPool.put(JONGO_ADMIN, pool);
         }
         return instance;
-    }
-    
-    public static JongoJDBCConnection getJongoAdminJDBCConnection() {
-        JDBCConnectionFactory me = JDBCConnectionFactory.instanceOf();
-        JongoJDBCConnection cx = me.getJongoJDBCConnection(configuration.getAdminDatabaseConfiguration());
-        return cx;
-    }
-    
-    public static JongoJDBCConnection getJongoJDBCConnection(final String database){
-        JDBCConnectionFactory me = JDBCConnectionFactory.instanceOf();
-        return me.getJongoJDBCConnection(configuration.getDatabaseConfiguration(database));
-    }
-
-    public JongoJDBCConnection getJongoJDBCConnection(final DatabaseConfiguration conf) {
-        JongoJDBCConnection cx = null;
-        switch (conf.getDriver()) {
-            case MySQL:
-                l.debug("New MySQL Connection to " + conf.toString());
-                cx = new MySQLConnection(conf);
-                break;
-            case HSQLDB:
-                l.debug("New HSQLDB Connection to " + conf.toString());
-                cx = new HSQLConnection(conf);
-                break;
-            case ORACLE:
-                l.debug("New Oracle Connection to " + conf.toString());
-                cx = new OracleConnection(conf);
-                break;
-            default:
-                throw new IllegalArgumentException("Not implemented yet");
-        }
-
-        return cx;
     }
 
     public static Connection getConnection(final String database) throws SQLException {

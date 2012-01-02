@@ -17,92 +17,49 @@
  */
 package org.jongo.config;
 
-import org.apache.commons.lang.StringUtils;
+import javax.ws.rs.core.MultivaluedMap;
 import org.jongo.enums.JDBCDriver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.jongo.jdbc.LimitParam;
+import org.jongo.jdbc.OrderParam;
 
 /**
- * Class to describe a database configuration object.
+ *
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
-public class DatabaseConfiguration {
+public interface DatabaseConfiguration {
+    public void loadDriver();
     
-    private static final Logger l = LoggerFactory.getLogger(DatabaseConfiguration.class);
+    public String getSelectAllFromTableQuery(final String table);
     
-    private final String name;
-    private final JDBCDriver driver;
-    private final String user;
-    private final String password;
-    private final String url;
-
-    public DatabaseConfiguration(String name, JDBCDriver driver, String user, String password, String url) {
-        this.name = name;
-        this.driver = driver;
-        this.user = user;
-        this.password = password;
-        this.url = url;
-    }
+    public String getSelectAllFromTableQuery(final String table, LimitParam limit, OrderParam order);
     
-    public static DatabaseConfiguration instanceForAdminInMemory(){
-        DatabaseConfiguration c = new DatabaseConfiguration("jongoAdmin", JDBCDriver.HSQLDB, "jongoAdmin", "jongoAdmin", "jdbc:hsqldb:mem:adminDemo");
-        return c;
-    }
+    public String getSelectAllFromTableQuery(final String table, final String idCol);
     
-    public static DatabaseConfiguration instanceForAdminInFile(){
-        DatabaseConfiguration c = new DatabaseConfiguration("jongoAdmin", JDBCDriver.HSQLDB, "jongoAdmin", "jongoAdmin", "jdbc:hsqldb:file:data/jongoAdmin");
-        return c;
-    }
-
-    public JDBCDriver getDriver() {
-        return driver;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public String getUser() {
-        return user;
-    }
+    public String getSelectAllFromTableQuery(final String table, final String idCol, LimitParam limit, OrderParam order);
     
-    public boolean isValid(){
-        if(StringUtils.isBlank(name)){
-            l.warn("Invalid database name. Check your configuration.");
-            return false;
-        }
-        
-        if(StringUtils.isBlank(user)){
-            l.warn("Invalid database user. Check your configuration.");
-            return false;
-        }
-        
-        if(StringUtils.isBlank(password)){
-            l.warn("Invalid database password. Check your configuration.");
-            return false;
-        }
-        
-        if(StringUtils.isBlank(url)){
-            l.warn("Invalid database url. Check your configuration.");
-            return false;
-        }
-        
-        return true;
-    }
+    public String getInsertQuery(final String table, final MultivaluedMap<String,String> params);
+    
+    public String getUpdateQuery(final String table, final String key, final MultivaluedMap<String,String> params);
+    
+    public String getDeleteQuery(final String table, final String key);
+    
+    public String getUrl();
 
-    @Override
-    public String toString() {
-        return "DatabaseConfiguration{" + "name=" + name + ", driver=" + driver + ", user=" + user + ", password=" + password + ", url=" + url + '}';
-    }
+    public String getUsername();
     
+    public String getPassword();
     
+    public JDBCDriver getDriver();
+    
+    /**
+     * Implements a string which should return only return the first row of a table. Since every RDBMS supports a different syntax we have
+     * to implement it for each connection. From the wikipedia: http://en.wikipedia.org/wiki/Select_(SQL)#FETCH_FIRST_clause
+     * SELECT * FROM T FETCH FIRST 10 ROWS ONLY
+     * This clause currently is supported by IBM DB2, Sybase SQL Anywhere, PostgreSQL, EffiProz and HSQLDB version 2.0.
+     * SELECT * FROM T LIMIT 10 OFFSET 20	Netezza, MySQL, PostgreSQL (also supports the standard, since version 8.4), SQLite, HSQLDB, H2
+     * SELECT * from T WHERE ROWNUM <= 10	Oracle (also supports the standard, since Oracle8i)
+     * @param table
+     * @return a query that when executed should only return the first row of a table.
+     */
+    public String getFirstRowQuery(final String table);
 }

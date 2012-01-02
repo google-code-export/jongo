@@ -25,6 +25,7 @@ import org.jongo.enums.JDBCDriver;
  *
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
+@Deprecated
 public interface JongoJDBCConnection {
     
     public void loadDriver();

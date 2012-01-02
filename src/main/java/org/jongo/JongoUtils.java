@@ -29,12 +29,11 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.jongo.config.DatabaseConfiguration;
 import org.jongo.config.JongoConfiguration;
 import org.jongo.exceptions.JongoBadRequestException;
 import org.jongo.exceptions.StartupException;
 import org.jongo.jdbc.AdminJDBCExecutor;
-import org.jongo.jdbc.JDBCConnectionFactory;
-import org.jongo.jdbc.JongoJDBCConnection;
 import org.jongo.rest.xstream.JongoMapConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -250,16 +249,16 @@ public class JongoUtils {
     
     public static void loadAdminDatabase(final JongoConfiguration conf) throws StartupException{
         l.info("Initializing JDBC Connections");
-        JongoJDBCConnection conn = null;
+        DatabaseConfiguration dbconf = null;
         try{
-            conn = JDBCConnectionFactory.getJongoAdminJDBCConnection();
+            dbconf = conf.getAdminDatabaseConfiguration();
             AdminJDBCExecutor.createJongoTablesAndData();
         }catch(Exception e){
             l.error(e.getMessage());
             throw new StartupException("Failed to generate Jongo Tables and default configuration", true);
         }
         
-        if(conn == null){
+        if(dbconf == null){
             throw new StartupException("Failed to load database. Quitting", true);
         }
     }

@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.logging.Level;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.demo.Demo;
 import org.jongo.enums.JDBCDriver;
@@ -88,10 +87,10 @@ public class JongoConfiguration {
             
             if(demo){
                 l.debug("Loading demo configuration with memory databases");
-                instance.admin = DatabaseConfiguration.instanceForAdminInMemory();
+                instance.admin = AbstractDatabaseConfiguration.instanceForAdminInMemory();
                 instance.databases = Demo.getDemoDatabasesConfiguration();
             }else{
-                instance.admin = DatabaseConfiguration.instanceForAdminInFile();
+                instance.admin = AbstractDatabaseConfiguration.instanceForAdminInFile();
                 try {
                     instance.databases = getDatabaseConfigurations(prop);
                 } catch (StartupException ex) {
@@ -159,7 +158,7 @@ public class JongoConfiguration {
         String username = prop.getProperty(name + p_prefix_db_username);
         String password = prop.getProperty(name + p_prefix_db_password);
         String url = prop.getProperty(name + p_prefix_db_url);
-        DatabaseConfiguration c = new DatabaseConfiguration(name, driver, username, password, url);
+        DatabaseConfiguration c = AbstractDatabaseConfiguration.instanceOf(name, driver, username, password, url);
         return c;
     }
     
