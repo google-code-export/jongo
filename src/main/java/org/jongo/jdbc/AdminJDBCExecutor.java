@@ -25,6 +25,8 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.JongoUtils;
+import org.jongo.config.DatabaseConfiguration;
+import org.jongo.config.JongoConfiguration;
 import org.jongo.domain.JongoQuery;
 import org.jongo.domain.JongoTable;
 import org.jongo.handler.JongoQueryResultSetHandler;
@@ -42,7 +44,8 @@ import org.slf4j.LoggerFactory;
  */
 public class AdminJDBCExecutor {
     private static final Logger l = LoggerFactory.getLogger(JDBCExecutor.class);
-    private static final JongoJDBCConnection conn = JDBCConnectionFactory.getJongoAdminJDBCConnection();
+    private static final JongoConfiguration conf = JongoConfiguration.instanceOf();
+    private static final DatabaseConfiguration dbconf = conf.getAdminDatabaseConfiguration();
     private static final QueryRunner run = JDBCConnectionFactory.getAdminQueryRunner();
     
     /**
@@ -94,7 +97,7 @@ public class AdminJDBCExecutor {
     
     public static void createJongoTablesAndData() throws SQLException{
         ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(false);
-        String query = conn.getSelectAllFromTableQuery("JongoTable");
+        String query = dbconf.getSelectAllFromTableQuery("JongoTable");
         List<RowResponse> results = null;
         try {
             results = run.query(query, res);
@@ -123,7 +126,7 @@ public class AdminJDBCExecutor {
             params.add(formParams.getFirst(k));
         }
         
-        String query = conn.getInsertQuery(table, formParams);
+        String query = dbconf.getInsertQuery(table, formParams);
         l.debug(query);
         
         try {
@@ -134,7 +137,7 @@ public class AdminJDBCExecutor {
     }
     
     public static List<RowResponse> find(final String table, Object... params) throws JongoJDBCException {
-        String query = conn.getSelectAllFromTableQuery(table, "id");
+        String query = dbconf.getSelectAllFromTableQuery(table, "id");
         l.debug(query + " params: " + JongoUtils.varargToString(params));
         ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(true);
         try {
@@ -146,7 +149,7 @@ public class AdminJDBCExecutor {
     }
     
     public static List<RowResponse> findAll(final String table) throws JongoJDBCException {
-        String query = conn.getSelectAllFromTableQuery(table);
+        String query = dbconf.getSelectAllFromTableQuery(table);
         l.debug(query);
         ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(true);
         try {
@@ -167,7 +170,7 @@ public class AdminJDBCExecutor {
         }
         params.add(id);
         
-        String query = conn.getUpdateQuery(table, "id", formParams);
+        String query = dbconf.getUpdateQuery(table, "id", formParams);
         l.debug(query);
         try {
             return run.update(query, JongoUtils.parseValues(params));
@@ -179,7 +182,7 @@ public class AdminJDBCExecutor {
     public static int delete(final String table, final String id) throws JongoJDBCException {
         l.debug("Deleting admin " + table);
         
-        String query = conn.getDeleteQuery(table, "id");
+        String query = dbconf.getDeleteQuery(table, "id");
         l.debug(query);
         
         try {
