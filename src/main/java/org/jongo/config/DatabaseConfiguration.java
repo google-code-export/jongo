@@ -109,7 +109,7 @@ public interface DatabaseConfiguration {
     public JDBCDriver getDriver();
     
     /**
-     * Implements a string which should return only return the first row of a table. Since every RDBMS supports a different syntax we have
+     * Implements a string which should only return the first row of a table. Since every RDBMS supports a different syntax we have
      * to implement it for each connection. From the wikipedia: http://en.wikipedia.org/wiki/Select_(SQL)#FETCH_FIRST_clause
      * SELECT * FROM T FETCH FIRST 10 ROWS ONLY
      * This clause currently is supported by IBM DB2, Sybase SQL Anywhere, PostgreSQL, EffiProz and HSQLDB version 2.0.
@@ -119,4 +119,11 @@ public interface DatabaseConfiguration {
      * @return a query that when executed should only return the first row of a table.
      */
     public String getFirstRowQuery(final String table);
+    
+    /**
+     * Generates a query specific to evert database to obtain the list of tables of the current
+     * database. Try to implement the query in such a way that the key for the table name is "table_name".
+     * @return a query that when executed should return a list with the tables of the current database.
+     */
+    public String getListOfTablesQuery();
 }

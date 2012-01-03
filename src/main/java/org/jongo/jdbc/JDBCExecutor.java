@@ -259,4 +259,21 @@ public class JDBCExecutor {
             l.debug(ex.getMessage());
         }
     }
+    
+    public static List<RowResponse> getListOfTables(final String database) throws JongoJDBCException{
+        l.debug("Obtaining the list of tables for the database " + database);
+        if(!conf.allowListTables()){
+            throw JongoJDBCExceptionFactory.getException(database, "Cant read database metadata. Access Denied", JongoJDBCException.ILLEGAL_READ_CODE);
+        }
+        ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(true);
+        DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(database);
+        String query = dbconf.getListOfTablesQuery();
+        QueryRunner run = JDBCConnectionFactory.getQueryRunner(database);
+        try {
+            List<RowResponse> results = run.query(query, res);
+            return results;
+        } catch (SQLException ex) {
+            throw JongoJDBCExceptionFactory.getException(database, ex.getMessage(), ex);
+        }
+    }
 }

@@ -29,6 +29,7 @@ import javax.ws.rs.core.UriInfo;
  */
 public interface JongoWS {
     
+    public Response get(final String format, final UriInfo ui);
     public Response get(final String table, final String format, final UriInfo ui);
     public Response get(final String table, final String format, final String id, final UriInfo ui);
     public Response find(final String table, final String format, final String col, final String val, final UriInfo ui);
