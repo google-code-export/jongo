@@ -97,5 +97,10 @@ public class OracleConfiguration extends AbstractDatabaseConfiguration implement
         query.append(limit.getStart());
         return query.toString();
     }
+
+    @Override
+    public String getListOfTablesQuery() {
+        return "SELECT TABLE_NAME FROM ALL_ALL_TABLES";
+    }
     
 }

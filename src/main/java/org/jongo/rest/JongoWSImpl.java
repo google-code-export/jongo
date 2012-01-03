@@ -21,6 +21,7 @@ package org.jongo.rest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -61,6 +62,38 @@ public class JongoWSImpl implements JongoWS {
     
     private static final Logger l = LoggerFactory.getLogger(JongoWSImpl.class);
     private static final Usage u = Usage.getInstance();
+    
+    @GET
+    @Path("meta")
+    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+    @Override
+    public Response get(@DefaultValue("json") @QueryParam("format") String format, @Context final UriInfo ui) {
+        final String database = ui.getBaseUri().getPath().replaceAll("/", "");
+        Response response = null;
+        List<RowResponse> results = null;
+        try {
+            results = JDBCExecutor.getListOfTables(database);
+        } catch (JongoJDBCException ex) {
+            l.info("Received a JongoJDBCException " + ex.getMessage());
+            response =  ex.getResponse(format);
+        } catch (Exception ex){
+            l.info("Received an Unhandled Exception " + ex.getMessage());
+            JongoResponse error = new JongoError(database, Response.Status.INTERNAL_SERVER_ERROR);
+            response =  error.getResponse(format);
+        }
+        
+        if(results == null && response == null){
+            JongoResponse error = new JongoError(database, Response.Status.NOT_FOUND);
+            response =  error.getResponse(format);
+        }
+        
+        if(response == null){
+            JongoResponse r = new JongoSuccess(database, results);
+            response = r.getResponse(format);
+        }
+        
+        return response;
+    }
     
     @GET
     @Path("{table}")

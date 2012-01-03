@@ -46,6 +46,7 @@ public class JongoConfiguration {
     private static final String p_name_jongo_allow_apps = "jongo.allow.apps";
     private static final String p_name_jongo_default_limit = "jongo.default.limit";
     private static final String p_name_jongo_max_limit = "jongo.default.max.limit";
+    private static final String p_name_jongo_allow_list_tables = "jongo.allow.database.metadata";
     private static final String p_name_jongo_database_list = "jongo.database.list";
     private static final String p_prefix_db_driver = ".jdbc.driver";
     private static final String p_prefix_db_username = ".jdbc.username";
@@ -60,6 +61,7 @@ public class JongoConfiguration {
     
     private Integer limit;
     private Integer maxLimit;
+    private boolean listTables;
     
     private boolean adminEnabled;
     private String adminIp;
@@ -84,6 +86,7 @@ public class JongoConfiguration {
             instance.appsEnabled = Boolean.valueOf(prop.getProperty(p_name_jongo_allow_apps));
             instance.limit = Integer.valueOf(prop.getProperty(p_name_jongo_default_limit));
             instance.maxLimit = Integer.valueOf(prop.getProperty(p_name_jongo_max_limit));
+            instance.listTables = Boolean.valueOf(prop.getProperty(p_name_jongo_allow_list_tables));
             
             if(demo){
                 l.debug("Loading demo configuration with memory databases");
@@ -219,5 +222,9 @@ public class JongoConfiguration {
     
     public Set<String> getDatabases(){
         return databases.keySet();
+    }
+
+    public boolean allowListTables() {
+        return listTables;
     }
 }

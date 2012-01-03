@@ -60,7 +60,12 @@ public class MySQLConfiguration extends AbstractDatabaseConfiguration implements
      * @return a MySQL query that when executed should only return the first row of a table.
      */
     @Override
-    public String getFirstRowQuery(String table) {
+    public String getFirstRowQuery(final String table) {
         return "SELECT * FROM " + table + " LIMIT 1";
+    }
+
+    @Override
+    public String getListOfTablesQuery() {
+        return "SHOW TABLES";
     }
 }
