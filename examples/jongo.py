@@ -21,10 +21,16 @@
 
 # An API to abstract the use of jongo from a Python application. It uses
 # pretty standard libraries in Python 2.7 so it should work with any
-# version of Python from 2.5 to 2.7
+# version of Python from 2.6 to 2.7
+# With Python 2.4 you'll need to get the simplejson library 
+# http://pypi.python.org/pypi/simplejson/2.1.0
 
-import json
+try:
+    import json
+except ImportError:
+    import simplejson as json
 import httplib, urllib
+
 
 class JongoEvent(object):
     def __init__(self):
@@ -70,7 +76,7 @@ class Response(object):
         self.raw = json.loads(buf)
         self.code = self.raw['code']
         self.count = self.raw['count']
-        if self.code is 200 or self.code is 201:
+        if self.code == 200 or self.code == 201:
             self.process_success()
         else:
             self.process_failure()
