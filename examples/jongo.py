@@ -75,7 +75,6 @@ class Response(object):
     def callback(self, buf):
         self.raw = json.loads(buf)
         self.code = self.raw['code']
-        self.count = self.raw['count']
         if self.code == 200 or self.code == 201:
             self.process_success()
         else:
@@ -83,6 +82,7 @@ class Response(object):
 
     def process_success(self):
         self.success = True
+        self.count = self.raw['count']
         for i in self.raw['response']:
             self.data.append(i)
 
