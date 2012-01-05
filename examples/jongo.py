@@ -342,5 +342,11 @@ class JongoModel(object):
             raise TypeError("Cannot commit non ghost, dirty or dead models")
 
     def destroy(self):
+        if not self.id:
+            raise KeyError("Invalid id for the model")
+
+        if not self.proxy:
+            raise ValueError("Proxy has not been set for this model")
+
         self.dead = True
         self.commit()
