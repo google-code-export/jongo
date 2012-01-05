@@ -341,3 +341,6 @@ class JongoModel(object):
         else:
             raise TypeError("Cannot commit non ghost, dirty or dead models")
 
+    def destroy(self):
+        self.dead = True
+        self.commit()
