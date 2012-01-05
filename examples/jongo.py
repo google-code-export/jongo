@@ -128,8 +128,8 @@ class Sort(object):
         return urllib.urlencode(me)
 
 class ProxyError(Exception):
-    def __init__(self, message):
-        self.message = message
+    def __init__(self, message, error):
+        self.message = "%s: %s" % (message, error)
 
     def __str__(self):
         return repr(self.message)
@@ -146,7 +146,7 @@ class Proxy(object):
         request = Request(self.url, self.path, 'POST', model_instance.toJSON())
         request.perform()
         if not request.response.success:
-            raise ProxyError(request.response.error)
+            raise ProxyError(request.response.message, request.response.error)
 
     def read_all(self):
         data = []
@@ -282,12 +282,13 @@ class JongoStore(object):
             self.load()
 
 class JongoModel(object):
-    def __init__(self, id=None, idCol=None, ghost=False, dirty=False, dead=False):
+    def __init__(self, id=None, idCol=None, ghost=False, dirty=False, dead=False, proxy=None):
         self.id = id
         self.idCol = idCol
         self.ghost = ghost
         self.dirty = dirty
         self.dead = dead
+        self.proxy = proxy
 
     def _get_unmappable_values(self):
         unmap = [ "proxy", "id", "idCol", "ghost", "dirty", "dead" ] 
@@ -317,4 +318,26 @@ class JongoModel(object):
         for attr, value in self.__dict__.iteritems():
             me.append("%s:%s" % (attr, value))
         return " ".join(me)
+
+    def load(self):
+        if not self.id:
+            raise KeyError("Invalid id for the model")
+
+        if not self.proxy:
+            raise ValueError("Proxy has not been set for this model")
+
+        return self.proxy.read(self.id)
+        
+    def commit(self):
+        if not self.proxy:
+            raise ValueError("Proxy has not been set for this model")
+
+        if self.ghost:
+            self.proxy.create(self)
+        elif self.dirty:
+            self.proxy.update(self)
+        elif self.dead:
+            self.proxy.remove(self)
+        else:
+            raise TypeError("Cannot commit non ghost, dirty or dead models")
 
