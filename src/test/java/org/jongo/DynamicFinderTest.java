@@ -36,77 +36,77 @@ public class DynamicFinderTest {
     public void test_findByName() {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE name = ?";
-        doTest(dynamicQuery, query);
+        assertTrue(doTest(dynamicQuery, query));
     }
 
     @Test
     public void test_findByNameAndAgeGreaterThanEquals() {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE name = ? AND age >= ?";
-        doTest(dynamicQuery, query);
+        assertTrue(doTest(dynamicQuery, query));
     }
 
     @Test
     public void test_findByNameEqualsAndAgeIsNotNull() {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE name = ? AND age IS NOT NULL";
-        doTest(dynamicQuery, query);
+        assertTrue(doTest(dynamicQuery, query));
     }
 
     @Test
     public void test_findByAgeEqualsAndNameIsNull() {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE age = ? AND name IS NULL";
-        doTest(dynamicQuery, query);
+        assertTrue(doTest(dynamicQuery, query));
     }
 
     @Test
     public void test_findByNameAndAgeEquals() {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE name = ? AND age = ?";
-        doTest(dynamicQuery, query);
+        assertTrue(doTest(dynamicQuery, query));
     }
 
     @Test
     public void test_findByNameLessThanAndAgeGreaterThanEquals() {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE name < ? AND age >= ?";
-        doTest(dynamicQuery, query);
+        assertTrue(doTest(dynamicQuery, query));
     }
 
     @Test
     public void test_findAllByAgeBetweenAndNameEquals() {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE age BETWEEN ? AND ? AND name = ?";
-        doTest(dynamicQuery, query);
+        assertTrue(doTest(dynamicQuery, query));
     }
 
     @Test
     public void test_findByNameAndAgeIsNull() {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE name = ? AND age IS NULL";
-        doTest(dynamicQuery, query);
+        assertTrue(doTest(dynamicQuery, query));
     }
 
     @Test
     public void test_findAllByAgeBetween() {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE age BETWEEN ? AND ?";
-        doTest(dynamicQuery, query);
+        assertTrue(doTest(dynamicQuery, query));
     }
 
     @Test
     public void test_findByNameAndAgeIsNotNull() {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE name = ? AND age IS NOT NULL";
-        doTest(dynamicQuery, query);
+        assertTrue(doTest(dynamicQuery, query));
     }
 
     @Test
     public void test_findByNameEquals() {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE name = ?";
-        doTest(dynamicQuery, query);
+        assertTrue(doTest(dynamicQuery, query));
     }
 
     @Test
@@ -120,14 +120,14 @@ public class DynamicFinderTest {
     public void test_findByNameIsNotNull() {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE name IS NOT NULL";
-        doTest(dynamicQuery, query);
+        assertTrue(doTest(dynamicQuery, query));
     }
 
     @Test
     public void test_findByNameIsNotNullAndAgeIsNotNull() {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE name IS NOT NULL AND age IS NOT NULL";
-        doTest(dynamicQuery, query);
+        assertTrue(doTest(dynamicQuery, query));
     }
 
     @Test
@@ -141,42 +141,50 @@ public class DynamicFinderTest {
     public void test_findByNameAndAgeGreaterThan() {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE name = ? AND age > ?";
-        doTest(dynamicQuery, query);
+        assertTrue(doTest(dynamicQuery, query));
     }
 
     @Test
     public void test_findByNameIsNull() {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE name IS NULL";
-        doTest(dynamicQuery, query);
+        assertTrue(doTest(dynamicQuery, query));
     }
 
     @Test
     public void test_findByNameGreaterThanAndAgeIsNull() {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE name > ? AND age IS NULL";
-        doTest(dynamicQuery, query);
+        assertTrue(doTest(dynamicQuery, query));
     }
 
     @Test
     public void test_findByNameGreaterThanEqualsAndAgeIsNotNull() {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE name >= ? AND age IS NOT NULL";
-        doTest(dynamicQuery, query);
+        assertTrue(doTest(dynamicQuery, query));
     }
 
     @Test
     public void test_findByAgeAndNameIsNull() {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE age = ? AND name IS NULL";
-        doTest(dynamicQuery, query);
+        assertTrue(doTest(dynamicQuery, query));
     }
     
     @Test
     public void test_findAllByNameLike() {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE name LIKE ?";
-        doTest(dynamicQuery, query);
+        assertTrue(doTest(dynamicQuery, query));
+    }
+    
+    @Test
+    public void test_findLastByNameLike() {
+        String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
+        String query = "SELECT * FROM sometable WHERE name LIKE ?";
+        // In the future this shouldn't fail
+        assertFalse(doTest(dynamicQuery, query));
     }
     
     @Test(expected=JongoBadRequestException.class)
@@ -233,13 +241,14 @@ public class DynamicFinderTest {
         doTest(dynamicQuery);
     }
     
-    private void doTest(String dynamicQuery, String query) {
+    private boolean doTest(String dynamicQuery, String query) {
         try {
             DynamicFinder d = DynamicFinder.valueOf("sometable", dynamicQuery);
-            assertTrue(d.getSql().equalsIgnoreCase(query));
+            return d.getSql().equalsIgnoreCase(query);
         } catch (JongoBadRequestException ex) {
 //            System.out.print(ex.getMessage());
         }
+        return false;
     }
     
     private void doTest(String dynamicQuery) throws JongoBadRequestException {
@@ -276,7 +285,7 @@ public class DynamicFinderTest {
             b.append("(){\nString dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split(\"_\")[1];\nString query = \"");
             b.append(result);
             b.append("\";\n");
-            b.append("doTest(dynamicQuery, query);\n}");
+            b.append("assertTrue(doTest(dynamicQuery, query));\n}");
 //            System.out.println(b.toString());
         }
         
