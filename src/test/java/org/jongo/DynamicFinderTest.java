@@ -38,6 +38,14 @@ public class DynamicFinderTest {
         String query = "SELECT * FROM sometable WHERE name = ?";
         assertTrue(doTest(dynamicQuery, query));
     }
+    
+    @Test
+    public void testSpecialCharsInTableNames() {
+        assertTrue(doTest("findByUser_id", "SELECT * FROM sometable WHERE user_id = ?"));
+        assertTrue(doTest("findBy09_id", "SELECT * FROM sometable WHERE 09_id = ?"));
+        assertTrue(doTest("findByid_09", "SELECT * FROM sometable WHERE id_09 = ?"));
+        assertTrue(doTest("findByid09", "SELECT * FROM sometable WHERE id09 = ?"));
+    }
 
     @Test
     public void test_findByNameAndAgeGreaterThanEquals() {
