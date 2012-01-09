@@ -72,6 +72,12 @@ public class UtilsTest {
     @Test
     public void testSplitCamelCase(){
         assertEquals(JongoUtils.splitCamelCase("nameIsNull"), "name Is Null");
+        assertEquals(JongoUtils.splitCamelCase("name_idIsNull"), "name_id Is Null");
+        assertEquals(JongoUtils.splitCamelCase("name_09IsNull"), "name_09 Is Null");
+        assertEquals(JongoUtils.splitCamelCase("01_09IsNull"), "01_09 Is Null");
+        assertEquals(JongoUtils.splitCamelCase("01IsNull"), "01 Is Null");
+//        This is an invalid usage but the sql will break with this sort of query
+//        assertEquals(JongoUtils.splitCamelCase("01*.Null"), "01 Is Null");
         assertEquals(JongoUtils.splitCamelCase(""), "");
     }
     
