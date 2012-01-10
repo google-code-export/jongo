@@ -71,7 +71,7 @@ public abstract class AbstractDatabaseConfiguration {
             default:
                 throw new IllegalArgumentException("Not implemented yet");
         }
-        
+        c.loadDriver();
         return c;
     }
     
