@@ -253,7 +253,7 @@ public class JDBCExecutor {
     public static void shutdown(){
         l.debug("Shutting down JDBC connections");
         try {
-//            JDBCConnectionFactory.getDataSource().getConnection().close();
+            JDBCConnectionFactory.closeConnections();
         } catch (Exception ex) {
             l.warn("Failed to close connection to database?");
             l.debug(ex.getMessage());
