@@ -107,4 +107,11 @@ public class JDBCConnectionFactory {
         DataSource ds = getDataSource(JONGO_ADMIN);
         return new QueryRunner(ds);
     }
+    
+    public static void closeConnections() throws SQLException{
+        for(String dbname : configuration.getDatabases()){
+            l.debug("Shutting down JDBC connection " + dbname);
+            getConnection(dbname).close();
+        }
+    }
 }
