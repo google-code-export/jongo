@@ -67,7 +67,7 @@ public class JongoWSImpl implements JongoWS {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
     public Response get(@DefaultValue("json") @QueryParam("format") String format, @Context final UriInfo ui) {
-        final String database = ui.getBaseUri().getPath().replaceAll("/", "");
+        final String database = JongoUtils.getDatabaseNameFromPath(ui);
         Response response = null;
         List<RowResponse> results = null;
         try {
@@ -107,7 +107,7 @@ public class JongoWSImpl implements JongoWS {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
     public Response get(@PathParam("table") String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") String id, @Context final UriInfo ui) {
-        final String database = ui.getBaseUri().getPath().replaceAll("/", "");
+        final String database = JongoUtils.getDatabaseNameFromPath(ui);
         l.debug("Geting resource from " + database + "." + table + " with id " + id);
         
         final Long start = System.nanoTime();
