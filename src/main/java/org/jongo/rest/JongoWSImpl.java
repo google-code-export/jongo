@@ -322,7 +322,7 @@ public class JongoWSImpl implements JongoWS {
     @Path("{table}/{column}/{value}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
-    public Response find(@PathParam("table") String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("column") final String col, @PathParam("value") final String val, @Context final UriInfo ui) {
+    public Response find(@PathParam("table") String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("column") final String col, @PathParam("args") final String val, @Context final UriInfo ui) {
         final String database = JongoUtils.getDatabaseNameFromPath(ui);
         l.debug("Geting resource from " + database + "." + table + " with " + col + " value " + val);
         
@@ -359,7 +359,7 @@ public class JongoWSImpl implements JongoWS {
     @Path("{table}/dynamic/{query}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
-    public Response findBy(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("query") String query, @QueryParam("value") String value, @QueryParam("values")  List<String> values, @Context final UriInfo ui) {
+    public Response findBy(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("query") String query, @QueryParam("args")  List<String> values, @Context final UriInfo ui) {
         final String database = JongoUtils.getDatabaseNameFromPath(ui);
         l.debug("Find resource from " + database + "." + table + " with " + query);
         
@@ -372,7 +372,7 @@ public class JongoWSImpl implements JongoWS {
             response =  error.getResponse(format);
         }else{
             if(values.isEmpty()){
-                if(value == null){
+                if(values.size() == 1){
                     try{
                         DynamicFinder df = DynamicFinder.valueOf(table, query);
                         results = JDBCExecutor.find(database, df);
@@ -389,6 +389,7 @@ public class JongoWSImpl implements JongoWS {
                         response =  error.getResponse(format);
                     }
                 }else{
+                    String value = values.get(0);
                     try{
                         DynamicFinder df = DynamicFinder.valueOf(table, query, value);
                         results = JDBCExecutor.find(database, df, JongoUtils.parseValue(value));
@@ -407,7 +408,6 @@ public class JongoWSImpl implements JongoWS {
                 }
 
             }else{
-                
                 try{
                     DynamicFinder df = DynamicFinder.valueOf(table, query, values.toArray(new String []{}));
                     results = JDBCExecutor.find(database, df, JongoUtils.parseValues(values));
