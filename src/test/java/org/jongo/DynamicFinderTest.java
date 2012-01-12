@@ -195,6 +195,21 @@ public class DynamicFinderTest {
         assertFalse(doTest(dynamicQuery, query));
     }
     
+    @Test
+    public void test_findAllByMarketEqualsAndDateBetween() {
+        String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
+        String query = "SELECT * FROM sometable WHERE date BETWEEN ? AND ? AND market = ?";
+        // In the future this shouldn't fail
+        assertTrue(doTest(dynamicQuery, query));
+    }
+    
+    @Test
+    public void test_findAllByDateBetweenAndMarketEquals() {
+        String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
+        String query = "SELECT * FROM sometable WHERE date BETWEEN ? AND ? AND market = ?";
+        assertTrue(doTest(dynamicQuery, query));
+    }
+    
     @Test(expected=JongoBadRequestException.class)
     public void test_findAllByAgeGreaterTahnEquals() throws JongoBadRequestException{
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
@@ -254,7 +269,7 @@ public class DynamicFinderTest {
             DynamicFinder d = DynamicFinder.valueOf("sometable", dynamicQuery);
             return d.getSql().equalsIgnoreCase(query);
         } catch (JongoBadRequestException ex) {
-//            System.out.print(ex.getMessage());
+            System.out.print(ex.getMessage());
         }
         return false;
     }
