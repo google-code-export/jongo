@@ -319,19 +319,23 @@ public class JongoWSImpl implements JongoWS {
     }
     
     @GET
-    @Path("{table}/{column}/{value}")
+    @Path("{table}/{column}/{arg}")
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
-    public Response find(@PathParam("table") String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("column") final String col, @PathParam("args") final String val, @Context final UriInfo ui) {
+    public Response find(@PathParam("table") String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("column") final String col, @PathParam("arg") final String arg, @Context final UriInfo ui) {
         final String database = JongoUtils.getDatabaseNameFromPath(ui);
-        l.debug("Geting resource from " + database + "." + table + " with " + col + " value " + val);
+        l.debug("Geting resource from " + database + "." + table + " with " + col + " value " + arg);
         
         final Long start = System.nanoTime();
+        
+        MultivaluedMap<String, String> pathParams = ui.getQueryParameters();
+        LimitParam limit = LimitParam.valueOf(pathParams);
+        OrderParam order = OrderParam.valueOf(pathParams);
         
         Response response = null;
         List<RowResponse> results = null;
         try {
-            results = JDBCExecutor.findByColumn(database, table, col, JongoUtils.parseValue(val));
+            results = JDBCExecutor.findByColumn(database, table, col, limit, order, JongoUtils.parseValue(arg));
         } catch (JongoJDBCException ex) {
             l.info("Received a JongoJDBCException " + ex.getMessage());
             response =  ex.getResponse(format);
@@ -342,7 +346,7 @@ public class JongoWSImpl implements JongoWS {
         }
         
         if((results == null || results.isEmpty()) && response == null ){
-            JongoResponse error = new JongoError(table, Response.Status.NOT_FOUND, "No results for " + table + " with " + col + " = " + val);
+            JongoResponse error = new JongoError(table, Response.Status.NOT_FOUND, "No results for " + table + " with " + col + " = " + arg);
             response =  error.getResponse(format);
         }
         
@@ -365,6 +369,10 @@ public class JongoWSImpl implements JongoWS {
         
         final Long start = System.nanoTime();
         
+        MultivaluedMap<String, String> pathParams = ui.getQueryParameters();
+        LimitParam limit = LimitParam.valueOf(pathParams);
+        OrderParam order = OrderParam.valueOf(pathParams);
+        
         Response response = null;
         List<RowResponse> results = null;
         if(query == null){
@@ -372,10 +380,10 @@ public class JongoWSImpl implements JongoWS {
             response =  error.getResponse(format);
         }else{
             if(values.isEmpty()){
-                if(values.size() == 1){
+                if(values.isEmpty()){
                     try{
                         DynamicFinder df = DynamicFinder.valueOf(table, query);
-                        results = JDBCExecutor.find(database, df);
+                        results = JDBCExecutor.find(database, df, limit, order);
                     } catch (JongoJDBCException ex) {
                         l.info("Received a JongoJDBCException " + ex.getMessage());
                         response =  ex.getResponse(format);
@@ -392,7 +400,7 @@ public class JongoWSImpl implements JongoWS {
                     String value = values.get(0);
                     try{
                         DynamicFinder df = DynamicFinder.valueOf(table, query, value);
-                        results = JDBCExecutor.find(database, df, JongoUtils.parseValue(value));
+                        results = JDBCExecutor.find(database, df, limit, order, JongoUtils.parseValue(value));
                     } catch (JongoJDBCException ex) {
                         l.info("Received a JongoJDBCException " + ex.getMessage());
                         response =  ex.getResponse(format);
@@ -410,7 +418,7 @@ public class JongoWSImpl implements JongoWS {
             }else{
                 try{
                     DynamicFinder df = DynamicFinder.valueOf(table, query, values.toArray(new String []{}));
-                    results = JDBCExecutor.find(database, df, JongoUtils.parseValues(values));
+                    results = JDBCExecutor.find(database, df, limit, order, JongoUtils.parseValues(values));
                 } catch (JongoJDBCException ex) {
                     l.info("Received a JongoJDBCException " + ex.getMessage());
                     response =  ex.getResponse(format);
