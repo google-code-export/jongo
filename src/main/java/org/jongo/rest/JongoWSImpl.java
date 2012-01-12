@@ -21,7 +21,6 @@ package org.jongo.rest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -156,7 +155,7 @@ public class JongoWSImpl implements JongoWS {
     @Consumes(MediaType.APPLICATION_JSON)
     @Override
     public Response insert(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, final String jsonRequest, @Context final UriInfo ui) {
-        final String database = ui.getBaseUri().getPath().replaceAll("/", "");
+        final String database = JongoUtils.getDatabaseNameFromPath(ui);
         l.debug("Insert new " + database + "." + table + " with JSON values: " + jsonRequest);
         
         final Long start = System.nanoTime();
@@ -200,7 +199,7 @@ public class JongoWSImpl implements JongoWS {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Override
     public Response insert(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, final MultivaluedMap<String, String> formParams, @Context final UriInfo ui) {
-        final String database = ui.getBaseUri().getPath().replaceAll("/", "");
+        final String database = JongoUtils.getDatabaseNameFromPath(ui);
         l.debug("Insert new " + database + "." + table + " with values: " + formParams);
         
         final Long start = System.nanoTime();
@@ -244,7 +243,7 @@ public class JongoWSImpl implements JongoWS {
     @Consumes(MediaType.APPLICATION_JSON)
     @Override
     public Response update(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") final String id, final String jsonRequest, @Context final UriInfo ui) {
-        final String database = ui.getBaseUri().getPath().replaceAll("/", "");
+        final String database = JongoUtils.getDatabaseNameFromPath(ui);
         l.debug("Update record " + id + " in table " + database + "." + table + " with values: " + jsonRequest);
         
         final Long start = System.nanoTime();
@@ -285,7 +284,7 @@ public class JongoWSImpl implements JongoWS {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
     public Response delete(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("id") final String id, @Context final UriInfo ui) {
-        final String database = ui.getBaseUri().getPath().replaceAll("/", "");
+        final String database = JongoUtils.getDatabaseNameFromPath(ui);
         l.debug("Delete record " + id + " from table " + database + "." + table);
         
         final Long start = System.nanoTime();
@@ -324,7 +323,7 @@ public class JongoWSImpl implements JongoWS {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
     public Response find(@PathParam("table") String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("column") final String col, @PathParam("value") final String val, @Context final UriInfo ui) {
-        final String database = ui.getBaseUri().getPath().replaceAll("/", "");
+        final String database = JongoUtils.getDatabaseNameFromPath(ui);
         l.debug("Geting resource from " + database + "." + table + " with " + col + " value " + val);
         
         final Long start = System.nanoTime();
@@ -361,7 +360,7 @@ public class JongoWSImpl implements JongoWS {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
     public Response findBy(@PathParam("table") final String table, @DefaultValue("json") @QueryParam("format") String format, @PathParam("query") String query, @QueryParam("value") String value, @QueryParam("values")  List<String> values, @Context final UriInfo ui) {
-        final String database = ui.getBaseUri().getPath().replaceAll("/", "");
+        final String database = JongoUtils.getDatabaseNameFromPath(ui);
         l.debug("Find resource from " + database + "." + table + " with " + query);
         
         final Long start = System.nanoTime();
@@ -445,7 +444,7 @@ public class JongoWSImpl implements JongoWS {
     @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
     @Override
     public Response query(@PathParam("query") String query, @DefaultValue("json") @QueryParam("format") String format, @QueryParam("args") List<String> arguments, @Context final UriInfo ui) {
-        final String database = ui.getBaseUri().getPath().replaceAll("/", "");
+        final String database = JongoUtils.getDatabaseNameFromPath(ui);
         l.debug("Executing Complex Query " + query);
         
         final Long start = System.nanoTime();
