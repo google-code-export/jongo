@@ -183,11 +183,11 @@ public class JDBCExecutor {
         return result;
     }
 
-    public static List<RowResponse> findByColumn(final String database, final String table, final String column, Object... params) throws JongoJDBCException {
+    public static List<RowResponse> findByColumn(final String database, final String table, final String column, final LimitParam limit, final OrderParam order, Object... params) throws JongoJDBCException {
         JongoTable result = isReadable(database, table);
         
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(database);
-        String query = dbconf.getSelectAllFromTableQuery(table, column);
+        String query = dbconf.getSelectAllFromTableQuery(table, column, limit, order);
         l.debug(query + " params: " + JongoUtils.varargToString(params));
         
         QueryRunner run = JDBCConnectionFactory.getQueryRunner(database);
@@ -200,15 +200,19 @@ public class JDBCExecutor {
         }
     }
     
-    public static List<RowResponse> find(final String database, final DynamicFinder query, Object... params) throws JongoJDBCException{
-        l.debug(query.getSql() + " params: " + JongoUtils.varargToString(params));
+    public static List<RowResponse> find(final String database, final DynamicFinder df, final LimitParam limit, final OrderParam order, Object... params) throws JongoJDBCException{
+        l.debug(df.getSql() + " params: " + JongoUtils.varargToString(params));
         
-        isReadable(database, query.getTable());
+        isReadable(database, df.getTable());
+        
+        DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(database);
+        String query = dbconf.wrapDynamicFinderQuery(df, limit, order);
+        l.debug(query + " params: " + JongoUtils.varargToString(params));
         
         QueryRunner run = JDBCConnectionFactory.getQueryRunner(database);
-        ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(query.findAll());
+        ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(true);
         try {
-            List<RowResponse> results = run.query(query.getSql(), res, params);
+            List<RowResponse> results = run.query(query, res, params);
             return results;
         } catch (SQLException ex) {
             throw JongoJDBCExceptionFactory.getException(database, ex.getMessage(), ex);

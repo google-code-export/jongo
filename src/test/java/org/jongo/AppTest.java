@@ -81,14 +81,14 @@ public class AppTest {
     
     @Test
     public void testDynamicFinders(){
-        doTestResponse(client.doGET("user/dynamic/findAllByAgeBetween?values=18&values=99&format=xml"), Response.Status.OK, 2);
-        doTestResponse(client.doGET("user/dynamic/findAllByBirthdayBetween?values=1992-01-01&values=1992-12-31&format=xml"), Response.Status.OK, 1);
-        doTestResponse(client.doGET("car/dynamic/findAllByFuelIsNull?format=xml"), Response.Status.OK, 1);
-        doTestResponse(client.doGET("car/dynamic/findAllByFuelIsNotNull?format=xml"), Response.Status.OK, 2);
-        doTestResponse(client.doGET("user/dynamic/findAllByCreditGreaterThan?value=0&format=xml"), Response.Status.OK, 1);
-        doTestResponse(client.doGET("user/dynamic/findAllByCreditGreaterThanEquals?value=0&format=xml"), Response.Status.OK, 2);
-        doTestResponse(client.doGET("user/dynamic/findAllByCreditLessThan?value=0&format=xml"), Response.Status.NOT_FOUND, 0);
-        doTestResponse(client.doGET("user/dynamic/findAllByCreditLessThanEquals?value=0&format=xml"), Response.Status.OK, 1);
+        doTestResponse(client.doGET("user/dynamic/findAllByAgeBetween?args=18&args=99&format=xml"), Response.Status.OK, 2);
+        doTestResponse(client.doGET("user/dynamic/findAllByBirthdayBetween?args=1992-01-01&args=1992-12-31&format=xml"), Response.Status.OK, 1);
+        doTestResponse(client.doGET("car/dynamic/findAllByFuelIsNull?format=xml&sort=cid"), Response.Status.OK, 1);
+        doTestResponse(client.doGET("car/dynamic/findAllByFuelIsNotNull?format=xml&sort=cid"), Response.Status.OK, 2);
+        doTestResponse(client.doGET("user/dynamic/findAllByCreditGreaterThan?args=0&format=xml"), Response.Status.OK, 1);
+        doTestResponse(client.doGET("user/dynamic/findAllByCreditGreaterThanEquals?args=0&format=xml"), Response.Status.OK, 2);
+        doTestResponse(client.doGET("user/dynamic/findAllByCreditLessThan?args=0&format=xml"), Response.Status.NOT_FOUND, 0);
+        doTestResponse(client.doGET("user/dynamic/findAllByCreditLessThanEquals?args=0&format=xml"), Response.Status.OK, 1);
     }
     
     @Test
