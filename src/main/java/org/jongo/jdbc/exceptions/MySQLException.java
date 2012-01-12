@@ -77,7 +77,7 @@ public class MySQLException extends JongoJDBCException {
      */
     @Override
     public boolean isBadSQLGrammar() {
-        return (sqlErrorCode == 1064);
+        return (sqlErrorCode == 1064 || sqlErrorCode == 5501);
     }
 
     /**
