@@ -217,7 +217,11 @@ public class DynamicFinder {
         if (this.firstOperator == Operator.BETWEEN) {
             this.sql = generateBetweenQuery(this.table, this.firstColumn, this.booleanOperator, this.secondColumn, this.secondOperator);
         }else{
-            this.sql = generateTwoColumnQuery(this.table, this.firstColumn, this.firstOperator, this.booleanOperator, this.secondColumn, this.secondOperator);
+            if(this.secondOperator == Operator.BETWEEN){
+                this.sql = generateBetweenQuery(this.table, this.secondColumn, this.booleanOperator, this.firstColumn, this.firstOperator);
+            }else{
+                this.sql = generateTwoColumnQuery(this.table, this.firstColumn, this.firstOperator, this.booleanOperator, this.secondColumn, this.secondOperator);
+            }
         }
     }
 
