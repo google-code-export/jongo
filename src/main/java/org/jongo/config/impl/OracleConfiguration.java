@@ -108,7 +108,7 @@ public class OracleConfiguration extends AbstractDatabaseConfiguration implement
     public String wrapDynamicFinderQuery(final DynamicFinder finder, LimitParam limit, OrderParam order){
         final String [] parts = finder.getSql().split("WHERE");
         final StringBuilder query = new StringBuilder("SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY ");
-        query.append(order.getColumn());
+        query.append(order.getNotNullColumn());
         query.append(" ");
         query.append(order.getDirection());
         query.append(" )AS ROW_NUMBER, ");
