@@ -65,7 +65,7 @@ public class OracleConfiguration extends AbstractDatabaseConfiguration implement
     @Override
     public String getSelectAllFromTableQuery(final String table, LimitParam limit, OrderParam order){
         final StringBuilder query = new StringBuilder("SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY ");
-        query.append(order.getColumn());
+        query.append(order.getNotNullColumn());
         query.append(" ");
         query.append(order.getDirection());
         query.append(" )AS ROW_NUMBER, ");
@@ -82,7 +82,7 @@ public class OracleConfiguration extends AbstractDatabaseConfiguration implement
     @Override
     public String getSelectAllFromTableQuery(final String table, final String idCol, LimitParam limit, OrderParam order){
         final StringBuilder query = new StringBuilder("SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY ");
-        query.append(order.getColumn());
+        query.append(order.getNotNullColumn());
         query.append(" ");
         query.append(order.getDirection());
         query.append(" )AS ROW_NUMBER, ");
