@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -261,5 +262,9 @@ public class JongoUtils {
         if(dbconf == null){
             throw new StartupException("Failed to load database. Quitting", true);
         }
+    }
+    
+    public static String getDatabaseNameFromPath(final UriInfo ui){
+        return ui.getBaseUri().getPath().replaceAll("/", "");
     }
 }
