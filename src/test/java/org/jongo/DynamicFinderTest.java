@@ -23,7 +23,12 @@ import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.jongo.config.impl.MySQLConfiguration;
+import org.jongo.config.impl.OracleConfiguration;
 import org.jongo.jdbc.DynamicFinder;
+import org.jongo.jdbc.LimitParam;
+import org.jongo.jdbc.OrderParam;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -31,6 +36,11 @@ import org.junit.Test;
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public class DynamicFinderTest {
+    
+    @Before
+    public void setUp(){
+        System.setProperty("environment","demo");
+    }
 
     @Test
     public void test_findByName() {
@@ -208,6 +218,21 @@ public class DynamicFinderTest {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         String query = "SELECT * FROM sometable WHERE date BETWEEN ? AND ? AND market = ?";
         assertTrue(doTest(dynamicQuery, query));
+    }
+    
+    @Test
+    public void testLimitAndOrder_findAllByDateBetweenAndMarketEquals() throws JongoBadRequestException{
+        String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
+        LimitParam l = new LimitParam();
+        OrderParam o = new OrderParam("id");
+        MySQLConfiguration my = new MySQLConfiguration("a", "a", "a", "a");
+        OracleConfiguration ora = new OracleConfiguration("a", "a", "a", "a");
+        String my_result = my.wrapDynamicFinderQuery(DynamicFinder.valueOf("sometable", dynamicQuery), l, o);
+        String ora_result = ora.wrapDynamicFinderQuery(DynamicFinder.valueOf("sometable", dynamicQuery), l, o);
+        String my_query = "SELECT * FROM sometable WHERE date BETWEEN ? AND ? AND market = ? ORDER BY id ASC LIMIT 25 OFFSET 0";
+        String ora_query = "SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY id ASC )AS ROW_NUMBER, sometable.* FROM sometable WHERE  date BETWEEN ? AND ? AND market = ? ) k WHERE ROW_NUMBER <=25 AND ROW_NUMBER >=  0";
+        assertEquals(my_query, my_result);
+        assertEquals(ora_query, ora_result);
     }
     
     @Test(expected=JongoBadRequestException.class)
