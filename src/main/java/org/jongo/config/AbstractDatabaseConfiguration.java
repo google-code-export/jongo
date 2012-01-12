@@ -168,7 +168,7 @@ public abstract class AbstractDatabaseConfiguration {
     public String wrapDynamicFinderQuery(final DynamicFinder finder, final LimitParam limit, final OrderParam order){
         final StringBuilder query = new StringBuilder(finder.getSql());
         query.append(" ORDER BY ");
-        query.append(order.getColumn());
+        query.append(order.getNotNullColumn());
         query.append(" ");
         query.append(order.getDirection());
         query.append(" LIMIT ");
