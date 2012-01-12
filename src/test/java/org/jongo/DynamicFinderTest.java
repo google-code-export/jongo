@@ -224,7 +224,7 @@ public class DynamicFinderTest {
     public void testLimitAndOrder_findAllByDateBetweenAndMarketEquals() throws JongoBadRequestException{
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         LimitParam l = new LimitParam();
-        OrderParam o = new OrderParam("id");
+        OrderParam o = new OrderParam();
         MySQLConfiguration my = new MySQLConfiguration("a", "a", "a", "a");
         OracleConfiguration ora = new OracleConfiguration("a", "a", "a", "a");
         String my_result = my.wrapDynamicFinderQuery(DynamicFinder.valueOf("sometable", dynamicQuery), l, o);
