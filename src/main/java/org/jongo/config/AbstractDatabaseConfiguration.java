@@ -23,6 +23,7 @@ import org.jongo.config.impl.HSQLDBConfiguration;
 import org.jongo.config.impl.MySQLConfiguration;
 import org.jongo.config.impl.OracleConfiguration;
 import org.jongo.enums.JDBCDriver;
+import org.jongo.jdbc.DynamicFinder;
 import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
 import org.slf4j.Logger;
@@ -161,6 +162,19 @@ public abstract class AbstractDatabaseConfiguration {
         final StringBuilder query = new StringBuilder("SELECT * FROM ");
         query.append(table);
         query.append(" FETCH FIRST 1 ROW ONLY");
+        return query.toString();
+    }
+    
+    public String wrapDynamicFinderQuery(final DynamicFinder finder, final LimitParam limit, final OrderParam order){
+        final StringBuilder query = new StringBuilder(finder.getSql());
+        query.append(" ORDER BY ");
+        query.append(order.getColumn());
+        query.append(" ");
+        query.append(order.getDirection());
+        query.append(" LIMIT ");
+        query.append(limit.getLimit());
+        query.append(" OFFSET ");
+        query.append(limit.getStart());
         return query.toString();
     }
 
