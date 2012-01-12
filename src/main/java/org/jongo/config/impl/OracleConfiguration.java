@@ -20,6 +20,7 @@ package org.jongo.config.impl;
 import org.jongo.config.AbstractDatabaseConfiguration;
 import org.jongo.config.DatabaseConfiguration;
 import org.jongo.enums.JDBCDriver;
+import org.jongo.jdbc.DynamicFinder;
 import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
 import org.slf4j.Logger;
@@ -101,6 +102,26 @@ public class OracleConfiguration extends AbstractDatabaseConfiguration implement
     @Override
     public String getListOfTablesQuery() {
         return "SELECT TABLE_NAME FROM ALL_ALL_TABLES";
+    }
+    
+    @Override
+    public String wrapDynamicFinderQuery(final DynamicFinder finder, LimitParam limit, OrderParam order){
+        final String [] parts = finder.getSql().split("WHERE");
+        final StringBuilder query = new StringBuilder("SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY ");
+        query.append(order.getColumn());
+        query.append(" ");
+        query.append(order.getDirection());
+        query.append(" )AS ROW_NUMBER, ");
+        query.append(finder.getTable());
+        query.append(".* FROM ");
+        query.append(finder.getTable());
+        query.append(" WHERE ");
+        query.append(parts[1]);
+        query.append(" ) k WHERE ROW_NUMBER <=");
+        query.append(limit.getLimit());
+        query.append(" AND ROW_NUMBER >=  ");
+        query.append(limit.getStart());
+        return query.toString();
     }
     
 }
