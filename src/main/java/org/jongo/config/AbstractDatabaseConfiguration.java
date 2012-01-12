@@ -103,7 +103,7 @@ public abstract class AbstractDatabaseConfiguration {
         query.append(idCol);
         query.append(" = ?");
         query.append(" ORDER BY ");
-        query.append(order.getColumn());
+        query.append(order.getNotNullColumn());
         query.append(" ");
         query.append(order.getDirection());
         query.append(" LIMIT ");
