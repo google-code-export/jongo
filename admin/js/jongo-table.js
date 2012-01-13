@@ -179,7 +179,7 @@ function deleteTable(id){
             Ok: function() {
                 var ret = $.ajax({
                     type: 'DELETE',
-                    url: 'http://localhost:8080/adminws/table/' + id,
+                    url: '/adminws/table/' + id,
                     success: function() {},
                     dataType: 'json'
                 });
