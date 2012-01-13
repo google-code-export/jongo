@@ -135,9 +135,11 @@ class ProxyError(Exception):
         return repr(self.message)
 
 class Proxy(object):
-    def __init__(self, url, path, model, pageSize=25):
+    def __init__(self, url, database, table, model, pageSize=25):
         self.url = url
-        self.path = path
+        self.database = database
+        self.table = table
+        self.path = "/%s/%s" % (database, table)
         self.model = model
         self.page = Page(pageSize)
         self.sort = None
@@ -161,7 +163,7 @@ class Proxy(object):
                 model_instance.map_response_data(response)
                 data.append(model_instance)
         else:
-            raise ProxyError(request.response.error)
+            raise ProxyError(request.response.message, request.response.error)
         return data
 
     def read(self, id):
@@ -179,14 +181,30 @@ class Proxy(object):
         request = Request(self.url, instance_path, 'PUT', instance.toJSON())
         request.perform()
         if not request.response.success:
-            raise ProxyError(request.response.error)
+            raise ProxyError(request.response.message, request.response.error)
 
     def delete(self, instance):
         instance_path = "%s/%d" % (self.path, instance.id)
         request = Request(self.url, instance_path, 'DELETE')
         request.perform()
         if not request.response.success:
-            raise ProxyError(request.response.error)
+            raise ProxyError(request.response.message, request.response.error)
+
+    def query(self, query_name, *args):
+        data = []
+        query_path = "/%s/query/%s" % (self.database, query_name)
+        if args is not None and len(args) > 0:
+            query_path = "/%s/query/%s?args=%s" % (self.database, query_name, "&args=".join(map(str, args)))
+        request = Request(self.url, query_path)
+        request.perform()
+        if request.response.success:
+            for response in request.response.data:
+                model_instance = self.model()
+                model_instance.map_response_data(response)
+                data.append(model_instance)
+        else:
+            raise ProxyError(request.response.message, request.response.error)
+        return data
 
 class JongoStore(object):
     def __init__(self, proxy=None, model=None, autoLoad=False, autoSync=False, data=None):
@@ -233,6 +251,21 @@ class JongoStore(object):
         for i in self.data:
             if i.id == id:
                 ret = i
+        return ret
+
+    def findBy(self, name, value):
+        ret = None
+        for instance in self.data:
+            if getattr(instance, name) == value:
+                ret = instance
+                break
+        return ret
+
+    def findAllBy(self, name, value):
+        ret = []
+        for instance in self.data:
+            if getattr(instance, name) == value:
+                ret.append(instance)
         return ret
 
     def count(self):
