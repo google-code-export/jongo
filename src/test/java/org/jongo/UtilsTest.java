@@ -49,14 +49,14 @@ public class UtilsTest {
     public void testIsDate() throws ParseException{
         DateTimeFormatter df = ISODateTimeFormat.date();
         DateTime date = df.parseDateTime("2011-01-19");
-        assertEquals(date, JongoUtils.isDateTime("2011-01-19"));
-        assertEquals(date, JongoUtils.isDateTime("20110119"));
+        assertEquals(date, JongoUtils.isDate("2011-01-19"));
+        assertEquals(date, JongoUtils.isDate("20110119"));
         
-        assertNull(JongoUtils.isDateTime("2011-19-01"));
-        assertNull(JongoUtils.isDateTime("2011.01.19"));
-        assertNull(JongoUtils.isDateTime("2011"));
-        assertNull(JongoUtils.isDateTime(""));
-        assertNull(JongoUtils.isDateTime(null));
+        assertNull(JongoUtils.isDate("2011-19-01"));
+        assertNull(JongoUtils.isDate("2011.01.19"));
+        assertNull(JongoUtils.isDate("2011"));
+        assertNull(JongoUtils.isDate(""));
+        assertNull(JongoUtils.isDate(null));
     }
     
     @Test
@@ -67,6 +67,24 @@ public class UtilsTest {
         assertNull(JongoUtils.isDateTime("2011-12-11 22:00:00"));
         assertNull(JongoUtils.isDateTime(""));
         assertNull(JongoUtils.isDateTime(null));
+        assertNull(JongoUtils.isDateTime("2011-01-19"));
+        assertNull(JongoUtils.isDateTime("20110119"));
+        assertNull(JongoUtils.isDateTime("22:00:00"));
+        assertNull(JongoUtils.isDateTime("12:35:45.200+01:00"));
+    }
+    
+    @Test
+    public void testIsTime(){
+        DateTimeFormatter df = ISODateTimeFormat.time();
+        DateTime date = df.parseDateTime("12:35:45.000Z");
+        assertEquals(date, JongoUtils.isTime("12:35:45.000Z"));
+        assertEquals(date, JongoUtils.isTime("123545.000Z"));
+        assertNull(JongoUtils.isTime(""));
+        assertNull(JongoUtils.isTime(null));
+        assertNull(JongoUtils.isTime("2011-01-19"));
+        assertNull(JongoUtils.isTime("20110119"));
+        assertNull(JongoUtils.isTime("22:00:00"));
+        assertNull(JongoUtils.isTime("2011-12-11T12:35:45.200Z"));
     }
     
     @Test
@@ -88,8 +106,9 @@ public class UtilsTest {
         assertTrue(JongoUtils.parseValue(" ") instanceof String);
         assertTrue(JongoUtils.parseValue("false") instanceof String);
         assertTrue(JongoUtils.parseValue("true") instanceof String);
-        assertTrue(JongoUtils.parseValue("2011-12-11T12:35:45.200+01:00") instanceof java.sql.Date);
+        assertTrue(JongoUtils.parseValue("2011-12-11T12:35:45.200+01:00") instanceof java.sql.Timestamp);
         assertTrue(JongoUtils.parseValue("2011-01-19") instanceof java.sql.Date);
+        assertTrue(JongoUtils.parseValue("12:35:45.200+01:00") instanceof java.sql.Time);
     }
     
     @Test(expected=IllegalArgumentException.class)
@@ -137,7 +156,7 @@ public class UtilsTest {
         DatabaseConfiguration c = AbstractDatabaseConfiguration.instanceOf("test1", JDBCDriver.HSQLDB, "k", "k", "jdbc");
         assertEquals(c.getSelectAllFromTableQuery("table", l, o), "SELECT * FROM table ORDER BY id ASC LIMIT 25 OFFSET 0");
         c = AbstractDatabaseConfiguration.instanceOf("test1", JDBCDriver.ORACLE, "k", "k", "jdbc");
-        assertEquals(c.getSelectAllFromTableQuery("t", l, o), "SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY null ASC )AS ROW_NUMBER, t .* FROM t ) k WHERE ROW_NUMBER <=25 AND ROW_NUMBER >=  0");
-        assertEquals(c.getSelectAllFromTableQuery("t", "id", l, o), "SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY null ASC )AS ROW_NUMBER, t .* FROM t WHERE id= ? ) k WHERE ROW_NUMBER <=25 AND ROW_NUMBER >=  0");
+        assertEquals(c.getSelectAllFromTableQuery("t", l, o), "SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY id ASC )AS ROW_NUMBER, t .* FROM t ) k WHERE ROW_NUMBER <=25 AND ROW_NUMBER >=  0");
+        assertEquals(c.getSelectAllFromTableQuery("t", "id", l, o), "SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY id ASC )AS ROW_NUMBER, t .* FROM t WHERE id= ? ) k WHERE ROW_NUMBER <=25 AND ROW_NUMBER >=  0");
     }
 }
