@@ -89,6 +89,7 @@ public class AppTest {
         doTestResponse(client.doGET("user/dynamic/findAllByCreditGreaterThanEquals?args=0&format=xml"), Response.Status.OK, 2);
         doTestResponse(client.doGET("user/dynamic/findAllByCreditLessThan?args=0&format=xml"), Response.Status.NOT_FOUND, 0);
         doTestResponse(client.doGET("user/dynamic/findAllByCreditLessThanEquals?args=0&format=xml"), Response.Status.OK, 1);
+        doTestResponse(client.doGET("sales_stats/dynamic/findAllByLast_updateBetween?args=2000-01-01T00:00:00.000Z&args=2000-06-01T23:55:00.000Z&format=xml"), Response.Status.OK, 6);
     }
     
     @Test
