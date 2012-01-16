@@ -56,24 +56,22 @@ public class JongoUtils {
     public static DateTime isDateTime(final String arg){
         if(arg == null)  return null;
         DateTimeFormatter f = ISODateTimeFormat.dateTime();
-        DateTime ret = isDate(arg);
-        if(ret == null){
-            try{
-                ret = f.parseDateTime(arg);
-            }catch(IllegalArgumentException e){
-                l.debug(arg + " is not a valid ISO DateTime");
-            }
+        DateTime ret = null;
+        try{
+            ret = f.parseDateTime(arg);
+        }catch(IllegalArgumentException e){
+            l.debug(arg + " is not a valid ISO DateTime");
         }
         return ret;
     }
     
     /**
      * Check if a string has the ISO date format. Uses the ISODateTimeFormat.date() from JodaTime
-     * and returns a Date instance. The correct format is yyyy-MM-dd
+     * and returns a DateTime instance. The correct format is yyyy-MM-dd or yyyyMMdd
      * @param arg the string to check
      * @return a DateTime instance if the string is in the correct ISO format.
      */
-    private static DateTime isDate(final String arg){
+    public static DateTime isDate(final String arg){
         if(arg == null) return null;
         DateTime ret = null;
         DateTimeFormatter df = null;
@@ -87,6 +85,31 @@ public class JongoUtils {
             ret = df.parseDateTime(arg);
         }catch(IllegalArgumentException e){
             l.debug(arg + " is not a valid ISO date");
+        }
+        
+        return ret;
+    }
+    
+    /**
+     * Check if a string has the ISO time format. Uses the ISODateTimeFormat.time() from JodaTime
+     * and returns a DateTime instance. The correct format is HH:mm:ss.SSSZZ or HHmmss.SSSZ
+     * @param arg the string to check
+     * @return a DateTime instance if the string is in the correct ISO format.
+     */
+    public static DateTime isTime(final String arg){
+        if(arg == null) return null;
+        DateTime ret = null;
+        DateTimeFormatter df = null;
+        if(arg.contains(":")){
+            df = ISODateTimeFormat.time();
+        }else{
+            df = ISODateTimeFormat.basicTime();
+        }
+        
+        try{
+            ret = df.parseDateTime(arg);
+        }catch(IllegalArgumentException e){
+            l.debug(arg + " is not a valid ISO time");
         }
         
         return ret;
@@ -141,8 +164,23 @@ public class JongoUtils {
             DateTime date = JongoUtils.isDateTime(val);
             if(date != null){
                 l.debug("Got a DateTime " + date.toString(ISODateTimeFormat.dateTime()));
-                ret = new java.sql.Date(date.getMillis());
+                ret = new java.sql.Timestamp(date.getMillis());
             }else{
+                date = JongoUtils.isDate(val);
+                if(date != null){
+                    l.debug("Got a Date " + date.toString(ISODateTimeFormat.date()));
+                    ret = new java.sql.Date(date.getMillis());
+                }else{
+                    date = JongoUtils.isTime(val);
+                    if(date != null){
+                        l.debug("Got a Time " + date.toString(ISODateTimeFormat.time()));
+                        ret = new java.sql.Time(date.getMillis());
+                    }
+                }
+            }
+            
+            if(ret == null){
+                l.debug("Not a datetime. Try someting else. ");
                 try{
                     ret = new BigDecimal(val);
                 }catch(NumberFormatException e){
