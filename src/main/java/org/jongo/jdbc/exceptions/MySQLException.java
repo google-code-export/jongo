@@ -89,6 +89,7 @@ public class MySQLException extends JongoJDBCException {
         switch (sqlErrorCode) {
             case 1146:
             case 1054:
+            case 1364:
                 return (true);
             default:
                 return (false);
