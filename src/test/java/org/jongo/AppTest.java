@@ -104,7 +104,7 @@ public class AppTest {
     
     @Test
     public void testOrdering(){
-        doTestPagingResponse(client.doGET("car?format=xml"), Response.Status.OK, 3, "model", "C2", "X5");
+        doTestPagingResponse(client.doGET("car?format=xml&idField=cid"), Response.Status.OK, 3, "model", "C2", "X5");
         doTestPagingResponse(client.doGET("car?format=xml&sort=year"), Response.Status.OK, 3, "model", "C2", "X5");
         doTestPagingResponse(client.doGET("car?format=xml&sort=year&dir=ASC"), Response.Status.OK, 3, "model", "C2", "X5");
         doTestPagingResponse(client.doGET("car?format=xml&sort=year&dir=DESC"), Response.Status.OK, 3, "model", "X5", "C2");
@@ -115,11 +115,6 @@ public class AppTest {
         doTestPagingResponse(client.doGET("car?format=xml&sort=maker&dir=ASC&limit=1"), Response.Status.OK, 1, "model", "X5", "X5");
         doTestPagingResponse(client.doGET("car?format=xml&sort=maker&dir=DESC&limit=2"), Response.Status.OK, 2, "model", "500", "C2");
         doTestPagingResponse(client.doGET("car?format=xml&sort=maker&dir=DESC&limit=2&offset=1"), Response.Status.OK, 2, "model", "C2", "X5");
-    }
-    
-    @Test
-    public void testComplexQueries(){
-        doTestResponse(client.doGET("query/yearSummary?format=xml"), Response.Status.OK, 12);
     }
     
     @Test

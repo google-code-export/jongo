@@ -136,4 +136,9 @@ public class MySQLException extends JongoJDBCException {
     public boolean isVarParameterUnbound() {
         return (sqlErrorCode == 0);
     }
+
+    @Override
+    public boolean isReadOnly() {
+        return sqlErrorCode == 456;
+    }
 }

@@ -41,8 +41,6 @@ public class JongoConfiguration {
     
     private static final String p_name_jongo_ip = "jongo.ip";
     private static final String p_name_jongo_port = "jongo.port";
-    private static final String p_name_jongo_admin_enabled = "jongo.admin.enabled";
-    private static final String p_name_jongo_admin_ip = "jongo.admin.ip";
     private static final String p_name_jongo_allow_apps = "jongo.allow.apps";
     private static final String p_name_jongo_default_limit = "jongo.default.limit";
     private static final String p_name_jongo_max_limit = "jongo.default.max.limit";
@@ -63,12 +61,8 @@ public class JongoConfiguration {
     private Integer maxLimit;
     private boolean listTables;
     
-    private boolean adminEnabled;
-    private String adminIp;
-    
     private boolean appsEnabled;
     
-    private DatabaseConfiguration admin;
     private Map<String, DatabaseConfiguration> databases = null;
     
     private static final boolean demo = (System.getProperty("environment") != null && System.getProperty("environment").equalsIgnoreCase("demo")); 
@@ -81,8 +75,6 @@ public class JongoConfiguration {
             Properties prop = loadProperties();
             instance.ip = prop.getProperty(p_name_jongo_ip);
             instance.port = Integer.valueOf(prop.getProperty(p_name_jongo_port));
-            instance.adminIp = prop.getProperty(p_name_jongo_admin_ip);
-            instance.adminEnabled = Boolean.valueOf(prop.getProperty(p_name_jongo_admin_enabled));
             instance.appsEnabled = Boolean.valueOf(prop.getProperty(p_name_jongo_allow_apps));
             instance.limit = Integer.valueOf(prop.getProperty(p_name_jongo_default_limit));
             instance.maxLimit = Integer.valueOf(prop.getProperty(p_name_jongo_max_limit));
@@ -90,10 +82,8 @@ public class JongoConfiguration {
             
             if(demo){
                 l.debug("Loading demo configuration with memory databases");
-                instance.admin = AbstractDatabaseConfiguration.instanceForAdminInMemory();
                 instance.databases = Demo.getDemoDatabasesConfiguration();
             }else{
-                instance.admin = AbstractDatabaseConfiguration.instanceForAdminInFile();
                 try {
                     instance.databases = getDatabaseConfigurations(prop);
                 } catch (StartupException ex) {
@@ -188,14 +178,6 @@ public class JongoConfiguration {
         return port;
     }
 
-    public String getAdminIp() {
-        return adminIp;
-    }
-
-    public boolean isAdminEnabled() {
-        return adminEnabled;
-    }
-
     public boolean areAppsEnabled() {
         return appsEnabled;
     }
@@ -210,10 +192,6 @@ public class JongoConfiguration {
 
     public Integer getMaxLimit() {
         return maxLimit;
-    }
-    
-    public DatabaseConfiguration getAdminDatabaseConfiguration(){
-        return admin;
     }
     
     public DatabaseConfiguration getDatabaseConfiguration(final String database){
