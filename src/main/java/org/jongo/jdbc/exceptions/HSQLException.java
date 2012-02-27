@@ -46,7 +46,7 @@ public class HSQLException extends JongoJDBCException {
     @Override
     public boolean isBadSQLGrammar() {
         return (((sqlErrorCode >= 67) && (sqlErrorCode <= 71)) || sqlErrorCode == 5 || sqlErrorCode == 11 || sqlErrorCode == 12
-                || sqlErrorCode == 13 || sqlErrorCode == 58 || sqlErrorCode == 74 || sqlErrorCode == 121 || sqlErrorCode == 5501);
+                || sqlErrorCode == 13 || sqlErrorCode == 58 || sqlErrorCode == 74 || sqlErrorCode == 121);
     }
 
     /**
@@ -82,7 +82,7 @@ public class HSQLException extends JongoJDBCException {
      */
     @Override
     public boolean isNonExistentTableOrViewOrCol() {
-        return (sqlErrorCode == 22 || sqlErrorCode == 28 || sqlErrorCode == 53 || sqlErrorCode == 3603);
+        return (sqlErrorCode == 22 || sqlErrorCode == 28 || sqlErrorCode == 53 || sqlErrorCode == 3603 || sqlErrorCode == 5501);
     }
 
     /**
@@ -108,5 +108,10 @@ public class HSQLException extends JongoJDBCException {
     @Override
     public boolean isVarParameterUnbound() {
         return false;
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return sqlErrorCode == 456;
     }
 }

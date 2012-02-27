@@ -46,16 +46,6 @@ public abstract class AbstractDatabaseConfiguration {
     protected String password;
     protected String url;
 
-    public static DatabaseConfiguration instanceForAdminInMemory(){
-        DatabaseConfiguration c = new HSQLDBConfiguration("jongoAdmin", "jongoAdmin", "jongoAdmin", "jdbc:hsqldb:mem:adminDemo");
-        return c;
-    }
-    
-    public static DatabaseConfiguration instanceForAdminInFile(){
-        DatabaseConfiguration c = new HSQLDBConfiguration("jongoAdmin", "jongoAdmin", "jongoAdmin", "jdbc:hsqldb:file:data/jongoAdmin");
-        return c;
-    }
-    
     public static DatabaseConfiguration instanceOf(String name, JDBCDriver driver, String user, String password, String url){
         DatabaseConfiguration c = null;
         

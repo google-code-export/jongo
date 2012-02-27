@@ -40,13 +40,6 @@
       </includes>
     </fileSet>
     <fileSet>
-      <directory>admin/</directory>
-      <outputDirectory>/admin</outputDirectory>
-      <includes>
-        <include>*/**</include>
-      </includes>
-    </fileSet>
-    <fileSet>
       <directory>apps/</directory>
       <outputDirectory>/apps</outputDirectory>
       <includes>

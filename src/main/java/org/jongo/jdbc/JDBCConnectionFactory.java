@@ -43,7 +43,6 @@ public class JDBCConnectionFactory {
 
     private static final Logger l = LoggerFactory.getLogger(JDBCConnectionFactory.class);
     private static final JongoConfiguration configuration = JongoConfiguration.instanceOf();
-    private static final String JONGO_ADMIN = "jongoAdmin";
 
     private final Map<String, GenericObjectPool> connectionPool = new HashMap<String,GenericObjectPool>();
     
@@ -63,13 +62,6 @@ public class JDBCConnectionFactory {
                 PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, pool, null, null, false, true);
                 instance.connectionPool.put(dbname, pool);
             }
-            
-            l.debug("Registering Connection Pool for admin database");
-            DatabaseConfiguration dbcfg = configuration.getAdminDatabaseConfiguration();
-            GenericObjectPool pool = new GenericObjectPool(null, 5);
-            ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(dbcfg.getUrl(), dbcfg.getUsername(), dbcfg.getPassword());
-            PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, pool, null, null, false, true);
-            instance.connectionPool.put(JONGO_ADMIN, pool);
         }
         return instance;
     }
@@ -80,31 +72,14 @@ public class JDBCConnectionFactory {
         return ds.getConnection();
     }
 
-    public static Connection getAdminConnection() throws SQLException {
-        l.debug("Obtaining a connection from the admin datasource");
-        DataSource ds = getAdminDataSource();
-        return ds.getConnection();
-    }
-
     public static DataSource getDataSource(final String database) {
         JDBCConnectionFactory me = JDBCConnectionFactory.instanceOf();
         PoolingDataSource dataSource = new PoolingDataSource(me.connectionPool.get(database));
         return dataSource;
     }
 
-    public static DataSource getAdminDataSource() {
-        JDBCConnectionFactory me = JDBCConnectionFactory.instanceOf();
-        PoolingDataSource dataSource = new PoolingDataSource(me.connectionPool.get(JONGO_ADMIN));
-        return dataSource;
-    }
-    
     public static QueryRunner getQueryRunner(final String database){
         DataSource ds = getDataSource(database);
-        return new QueryRunner(ds);
-    }
-    
-    public static QueryRunner getAdminQueryRunner(){
-        DataSource ds = getDataSource(JONGO_ADMIN);
         return new QueryRunner(ds);
     }
     

@@ -29,8 +29,6 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.jongo.config.AbstractDatabaseConfiguration;
 import org.jongo.config.DatabaseConfiguration;
-import org.jongo.domain.JongoQuery;
-import org.jongo.domain.JongoTable;
 import org.jongo.enums.JDBCDriver;
 import org.jongo.jdbc.JDBCConnectionFactory;
 import org.slf4j.Logger;
@@ -51,7 +49,6 @@ public class Demo {
     
     private static void generateDemoDatabase(final String database){
         QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource(database));
-        QueryRunner adminRun = new QueryRunner(JDBCConnectionFactory.getAdminDataSource());
         try {
             l.info("Generating Demo Tables in database " + database);
             run.update(getCreateUserTable());
@@ -97,7 +94,7 @@ public class Demo {
             
             // generate some random data for the stats page
             DateTimeFormatter isofmt = ISODateTimeFormat.dateTime();
-             DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSSSSSSSS");
+            DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSSSSSSSS");
             DateTime dt = isofmt.parseDateTime("2012-01-16T13:34:00.000Z");
             for(int year = 2000; year < 2012; year++){
                 for (int month = 1; month <= 12; month++){
@@ -111,15 +108,7 @@ public class Demo {
                 }
             }
             
-            l.info("Inserting tables in JongoAdmin");
-            adminRun.update(JongoTable.CREATE, database, "user", "id", 3);
-            adminRun.update(JongoTable.CREATE, database, "car", "cid", 3);
-            adminRun.update(JongoTable.CREATE, database, "comments", "id", 3);
-            adminRun.update(JongoTable.CREATE, database, "maker", "id", 1);
-            adminRun.update(JongoTable.CREATE, database, "pictures", "id", 3);
-            adminRun.update(JongoTable.CREATE, database, "sales_stats", "id", 1);
-            adminRun.update(JongoTable.CREATE, database, "maker_stats", "id", 1);
-            adminRun.update(JongoQuery.CREATE, database, "yearSummary", "SELECT year FROM maker_stats GROUP BY year", "Returns all years we have data for");
+            run.update("SET TABLE maker READONLY TRUE");
             
         } catch (SQLException ex) {
             l.error("Failed to create demo tables " + ex.getMessage());

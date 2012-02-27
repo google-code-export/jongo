@@ -47,6 +47,7 @@ public abstract class JongoJDBCException extends Exception {
 	public abstract boolean isDatabaseUnavailable();
 	public abstract boolean isRowlockOrTimedOut();
 	public abstract boolean isVarParameterUnbound();
+    public abstract boolean isReadOnly();
     
     public JongoJDBCException(String msg){
         super(msg);
@@ -92,7 +93,7 @@ public abstract class JongoJDBCException extends Exception {
                 isUniqueConstraintViolation() ||
                 isVarParameterUnbound()){
             return Response.Status.BAD_REQUEST;
-        }else if(isIllegalAccess() || isReadAccess() || isWriteAccess()){
+        }else if(isIllegalAccess() || isReadAccess() || isWriteAccess() || isReadOnly()){
             return Response.Status.FORBIDDEN;
         }else if(isNonExistentTableOrViewOrCol()){
             return Response.Status.NOT_FOUND;

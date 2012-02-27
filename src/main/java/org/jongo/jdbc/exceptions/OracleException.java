@@ -146,4 +146,9 @@ public class OracleException extends JongoJDBCException
 	{
 		return(sqlErrorCode == 1008);
 	}
+
+    @Override
+    public boolean isReadOnly() {
+        return sqlErrorCode == 456;
+    }
 }

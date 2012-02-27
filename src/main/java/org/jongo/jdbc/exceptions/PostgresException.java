@@ -144,4 +144,9 @@ public class PostgresException extends JongoJDBCException {
     public boolean isVarParameterUnbound() {
         return (sqlState.equals("22023")); // INVALID PARAMETER VALUE
     }
+
+    @Override
+    public boolean isReadOnly() {
+        return sqlErrorCode == 456;
+    }
 }
