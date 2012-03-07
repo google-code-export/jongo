@@ -72,13 +72,8 @@ public class JongoConfiguration {
     public static JongoConfiguration instanceOf(){
         if(instance == null){
             instance = new JongoConfiguration();
-            Properties prop = loadProperties();
-            instance.ip = prop.getProperty(p_name_jongo_ip);
-            instance.port = Integer.valueOf(prop.getProperty(p_name_jongo_port));
-            instance.appsEnabled = Boolean.valueOf(prop.getProperty(p_name_jongo_allow_apps));
-            instance.limit = Integer.valueOf(prop.getProperty(p_name_jongo_default_limit));
-            instance.maxLimit = Integer.valueOf(prop.getProperty(p_name_jongo_max_limit));
-            instance.listTables = Boolean.valueOf(prop.getProperty(p_name_jongo_allow_list_tables));
+            Properties prop = getProperties(instance);
+            setProperties(instance, prop);
             
             if(demo){
                 l.debug("Loading demo configuration with memory databases");
@@ -95,6 +90,36 @@ public class JongoConfiguration {
             
         }
         return instance;
+    }
+    
+    private static void setProperties(JongoConfiguration instance, Properties prop){
+        instance.ip = prop.getProperty(p_name_jongo_ip);
+        instance.port = Integer.valueOf(prop.getProperty(p_name_jongo_port));
+        instance.appsEnabled = Boolean.valueOf(prop.getProperty(p_name_jongo_allow_apps));
+        instance.limit = Integer.valueOf(prop.getProperty(p_name_jongo_default_limit));
+        instance.maxLimit = Integer.valueOf(prop.getProperty(p_name_jongo_max_limit));
+        instance.listTables = Boolean.valueOf(prop.getProperty(p_name_jongo_allow_list_tables));
+    }
+    
+    private static Properties getProperties(JongoConfiguration instance){
+        Properties prop;
+        if(demo){
+            prop = loadDemoProperties();
+        }else{
+            prop = loadProperties();
+        }
+        return prop;
+    }
+    
+    private static Properties loadDemoProperties(){
+        Properties prop = new Properties();
+        prop.setProperty(p_name_jongo_ip, "localhost");
+        prop.setProperty(p_name_jongo_port, "8080");
+        prop.setProperty(p_name_jongo_allow_apps, "false");
+        prop.setProperty(p_name_jongo_default_limit, "25");
+        prop.setProperty(p_name_jongo_max_limit, "1000");
+        prop.setProperty(p_name_jongo_allow_list_tables, "true");
+        return prop;
     }
     
     private static Properties loadProperties(){
