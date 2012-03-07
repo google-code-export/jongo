@@ -23,8 +23,9 @@ import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import javax.ws.rs.core.MultivaluedMap;
+import java.util.Map;
 import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -229,16 +230,16 @@ public class JongoUtils {
      * @return a MultivaluedMap with the keys/values as represented by the incoming JSON string.
      * @throws JongoBadRequestException if the JSON string is not readable.
      */
-    public static MultivaluedMap<String, String> getParamsFromJSON(final String json) throws JongoBadRequestException{
+    public static Map<String, String> getParamsFromJSON(final String json) throws JongoBadRequestException{
         // XStream needs the response to be nested inside an object it can understand
         final String formattedJson = "{\"request\":" + json + "}";
         XStream xStream = new XStream(new JettisonMappedXmlDriver());
         xStream.setMode(XStream.NO_REFERENCES);
         xStream.registerConverter(new JongoMapConverter());
-        xStream.alias("request", MultivaluedMap.class);
+        xStream.alias("request", HashMap.class);
         try{
-            MultivaluedMap<String, String> ret = (MultivaluedMap<String, String>)xStream.fromXML(formattedJson);
-            if(ret.size() == 0){
+            Map<String, String> ret = (Map<String, String>)xStream.fromXML(formattedJson);
+            if(ret.isEmpty()){
                 throw new JongoBadRequestException("Invalid number of arguments for request " + json);
             }
             return ret;
