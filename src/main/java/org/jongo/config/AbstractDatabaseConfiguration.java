@@ -17,7 +17,7 @@
  */
 package org.jongo.config;
 
-import javax.ws.rs.core.MultivaluedMap;
+import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.config.impl.HSQLDBConfiguration;
 import org.jongo.config.impl.MySQLConfiguration;
@@ -112,7 +112,7 @@ public abstract class AbstractDatabaseConfiguration {
         return query.toString();
     }
     
-    public String getInsertQuery(final String table, final MultivaluedMap<String,String> params){
+    public String getInsertQuery(final String table, final Map<String,String> params){
         final StringBuilder query = new StringBuilder("INSERT INTO ");
         query.append(table);
         query.append("(");
@@ -123,7 +123,7 @@ public abstract class AbstractDatabaseConfiguration {
         return query.toString();
     }
     
-    public String getUpdateQuery(final String table, final String key, final MultivaluedMap<String,String> params){
+    public String getUpdateQuery(final String table, final String key, final Map<String,String> params){
         final StringBuilder query = new StringBuilder("UPDATE ");
         query.append(table);
         query.append(" SET ");
