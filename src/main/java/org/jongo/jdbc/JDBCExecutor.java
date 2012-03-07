@@ -61,18 +61,21 @@ public class JDBCExecutor {
     
     public static int insert(final QueryParams queryParams) throws JongoJDBCException {
         
+        if(!queryParams.isValid())
+            throw new IllegalArgumentException("Invalid QueryParams");
+        
         List<String> params = new ArrayList<String>(queryParams.getParams().size());
         String idToBeRemoved = null;
         for(String k : queryParams.getParams().keySet()){
             if(k.equalsIgnoreCase(queryParams.getIdField())){
-                if(!StringUtils.isBlank(queryParams.getParams().getFirst(k))){
-                    params.add(queryParams.getParams().getFirst(k));
+                if(!StringUtils.isBlank(queryParams.getParams().get(k))){
+                    params.add(queryParams.getParams().get(k));
                 }else{
                     l.info("For some reason I'm receiving and empty " + k + ". I'm removing it from the params. Are you using ExtJS?");
                     idToBeRemoved = k;
                 }
             }else{
-                params.add(queryParams.getParams().getFirst(k));
+                params.add(queryParams.getParams().get(k));
             }
         }
         
@@ -93,19 +96,23 @@ public class JDBCExecutor {
     }
     
     public static List<RowResponse> update(final QueryParams queryParams) throws JongoJDBCException {
+        
+        if(!queryParams.isValid())
+            throw new IllegalArgumentException("Invalid QueryParams");
+        
         l.debug("Updating table " + queryParams.getTable());
         
         List<String> params = new ArrayList<String>(queryParams.getParams().size());
         
         for(String k : queryParams.getParams().keySet()){
-            params.add(queryParams.getParams().getFirst(k));
+            params.add(queryParams.getParams().get(k));
         }
         params.add(queryParams.getId());
         
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(queryParams.getDatabase());
         QueryRunner run = JDBCConnectionFactory.getQueryRunner(queryParams.getDatabase());
         String query = dbconf.getUpdateQuery(queryParams.getTable(), queryParams.getIdField(), queryParams.getParams());
-        l.debug(query);
+        l.debug(query + " params: " + JongoUtils.varargToString(params));
         
         List<RowResponse> results = null;
         try {
@@ -139,7 +146,7 @@ public class JDBCExecutor {
             }
         }else{
             String query = dbconf.getSelectAllFromTableQuery(params.getTable(), params.getIdField(), params.getLimit(), params.getOrder());
-            l.debug(query);
+            l.debug(query + " params: " + params.toString());
         
             ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(false);
             try {
