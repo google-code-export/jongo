@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.http.NameValuePair;
@@ -72,6 +73,16 @@ public class UserMock {
         al.add(new BasicNameValuePair("lastupdate", lastupdate.toString(dateTimeFTR)));
         al.add(new BasicNameValuePair("credit", credit.toPlainString()));
         return al;
+    }
+    
+    public Map<String,String> toMap(){
+        Map<String, String> m = new HashMap<String, String>();
+        m.put("name", name);
+        m.put("age", String.valueOf(age));
+        m.put("birthday", birthday.toString(dateFTR));
+        m.put("lastupdate", lastupdate.toString(dateTimeFTR));
+        m.put("credit", credit.toPlainString());
+        return m;
     }
     
     public String toJSON(){
