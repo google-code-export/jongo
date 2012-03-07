@@ -46,7 +46,7 @@ public class HSQLException extends JongoJDBCException {
     @Override
     public boolean isBadSQLGrammar() {
         return (((sqlErrorCode >= 67) && (sqlErrorCode <= 71)) || sqlErrorCode == 5 || sqlErrorCode == 11 || sqlErrorCode == 12
-                || sqlErrorCode == 13 || sqlErrorCode == 58 || sqlErrorCode == 74 || sqlErrorCode == 121);
+                || sqlErrorCode == 13 || sqlErrorCode == 58 || sqlErrorCode == 74 || sqlErrorCode == 121 || sqlErrorCode == 5581);
     }
 
     /**
