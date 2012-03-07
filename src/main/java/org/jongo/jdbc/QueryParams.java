@@ -1,6 +1,9 @@
 package org.jongo.jdbc;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.ws.rs.core.MultivaluedMap;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Copyright (C) 2011, 2012 Alejandro Ayuso
@@ -30,13 +33,13 @@ public class QueryParams {
     private String table;
     private String id;
     private String idField = "id";
-    private MultivaluedMap<String, String> params;
+    private Map<String, String> params = new HashMap<String, String>();
     private LimitParam limit = new LimitParam();
     private OrderParam order = new OrderParam();
     
     public QueryParams(){}
 
-    public QueryParams(String database, String table, String id, String idField, MultivaluedMap<String, String> params, LimitParam limit, OrderParam order) {
+    public QueryParams(String database, String table, String id, String idField, Map<String, String> params, LimitParam limit, OrderParam order) {
         this.database = database;
         this.table = table;
         this.id = id;
@@ -58,7 +61,7 @@ public class QueryParams {
         return id;
     }
 
-    public MultivaluedMap<String, String> getParams() {
+    public Map<String, String> getParams() {
         return params;
     }
 
@@ -94,11 +97,77 @@ public class QueryParams {
         this.order = order;
     }
 
-    public void setParams(MultivaluedMap<String, String> params) {
-        this.params = params;
+    public void setParams(Map<String, String> params) {
+        this.params = new HashMap<String,String>();
+        for(final String k : params.keySet()){
+            final String v = params.get(k);
+            if(v != null)
+                this.params.put(k, v);
+        }
+    }
+    
+    public void setParams(final MultivaluedMap<String, String> formParams) {
+        this.params = new HashMap<String,String>(); // clear the params first.
+        for(String k : formParams.keySet()){
+            String v = formParams.getFirst(k);
+            if(v != null)
+                this.params.put(k, v);
+        }
+    }
+    
+    public void setParam(final String k, final String v){
+        this.params.put(k,v);
     }
 
     public void setTable(String table) {
         this.table = table;
     }
+    
+    public boolean isValid(){
+        return this.database != null && this.table != null && this.params != null;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final QueryParams other = (QueryParams) obj;
+        if ((this.database == null) ? (other.database != null) : !this.database.equals(other.database)) {
+            return false;
+        }
+        if ((this.table == null) ? (other.table != null) : !this.table.equals(other.table)) {
+            return false;
+        }
+        if ((this.id == null) ? (other.id != null) : !this.id.equals(other.id)) {
+            return false;
+        }
+        if ((this.idField == null) ? (other.idField != null) : !this.idField.equals(other.idField)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 17 * hash + (this.database != null ? this.database.hashCode() : 0);
+        hash = 17 * hash + (this.table != null ? this.table.hashCode() : 0);
+        hash = 17 * hash + (this.id != null ? this.id.hashCode() : 0);
+        hash = 17 * hash + (this.idField != null ? this.idField.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder("[");
+        b.append(StringUtils.join(this.params.values(), ","));
+        b.append("]");
+        return b.toString();
+    }
+    
+    
 }
