@@ -17,7 +17,7 @@
  */
 package org.jongo.config;
 
-import javax.ws.rs.core.MultivaluedMap;
+import java.util.Map;
 import org.jongo.enums.JDBCDriver;
 import org.jongo.jdbc.DynamicFinder;
 import org.jongo.jdbc.LimitParam;
@@ -81,7 +81,7 @@ public interface DatabaseConfiguration {
      * @param params the parameters to generate the parameterized query
      * @return the parameterized query String, i.e. INSERT INTO foo (a,b,c,d) VALUES (?,?,?,?)
      */
-    public String getInsertQuery(final String table, final MultivaluedMap<String,String> params);
+    public String getInsertQuery(final String table, final Map<String,String> params);
     
     /**
      * Generates an UPDATE parameterized query on the given table and key with
@@ -91,7 +91,7 @@ public interface DatabaseConfiguration {
      * @param params the parameters to generate the parameterized query
      * @return the parameterized query String, i.e. UPDATE foo SET (a=?,b=?,c=?,d=?) WHERE key = ?
      */
-    public String getUpdateQuery(final String table, final String key, final MultivaluedMap<String,String> params);
+    public String getUpdateQuery(final String table, final String key, final Map<String,String> params);
     
     /**
      * Generates a DELETE parameterized query on the given table and key
