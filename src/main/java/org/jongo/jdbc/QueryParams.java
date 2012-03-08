@@ -124,7 +124,7 @@ public class QueryParams {
     }
     
     public boolean isValid(){
-        return this.database != null && this.table != null && this.params != null;
+        return this.database != null && this.table != null && this.params != null && !this.params.isEmpty();
     }
 
     @Override
