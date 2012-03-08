@@ -153,7 +153,7 @@ public class JongoUtils {
      */
     public static Object parseValue(String val){
         Object ret = null;
-        if(StringUtils.isNumeric(val)){
+        if(!StringUtils.isWhitespace(val) && StringUtils.isNumeric(val)){
             try{
                 ret = Integer.valueOf(val);
             }catch(Exception e){
@@ -178,7 +178,7 @@ public class JongoUtils {
                 }
             }
             
-            if(ret == null){
+            if(ret == null && val != null){
                 l.debug("Not a datetime. Try someting else. ");
                 try{
                     ret = new BigDecimal(val);
