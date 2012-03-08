@@ -87,26 +87,30 @@ public class JDBCExecutorTest {
             row = rs.get(0);
             assertEquals("99", row.getColumns().get("AGE"));
             assertEquals(u.name, row.getColumns().get("NAME"));
+            q = DummyQueryParamsFactory.getUser();
+            q.setId(row.getColumns().get("ID"));
+            r = JDBCExecutor.delete(q);
+            assertEquals(1, r);
         }
         
     }
     
     @Test
-    public void test3Insert() throws JongoJDBCException{
+    public void testInsert() throws JongoJDBCException{
+        //test for empty QueryParams
         QueryParams q = new QueryParams();
         try{
-            //test for empty QueryParams
             JDBCExecutor.insert(q);
         }catch (IllegalArgumentException e){
             assertNotNull(e.getMessage());
         }
         
+        //test for empty parameters
         q = DummyQueryParamsFactory.getUser();
         try{
-            //test for empty parameters
             JDBCExecutor.insert(q);
-        }catch (JongoJDBCException e){
-            assertEquals(400 ,e.getResponse("json").getStatus());
+        }catch (IllegalArgumentException e){
+            assertNotNull(e.getMessage());
         }
         Map<String, String> params = UserMock.getRandomInstance().toMap();
         q.setParams(params);
@@ -124,8 +128,60 @@ public class JDBCExecutorTest {
         params = UserMock.getRandomInstance().toMap();
         params.put("birthday", "");
         q.setParams(params);
-        r = JDBCExecutor.insert(q);
-        assertEquals(1, r);
+        try{
+            JDBCExecutor.insert(q);
+        }catch (JongoJDBCException e){
+            assertNotNull(e.getMessage());
+            assertEquals(400, e.getResponse("json").getStatus());
+        }
+    }
+    
+    @Test
+    public void testUpdate() throws JongoJDBCException{
+        QueryParams q = DummyQueryParamsFactory.getUser();
+        q.setId("0");
+        List<RowResponse> rs = JDBCExecutor.get(q);
+        RowResponse row = rs.get(0);
+        assertEquals("foo", row.getColumns().get("NAME"));
+        q.setParam("name", "fooer");
+        rs = JDBCExecutor.update(q);
+        row = rs.get(0);
+        assertEquals("fooer", row.getColumns().get("NAME"));
+        
+        //test for empty QueryParams
+        q = new QueryParams();
+        try{
+            JDBCExecutor.update(q);
+        }catch (IllegalArgumentException e){
+            assertNotNull(e.getMessage());
+        }
+        
+        //test for empty parameters
+        q = DummyQueryParamsFactory.getUser();
+        try{
+            JDBCExecutor.update(q);
+        }catch (IllegalArgumentException e){
+            assertNotNull(e.getMessage());
+        }
+        
+        //test for null value
+        q = DummyQueryParamsFactory.getUser();
+        q.setId("0");
+        q.setParam("age", null);
+        rs = JDBCExecutor.update(q);
+        row = rs.get(0);
+        assertEquals("fooer", row.getColumns().get("NAME"));
+        assertEquals(null, row.getColumns().get("AGE"));
+        
+        //test for empty value
+        q.setId("0");
+        q.setParam("age", "35");
+        q.setParam("name", "");
+        rs = JDBCExecutor.update(q);
+        row = rs.get(0);
+        assertEquals("", row.getColumns().get("NAME"));
+        assertEquals("35", row.getColumns().get("AGE"));
+        
     }
     
     public List<UserMock> getTestValues(){
