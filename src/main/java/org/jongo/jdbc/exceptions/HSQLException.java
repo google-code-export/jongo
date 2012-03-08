@@ -19,13 +19,16 @@
 package org.jongo.jdbc.exceptions;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 
 /**
- * Subclass of DatabaseException with specific knowledge of various HSQL sql error codes.
- * Created on March 7, 2008
- * @author Jeff Smith
+ * Re-map the HSQLDB error codes from org.hsqldb.error.ErrorCode.java to
+ * something we can handle.
+ * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public class HSQLException extends JongoJDBCException {
+    
+    private static final Integer [] dataIntegrityViolationErrors = {8, 10, 104, 157, 177, 3500, 3501};
 
     public HSQLException(String msg) {
         super(msg);
@@ -46,7 +49,8 @@ public class HSQLException extends JongoJDBCException {
     @Override
     public boolean isBadSQLGrammar() {
         return (((sqlErrorCode >= 67) && (sqlErrorCode <= 71)) || sqlErrorCode == 5 || sqlErrorCode == 11 || sqlErrorCode == 12
-                || sqlErrorCode == 13 || sqlErrorCode == 58 || sqlErrorCode == 74 || sqlErrorCode == 121 || sqlErrorCode == 5581);
+                || sqlErrorCode == 13 || sqlErrorCode == 58 || sqlErrorCode == 74 || sqlErrorCode == 121 || sqlErrorCode == 5581
+                || (sqlErrorCode > 3407 && sqlErrorCode < 3499) );
     }
 
     /**
@@ -55,7 +59,8 @@ public class HSQLException extends JongoJDBCException {
      */
     @Override
     public boolean isDataIntegrityViolation() {
-        return ((sqlErrorCode == 8) || (sqlErrorCode == 177));
+        
+        return (Arrays.binarySearch(dataIntegrityViolationErrors, sqlErrorCode) >= 0);
     }
 
     /**
