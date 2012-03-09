@@ -18,7 +18,6 @@
 
 package org.jongo.jdbc;
 
-import org.jongo.jdbc.exceptions.JongoJDBCExceptionFactory;
 import org.jongo.handler.ResultSetMetaDataHandler;
 import org.jongo.handler.JongoResultSetHandler;
 import java.sql.SQLException;
@@ -31,7 +30,6 @@ import org.apache.commons.lang.StringUtils;
 import org.jongo.JongoUtils;
 import org.jongo.config.DatabaseConfiguration;
 import org.jongo.config.JongoConfiguration;
-import org.jongo.jdbc.exceptions.JongoJDBCException;
 import org.jongo.rest.xstream.RowResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +43,7 @@ public class JDBCExecutor {
     private static final Logger l = LoggerFactory.getLogger(JDBCExecutor.class);
     private static final JongoConfiguration conf = JongoConfiguration.instanceOf();
     
-    public static int delete(final QueryParams params) throws JongoJDBCException {
+    public static int delete(final QueryParams params) throws SQLException {
         l.debug("Deleting from " + params.getTable());
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(params.getDatabase());
         QueryRunner run = JDBCConnectionFactory.getQueryRunner(params.getDatabase());
@@ -55,11 +53,11 @@ public class JDBCExecutor {
         try {
             return run.update(query, JongoUtils.parseValue(params.getId()));
         } catch (SQLException ex) {
-            throw JongoJDBCExceptionFactory.getException(params.getDatabase(), ex.getMessage(), ex);
+            throw ex;
         }
     }
     
-    public static int insert(final QueryParams queryParams) throws JongoJDBCException {
+    public static int insert(final QueryParams queryParams) throws SQLException {
         
         if(!queryParams.isValid())
             throw new IllegalArgumentException("Invalid QueryParams");
@@ -71,7 +69,7 @@ public class JDBCExecutor {
                 if(!StringUtils.isBlank(queryParams.getParams().get(k))){
                     params.add(queryParams.getParams().get(k));
                 }else{
-                    l.info("For some reason I'm receiving and empty " + k + ". I'm removing it from the params. Are you using ExtJS?");
+                    l.info("For some reason I'm receiving an empty " + k + ". I'm removing it from the params. Are you using ExtJS?");
                     idToBeRemoved = k;
                 }
             }else{
@@ -91,11 +89,11 @@ public class JDBCExecutor {
         try {
             return run.update(query, JongoUtils.parseValues(params));
         } catch (SQLException ex) {
-            throw JongoJDBCExceptionFactory.getException(queryParams.getDatabase(), ex.getMessage(), ex);
+            throw ex;
         }
     }
     
-    public static List<RowResponse> update(final QueryParams queryParams) throws JongoJDBCException {
+    public static List<RowResponse> update(final QueryParams queryParams) throws SQLException {
         
         if(!queryParams.isValid())
             throw new IllegalArgumentException("Invalid QueryParams");
@@ -121,12 +119,12 @@ public class JDBCExecutor {
                 results = get(queryParams);
             }
         } catch (SQLException ex) {
-            throw JongoJDBCExceptionFactory.getException(queryParams.getDatabase(), ex.getMessage(), ex);
+            throw ex;
         }
         return results;
     }
     
-    public static List<RowResponse> get(final QueryParams params) throws JongoJDBCException {
+    public static List<RowResponse> get(final QueryParams params) throws SQLException {
         List<RowResponse> response = null;
         
         if(params.getOrder().getColumn() == null) params.getOrder().setColumn(params.getIdField());
@@ -142,7 +140,7 @@ public class JDBCExecutor {
             try {
                 response = run.query(query, res);
             } catch (SQLException ex) {
-                throw JongoJDBCExceptionFactory.getException(params.getDatabase(), ex.getMessage(), ex);
+                throw ex;
             }
         }else{
             String query = dbconf.getSelectAllFromTableQuery(params.getTable(), params.getIdField(), params.getLimit(), params.getOrder());
@@ -152,14 +150,14 @@ public class JDBCExecutor {
             try {
                 response =  run.query(query, res, JongoUtils.parseValue(params.getId()));
             } catch (SQLException ex) {
-                throw JongoJDBCExceptionFactory.getException(params.getDatabase(), ex.getMessage(), ex);
+                throw ex;
             }
         }
         return response;
         
     }
     
-    public static List<RowResponse> findByColumn(final QueryParams queryParams, Object... params) throws JongoJDBCException {
+    public static List<RowResponse> findByColumn(final QueryParams queryParams, Object... params) throws SQLException {
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(queryParams.getDatabase());
         String query = dbconf.getSelectAllFromTableQuery(queryParams.getTable(), queryParams.getIdField(), queryParams.getLimit(), queryParams.getOrder());
         l.debug(query + " params: " + JongoUtils.varargToString(params));
@@ -170,11 +168,11 @@ public class JDBCExecutor {
             List<RowResponse> results = run.query(query, res, params);
             return results;
         } catch (SQLException ex) {
-            throw JongoJDBCExceptionFactory.getException(queryParams.getDatabase(), ex.getMessage(), ex);
+            throw ex;
         }
     }
     
-    public static List<RowResponse> find(final String database, final DynamicFinder df, final LimitParam limit, final OrderParam order, Object... params) throws JongoJDBCException{
+    public static List<RowResponse> find(final String database, final DynamicFinder df, final LimitParam limit, final OrderParam order, Object... params) throws SQLException{
         l.debug(df.getSql() + " params: " + JongoUtils.varargToString(params));
         
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(database);
@@ -187,11 +185,11 @@ public class JDBCExecutor {
             List<RowResponse> results = run.query(query, res, params);
             return results;
         } catch (SQLException ex) {
-            throw JongoJDBCExceptionFactory.getException(database, ex.getMessage(), ex);
+            throw ex;
         }
     }
     
-    public static List<RowResponse> getTableMetaData(final QueryParams params) throws JongoJDBCException {
+    public static List<RowResponse> getTableMetaData(final QueryParams params) throws SQLException {
         l.debug("Obtaining metadata from table " + params.getTable());
         
         ResultSetHandler<List<RowResponse>> res = new ResultSetMetaDataHandler();
@@ -202,11 +200,11 @@ public class JDBCExecutor {
             List<RowResponse> results = run.query(query, res);
             return results;
         } catch (SQLException ex) {
-            throw JongoJDBCExceptionFactory.getException(params.getDatabase(), ex.getMessage(), ex);
+            throw ex;
         }
     }
     
-    public static List<RowResponse> executeQuery(final String database, final String queryName, final Object... params) throws JongoJDBCException {
+    public static List<RowResponse> executeQuery(final String database, final String queryName, final Object... params) throws SQLException {
         throw new NotImplementedException();
     }
     
@@ -220,11 +218,11 @@ public class JDBCExecutor {
         }
     }
     
-    public static List<RowResponse> getListOfTables(final String database) throws JongoJDBCException{
+    public static List<RowResponse> getListOfTables(final String database) throws SQLException{
         l.debug("Obtaining the list of tables for the database " + database);
-        if(!conf.allowListTables()){
-            throw JongoJDBCExceptionFactory.getException(database, "Cant read database metadata. Access Denied", JongoJDBCException.ILLEGAL_READ_CODE);
-        }
+//        if(!conf.allowListTables()){
+//            throw JongoJDBCExceptionFactory.getException(database, "Cant read database metadata. Access Denied", JongoJDBCException.ILLEGAL_READ_CODE);
+//        }
         ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(true);
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(database);
         String query = dbconf.getListOfTablesQuery();
@@ -233,7 +231,7 @@ public class JDBCExecutor {
             List<RowResponse> results = run.query(query, res);
             return results;
         } catch (SQLException ex) {
-            throw JongoJDBCExceptionFactory.getException(database, ex.getMessage(), ex);
+            throw ex;
         }
     }
 }

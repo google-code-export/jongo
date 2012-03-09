@@ -18,6 +18,7 @@
 
 package org.jongo;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,6 @@ import org.jongo.demo.Demo;
 import org.jongo.exceptions.StartupException;
 import org.jongo.jdbc.JDBCExecutor;
 import org.jongo.jdbc.QueryParams;
-import org.jongo.jdbc.exceptions.JongoJDBCException;
 import org.jongo.mocks.DummyQueryParamsFactory;
 import org.jongo.mocks.UserMock;
 import org.jongo.rest.xstream.RowResponse;
@@ -48,7 +48,7 @@ public class JDBCExecutorTest {
     }
     
     @Test
-    public void testGet() throws JongoJDBCException{
+    public void testGet() throws SQLException{
         QueryParams q = DummyQueryParamsFactory.getUser();
         q.setId("0");
         List<RowResponse> rs = JDBCExecutor.get(q);
@@ -64,7 +64,7 @@ public class JDBCExecutorTest {
     }
     
     @Test
-    public void testAll() throws JongoJDBCException{
+    public void testAll() throws SQLException{
         QueryParams q = DummyQueryParamsFactory.getUser();
         List<UserMock> users = getTestValues();
         List<UserMock> createdusers = new ArrayList<UserMock>();
@@ -96,7 +96,7 @@ public class JDBCExecutorTest {
     }
     
     @Test
-    public void testInsert() throws JongoJDBCException{
+    public void testInsert() throws SQLException{
         //test for empty QueryParams
         QueryParams q = new QueryParams();
         try{
@@ -130,14 +130,23 @@ public class JDBCExecutorTest {
         q.setParams(params);
         try{
             JDBCExecutor.insert(q);
-        }catch (JongoJDBCException e){
+        }catch (SQLException e){
             assertNotNull(e.getMessage());
-            assertEquals(400, e.getResponse("json").getStatus());
+        }
+        
+        //test with a readonly table
+        q = DummyQueryParamsFactory.getMakerTable();
+        q.setParam("name", "RO");
+        q.setParam("realname", "Read Only");
+        try{
+            JDBCExecutor.insert(q);
+        }catch (SQLException e){
+            assertNotNull(e.getMessage());
         }
     }
     
     @Test
-    public void testUpdate() throws JongoJDBCException{
+    public void testUpdate() throws SQLException{
         QueryParams q = DummyQueryParamsFactory.getUser();
         q.setId("0");
         List<RowResponse> rs = JDBCExecutor.get(q);
@@ -181,6 +190,17 @@ public class JDBCExecutorTest {
         row = rs.get(0);
         assertEquals("", row.getColumns().get("NAME"));
         assertEquals("35", row.getColumns().get("AGE"));
+        
+        //test with a readonly table
+        q = DummyQueryParamsFactory.getMakerTable();
+        q.setId("0");
+        q.setParam("name", "RO");
+        q.setParam("realname", "Read Only");
+        try{
+            JDBCExecutor.update(q);
+        }catch (SQLException e){
+            assertNotNull(e.getMessage());
+        }
         
     }
     

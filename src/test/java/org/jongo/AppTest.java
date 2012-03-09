@@ -72,11 +72,11 @@ public class AppTest {
         doTestResponse(client.doPOST("pictures?format=xml", ""), Response.Status.BAD_REQUEST, 0);
         doTestResponse(client.doPOST("pictures?format=xml", new ArrayList<NameValuePair>()), Response.Status.BAD_REQUEST, 0);
         // in the demo, by default, maker is not writtable
-        doTestResponse(client.doPOST("maker?format=xml", "{\"maker\":\"this should fail!\",\"id\":1}"), Response.Status.FORBIDDEN, 0);
-        doTestResponse(client.doPUT("maker/0?format=xml", "{\"maker\":\"this should fail!\"}"), Response.Status.FORBIDDEN, 0);
+        doTestResponse(client.doPOST("maker?format=xml", "{\"maker\":\"this should fail!\",\"id\":1}"), Response.Status.BAD_REQUEST, 0);
+        doTestResponse(client.doPUT("maker/0?format=xml", "{\"maker\":\"this should fail!\"}"), Response.Status.BAD_REQUEST, 0);
         // table is not in Jongo
-        doTestResponse(client.doPOST("notInJongo?format=xml", "{\"comment\":\"this should fail!\",\"cid\":1}"), Response.Status.FORBIDDEN, 0);
-        doTestResponse(client.doPUT("notInJongo/0?format=xml", "{\"comment\":\"this should fail!\"}"), Response.Status.FORBIDDEN, 0);
+        doTestResponse(client.doPOST("notInJongo?format=xml", "{\"comment\":\"this should fail!\",\"cid\":1}"), Response.Status.BAD_REQUEST, 0);
+        doTestResponse(client.doPUT("notInJongo/0?format=xml", "{\"comment\":\"this should fail!\"}"), Response.Status.BAD_REQUEST, 0);
     }
     
     @Test

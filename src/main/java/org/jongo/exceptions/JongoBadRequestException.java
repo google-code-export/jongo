@@ -27,6 +27,8 @@ import org.jongo.rest.xstream.JongoResponse;
  */
 public class JongoBadRequestException extends Exception {
     
+    private static final long serialVersionUID = 1L;
+    
     private String resource;
     
     public JongoBadRequestException(String msg){
@@ -40,7 +42,7 @@ public class JongoBadRequestException extends Exception {
     }
     
     public Response getResponse(final String format){
-        JongoResponse error = new JongoError(this.resource, Response.Status.BAD_REQUEST, this.getMessage());
+        JongoResponse error = new JongoError(this.resource, Response.Status.BAD_REQUEST.getStatusCode(), this.getMessage());
         return error.getResponse(format);
     }
 
