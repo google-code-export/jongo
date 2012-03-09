@@ -24,86 +24,69 @@ import org.jongo.rest.xstream.JongoError;
 import org.jongo.rest.xstream.JongoResponse;
 
 /**
- * DatabaseException denotes a generic runtime data access (SQL) exception. By declaring the 
- * exception as a descendant of RuntimeException, the jdbc framework give the programmer the option
- * of whether or not to catch the exception.
- * @author Jeff Smith (jeff@SoftTechDesign.com, www.SoftTechDesign.com)
- * @author Paolo Orru (paolo.orru@gmail.com) modified to add PostgreSQL support
+ *
+ * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
-public abstract class JongoJDBCException extends Exception {
+@Deprecated
+public abstract class JongoJDBCException extends SQLException {
     
-    public static final int ILLEGAL_READ_CODE = 999991;
-    public static final int ILLEGAL_WRITE_CODE = 999992;
-    public static final int ILLEGAL_ACCESS_CODE = 999993;
+    protected String database;
     
-	protected int sqlErrorCode = 0;
-	protected String sqlState = null;
+    /**
+     * Couldn't connect to the desired database or schema because
+     * of different reasons (invalid authentication, no connection, etc).
+     * @return 
+     */
+    public abstract boolean isBadGateway();
     
-	public abstract boolean isDataIntegrityViolation();
-	public abstract boolean isUniqueConstraintViolation();
-	public abstract boolean isBadSQLGrammar();
-	public abstract boolean isNonExistentTableOrViewOrCol();
-	public abstract boolean isInvalidBindVariableName();
-	public abstract boolean isDatabaseUnavailable();
-	public abstract boolean isRowlockOrTimedOut();
-	public abstract boolean isVarParameterUnbound();
-    public abstract boolean isReadOnly();
+    /**
+     * Couldn't connect to the desired database or schema because of
+     * a timeout from the datasource.
+     * @return 
+     */
+    public abstract boolean isGatewayTimeout();
     
-    public JongoJDBCException(String msg){
-        super(msg);
+    /**
+     * The data provided in the request is wrong and the database
+     * couldn't work with it.
+     * @return 
+     */
+    public abstract boolean isBadRequest();
+    
+    /**
+     * The request was a legal request, but the server is refusing to respond to it.
+     * @return 
+     */
+    public abstract boolean isForbidden();
+    
+    /**
+     * The requested resource (schema, table, view, stored procedure)
+     * could not be found but may be available again in the future.
+     * @return 
+     */
+    public abstract boolean isNotFound();
+    
+    public String getDatabase(){
+        return this.database;
     }
     
-    public JongoJDBCException(String msg, SQLException e){
-		super(msg);
-		sqlErrorCode = e.getErrorCode();
-		sqlState = e.getSQLState ();
-        if(this.sqlErrorCode < 0) this.sqlErrorCode = this.sqlErrorCode * -1;
-	}
-    
-    public JongoJDBCException(String msg, int sqlErrorCode){
-		super(msg);
-		this.sqlErrorCode = sqlErrorCode;
-		sqlState = null;
-        if(this.sqlErrorCode < 0) this.sqlErrorCode = this.sqlErrorCode * -1;
-	}
-    
-	public int getSqlErrorCode(){
-		return(sqlErrorCode);
-	}
-
-	public String getSqlState(){
-		return(sqlState);
-	}
-    
-    public boolean isIllegalAccess(){
-        return this.sqlErrorCode == ILLEGAL_ACCESS_CODE;
+    public void setDatabase(final String database){
+        this.database = database;
     }
     
-    public boolean isWriteAccess(){
-        return this.sqlErrorCode == ILLEGAL_WRITE_CODE;
-    }
-    
-    public boolean isReadAccess(){
-        return this.sqlErrorCode == ILLEGAL_READ_CODE;
-    }
-    
-    private Response.Status getResponseStatus(){
-        if(isDataIntegrityViolation() ||
-                isBadSQLGrammar() ||
-                isUniqueConstraintViolation() ||
-                isVarParameterUnbound()){
+    public Response.Status getHTTPStatus() {
+        if(this.isBadRequest()){
             return Response.Status.BAD_REQUEST;
-        }else if(isIllegalAccess() || isReadAccess() || isWriteAccess() || isReadOnly()){
+        }else if(this.isForbidden()){
             return Response.Status.FORBIDDEN;
-        }else if(isNonExistentTableOrViewOrCol()){
+        }else if(this.isNotFound()){
             return Response.Status.NOT_FOUND;
+        }else if(this.isBadGateway()){
+            return Response.Status.INTERNAL_SERVER_ERROR;
+        }else if(this.isGatewayTimeout()){
+            return Response.Status.SERVICE_UNAVAILABLE;
         }else{
             return Response.Status.INTERNAL_SERVER_ERROR;
         }
-    }
-    
-    public Response getResponse(final String format){
-        JongoResponse error = new JongoError(null, getResponseStatus(), this.getMessage());
-        return error.getResponse(format);
     }
 }
