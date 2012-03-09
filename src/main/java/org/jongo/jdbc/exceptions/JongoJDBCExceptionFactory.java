@@ -27,41 +27,22 @@ import org.slf4j.LoggerFactory;
  *
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
+@Deprecated
 public class JongoJDBCExceptionFactory {
     
     private static final Logger l = LoggerFactory.getLogger(JongoJDBCExceptionFactory.class);
     private static final JongoConfiguration configuration = JongoConfiguration.instanceOf();
     
-    public static JongoJDBCException getException(final String msg, final SQLException e) {
-        l.debug("Throwing JDBC Admin Exception with id " + e.getErrorCode());
-        return new HSQLException(msg, e);
-    }
-    
-    public static JongoJDBCException getException(final String database, final String msg, final SQLException e) {
+    public static JongoJDBCException getException(final String database, final SQLException e) {
         l.debug("Throwing JDBC Exception with id " + e.getErrorCode());
+        JongoJDBCException ex;
         switch (configuration.getDriver(database)) {
-            case MySQL:
-                return new MySQLException(msg, e);
             case HSQLDB:
-                return new HSQLException(msg, e);
-            case ORACLE:
-                return new OracleException(msg, e);
+                ex = (HSQLException) e; break;
             default:
                 throw new IllegalArgumentException("Not implemented yet");
         }
+        return ex;
     }
 
-    public static JongoJDBCException getException(final String database, final String msg, final int e) {
-        l.debug("Throwing JDBC Exception with id " + e);
-        switch (configuration.getDriver(database)) {
-            case MySQL:
-                return new MySQLException(msg, e);
-            case HSQLDB:
-                return new HSQLException(msg, e);
-            case ORACLE:
-                return new OracleException(msg, e);
-            default:
-                throw new IllegalArgumentException("Not implemented yet");
-        }
-    }
 }
