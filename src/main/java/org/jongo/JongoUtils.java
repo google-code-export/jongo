@@ -259,8 +259,4 @@ public class JongoUtils {
         
         return configuration;
     }
-    
-    public static String getDatabaseNameFromPath(final UriInfo ui){
-        return ui.getBaseUri().getPath().replaceAll("/", "");
-    }
 }
