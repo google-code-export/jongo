@@ -33,4 +33,11 @@ public class DummyQueryParamsFactory {
         q.setTable("user");
         return q;
     }
+    
+    public static QueryParams getMakerTable(){
+        QueryParams q = new QueryParams();
+        q.setDatabase(database);
+        q.setTable("maker");
+        return q;
+    }
 }
