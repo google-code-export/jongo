@@ -23,7 +23,7 @@ import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.*;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -258,5 +258,15 @@ public class JongoUtils {
         }
         
         return configuration;
+    }
+    
+    public static Map<String, String> hashMapOf(final MultivaluedMap<String, String> mv){
+        Map<String, String> map = new HashMap<String, String>();
+        for(String k : mv.keySet()){
+            String v = mv.getFirst(k);
+            if(StringUtils.isNotEmpty(v))
+                map.put(k, v);
+        }
+        return map;
     }
 }
