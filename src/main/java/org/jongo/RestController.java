@@ -20,7 +20,7 @@ package org.jongo;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.ws.rs.core.MultivaluedMap;
+import java.util.Map;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.exceptions.JongoBadRequestException;
@@ -149,34 +149,24 @@ public class RestController {
     public JongoResponse insertResource(final String table, final String customId, final String jsonRequest){
         l.debug("Insert new " + database + "." + table + " with JSON values: " + jsonRequest);
         
-        QueryParams params;
-        try{
-            params = QueryParams.valueOf(database, table, null, customId);
-        }catch (IllegalArgumentException e){
-            l.debug("Failed to generate query params " + e.getMessage());
-            return new JongoError(database, Response.Status.BAD_REQUEST, e.getMessage());
-        }
-        
-        JongoResponse response = null;
+        JongoResponse response;
         
         try {
-            params.setParams(JongoUtils.getParamsFromJSON(jsonRequest));
+            Map<String, String> params = JongoUtils.getParamsFromJSON(jsonRequest);
+            response = insertResource(table, customId, params);
         } catch (JongoBadRequestException ex){
-            l.info("Received a JongoBadRequestException " + ex.getMessage());
+            l.info("Failed to parse JSON arguments " + ex.getMessage());
             response = new JongoError(database, Response.Status.BAD_REQUEST, ex.getMessage());
         }
-        
-        if(response == null)
-            response = insertResource(params);
         
         return response;
     }
     
-    public JongoResponse insertResource(final String table, final String customId, final MultivaluedMap<String, String> formParams){
+    public JongoResponse insertResource(final String table, final String customId, final Map<String, String> formParams){
         l.debug("Insert new " + database + "." + table + " with values: " + formParams);
         
         JongoResponse response = null;
-        if(formParams.size() == 0)
+        if(formParams.isEmpty())
             response = new JongoError(table, Response.Status.BAD_REQUEST, "No arguments given");
         
         QueryParams params;
