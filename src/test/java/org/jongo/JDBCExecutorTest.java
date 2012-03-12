@@ -47,6 +47,13 @@ public class JDBCExecutorTest {
         Demo.generateDemoDatabases(configuration.getDatabases());
     }
     
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+        System.setProperty("environment", "demo");
+        JongoConfiguration configuration = JongoUtils.loadConfiguration();
+        Demo.destroyDemoDatabases(configuration.getDatabases());
+    }
+    
     @Test
     public void testGet() throws SQLException{
         QueryParams q = DummyQueryParamsFactory.getUser();
