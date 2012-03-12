@@ -49,6 +49,93 @@ public class QueryParams {
         this.order = order;
     }
     
+    public static QueryParams valueOf(String database, String table, String id, String idField, Map<String, String> params, LimitParam limit, OrderParam order){
+        QueryParams p = new QueryParams();
+        if(StringUtils.isBlank(database)){
+            throw new IllegalArgumentException("Database argument can't be blank, null or empty");
+        }else{
+            p.setDatabase(database);
+        }
+        
+        if(StringUtils.isBlank(table)){
+            throw new IllegalArgumentException("Resource argument can't be blank, null or empty");
+        }else{
+            p.setTable(table);
+        }
+        
+        if(StringUtils.isBlank(id)){
+            p.setId("");
+        }else{
+            p.setId(id);
+        }
+        
+        if(StringUtils.isBlank(idField)){
+            p.setIdField("id");
+        }else{
+            p.setIdField(idField);
+        }
+        
+        if(params != null){
+            p.setParams(params);
+        }
+        
+        if(limit == null){
+            p.setLimit(new LimitParam());
+        }else{
+            p.setLimit(limit);
+        }
+        
+        if(order == null){
+            p.setOrder(new OrderParam());
+        }else{
+            p.setOrder(order);
+        }
+        
+        return p;
+    }
+    
+    public static QueryParams valueOf(String database, String table, String id, String idField, Map<String, String> params, LimitParam limit){
+        return valueOf(database, table, id, idField, params, limit, null);
+    }
+    
+    public static QueryParams valueOf(String database, String table, String id, String idField, Map<String, String> params, OrderParam order){
+        return valueOf(database, table, id, idField, params, null, order);
+    }
+    
+    public static QueryParams valueOf(String database, String table, String id, String idField, Map<String, String> params){
+        return valueOf(database, table, id, idField, params, null, null);
+    }
+    
+    public static QueryParams valueOf(String database, String table, String id, String idField, MultivaluedMap<String, String> params){
+        QueryParams p = valueOf(database, table, id, idField, null, null, null);
+        p.setParams(params);
+        return p;
+    }
+    
+    public static QueryParams valueOf(String database, String table, String id, String idField, LimitParam limit, OrderParam order){
+        return valueOf(database, table, id, idField, null, limit, order);
+    }
+    
+    public static QueryParams valueOf(String database, String table, String id, String idField, LimitParam limit){
+        return valueOf(database, table, id, idField, null, limit, null);
+    }
+    
+    public static QueryParams valueOf(String database, String table, String id, String idField, OrderParam order){
+        return valueOf(database, table, id, idField, null, null, order);
+    }
+    
+    public static QueryParams valueOf(String database, String table, String id, String idField){
+        return valueOf(database, table, id, idField, null, null, null);
+    }
+    
+    public static QueryParams valueOf(String database, String table, String id){
+        return valueOf(database, table, id, null, null, null, null);
+    }
+    
+    public static QueryParams valueOf(String database, String table){
+        return valueOf(database, table, null, null, null, null, null);
+    }
+    
     public String getIdField() {
         return idField;
     }
