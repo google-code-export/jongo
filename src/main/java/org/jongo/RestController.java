@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import org.apache.commons.lang.StringUtils;
 import org.jongo.exceptions.JongoBadRequestException;
 import org.jongo.jdbc.*;
 import org.jongo.rest.xstream.JongoError;
@@ -43,6 +43,8 @@ public class RestController {
     private final String database;
     
     public RestController(String database){
+        if(StringUtils.isBlank(database))
+            throw new IllegalArgumentException("Database name can't be blank, empty or null");
         this.database = database;
     }
     
@@ -103,12 +105,9 @@ public class RestController {
         return null;
     }
     
-    public JongoResponse getResource(final String table, final String customId, final String id, final UriInfo ui){
+    public JongoResponse getResource(final String table, final String customId, final String id, final LimitParam limit, final OrderParam order){
         l.debug("Geting resource from " + database + "." + table + " with id " + id);
         
-        MultivaluedMap<String, String> pathParams = ui.getQueryParameters();
-        LimitParam limit = LimitParam.valueOf(pathParams);
-        OrderParam order = OrderParam.valueOf(pathParams);
         QueryParams params = new QueryParams();
         params.setDatabase(database);
         params.setTable(table);
@@ -276,17 +275,16 @@ public class RestController {
         return response;
     }
     
-    public JongoResponse findByColumn(final String table, final String col, final String arg, final UriInfo ui){
+    public JongoResponse findByColumn(final String table, final String col, final String arg, final LimitParam limit, final OrderParam order){
         l.debug("Geting resource from " + database + "." + table + " with " + col + " value " + arg);
         
-        MultivaluedMap<String, String> pathParams = ui.getQueryParameters();
         List<RowResponse> results = null;
         QueryParams params = new QueryParams();
         params.setDatabase(database);
         params.setTable(table);
         params.setIdField(col);
-        params.setLimit(LimitParam.valueOf(pathParams));
-        params.setOrder(OrderParam.valueOf(pathParams));
+        params.setLimit(limit);
+        params.setOrder(order);
         
         JongoResponse response = null;
         try {
@@ -309,12 +307,8 @@ public class RestController {
         return response;
     }
     
-    public JongoResponse findByDynamicFinder(final String table, final String query, final UriInfo ui, final List<String> values){
+    public JongoResponse findByDynamicFinder(final String table, final String query, final List<String> values, final LimitParam limit, final OrderParam order){
         l.debug("Find resource from " + database + "." + table + " with " + query);
-        
-        MultivaluedMap<String, String> pathParams = ui.getQueryParameters();
-        LimitParam limit = LimitParam.valueOf(pathParams);
-        OrderParam order = OrderParam.valueOf(pathParams);
         
         JongoResponse response = null;
         List<RowResponse> results = null;
