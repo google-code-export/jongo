@@ -22,7 +22,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
 import org.apache.commons.dbutils.QueryRunner;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
