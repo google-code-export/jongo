@@ -251,7 +251,11 @@ public class QueryParams {
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder("[");
-        b.append(StringUtils.join(this.params.values(), ","));
+        b.append(id); 
+        if(!this.params.values().isEmpty()){
+            b.append(", ");
+            b.append(StringUtils.join(this.params.values(), ","));
+        }
         b.append("]");
         return b.toString();
     }
