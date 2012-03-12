@@ -128,4 +128,12 @@ public class JongoError implements JongoResponse {
     public boolean isSuccess() {
         return success;
     }
+
+    public Integer getSqlCode() {
+        return sqlCode;
+    }
+
+    public String getSqlState() {
+        return sqlState;
+    }
 }
