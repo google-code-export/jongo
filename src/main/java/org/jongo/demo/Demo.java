@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import org.apache.commons.dbutils.QueryRunner;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -45,6 +46,11 @@ public class Demo {
     public static void generateDemoDatabases(final Set<String> databases){
         for( String k : databases)
             generateDemoDatabase(k);
+    }
+    
+    public static void destroyDemoDatabases(final Set<String> databases){
+        for( String k : databases)
+            destroyDemoDatabase(k);
     }
     
     private static void generateDemoDatabase(final String database){
@@ -112,6 +118,22 @@ public class Demo {
             
         } catch (SQLException ex) {
             l.error("Failed to create demo tables " + ex.getMessage());
+        }
+    }
+    
+    private static void destroyDemoDatabase(final String database){
+        QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource(database));
+        l.info("Destroying Demo Tables in database " + database);
+        try {
+            run.update("DROP TABLE maker_stats");
+            run.update("DROP TABLE sales_stats");
+            run.update("DROP TABLE comments");
+            run.update("DROP TABLE pictures");
+            run.update("DROP TABLE car");
+            run.update("DROP TABLE user");
+            run.update("DROP TABLE maker");
+        } catch (SQLException ex) {
+            l.error("Failed to destroy demo tables " + ex.getMessage());
         }
     }
     
