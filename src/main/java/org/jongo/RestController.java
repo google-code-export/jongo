@@ -49,6 +49,7 @@ public class RestController {
     }
     
     public JongoResponse getDatabaseMetadata(){
+        l.debug("Obtaining metadata for " + database);
         JongoResponse response = null;
         
         List<RowResponse> results = null;
@@ -74,12 +75,18 @@ public class RestController {
     }
     
     public JongoResponse getResourceMetadata(final String table){
-        JongoResponse response = null;
+        l.debug("Obtaining metadata for " + table);
         
+        QueryParams params;
+        try{
+            params = QueryParams.valueOf(database, table);
+        }catch (IllegalArgumentException e){
+            l.debug("Failed to generate query params " + e.getMessage());
+            return new JongoError(database, Response.Status.BAD_REQUEST, e.getMessage());
+        }
+        
+        JongoResponse response = null;
         List<RowResponse> results = null;
-        QueryParams params = new QueryParams();
-        params.setDatabase(database);
-        params.setTable(table);
         try {
             results = JDBCExecutor.getTableMetaData(params);
         } catch (SQLException ex) {
@@ -108,13 +115,13 @@ public class RestController {
     public JongoResponse getResource(final String table, final String customId, final String id, final LimitParam limit, final OrderParam order){
         l.debug("Geting resource from " + database + "." + table + " with id " + id);
         
-        QueryParams params = new QueryParams();
-        params.setDatabase(database);
-        params.setTable(table);
-        params.setIdField(customId);
-        params.setId(id);
-        params.setLimit(limit);
-        params.setOrder(order);
+        QueryParams params;
+        try{
+            params = QueryParams.valueOf(database, table, id, customId, limit, order);
+        }catch (IllegalArgumentException e){
+            l.debug("Failed to generate query params " + e.getMessage());
+            return new JongoError(database, Response.Status.BAD_REQUEST, e.getMessage());
+        }
         
         JongoResponse response = null;
         List<RowResponse> results = null;
@@ -142,10 +149,13 @@ public class RestController {
     public JongoResponse insertResource(final String table, final String customId, final String jsonRequest){
         l.debug("Insert new " + database + "." + table + " with JSON values: " + jsonRequest);
         
-        QueryParams params = new QueryParams();
-        params.setDatabase(database);
-        params.setTable(table);
-        params.setIdField(customId);
+        QueryParams params;
+        try{
+            params = QueryParams.valueOf(database, table, null, customId);
+        }catch (IllegalArgumentException e){
+            l.debug("Failed to generate query params " + e.getMessage());
+            return new JongoError(database, Response.Status.BAD_REQUEST, e.getMessage());
+        }
         
         JongoResponse response = null;
         
@@ -169,11 +179,13 @@ public class RestController {
         if(formParams.size() == 0)
             response = new JongoError(table, Response.Status.BAD_REQUEST, "No arguments given");
         
-        QueryParams params = new QueryParams();
-        params.setDatabase(database);
-        params.setTable(table);
-        params.setIdField(customId);
-        params.setParams(formParams);
+        QueryParams params;
+        try{
+            params = QueryParams.valueOf(database, table, null, customId, formParams);
+        }catch (IllegalArgumentException e){
+            l.debug("Failed to generate query params " + e.getMessage());
+            return new JongoError(database, Response.Status.BAD_REQUEST, e.getMessage());
+        }
         
         if(response == null)
             response = insertResource(params);
@@ -212,11 +224,15 @@ public class RestController {
         JongoResponse response = null;
         
         List<RowResponse> results = null;
-        QueryParams params = new QueryParams();
-        params.setDatabase(database);
-        params.setTable(table);
-        params.setIdField(customId);
-        params.setId(id);
+        
+        QueryParams params;
+        try{
+            params = QueryParams.valueOf(database, table, id, customId);
+        }catch (IllegalArgumentException e){
+            l.debug("Failed to generate query params " + e.getMessage());
+            return new JongoError(database, Response.Status.BAD_REQUEST, e.getMessage());
+        }
+        
         try {
             params.setParams(JongoUtils.getParamsFromJSON(jsonRequest));
             results = JDBCExecutor.update(params);
@@ -245,11 +261,13 @@ public class RestController {
     public JongoResponse deleteResource(final String table, final String customId, final String id){
         l.debug("Delete record " + id + " from table " + database + "." + table);
         
-        QueryParams params = new QueryParams();
-        params.setDatabase(database);
-        params.setTable(table);
-        params.setIdField(customId);
-        params.setId(id);
+        QueryParams params;
+        try{
+            params = QueryParams.valueOf(database, table, id, customId);
+        }catch (IllegalArgumentException e){
+            l.debug("Failed to generate query params " + e.getMessage());
+            return new JongoError(database, Response.Status.BAD_REQUEST, e.getMessage());
+        }
         
         JongoResponse response = null;
         int result = 0;
@@ -279,12 +297,14 @@ public class RestController {
         l.debug("Geting resource from " + database + "." + table + " with " + col + " value " + arg);
         
         List<RowResponse> results = null;
-        QueryParams params = new QueryParams();
-        params.setDatabase(database);
-        params.setTable(table);
-        params.setIdField(col);
-        params.setLimit(limit);
-        params.setOrder(order);
+        
+        QueryParams params;
+        try{
+            params = QueryParams.valueOf(database, table, null, col, limit, order);
+        }catch (IllegalArgumentException e){
+            l.debug("Failed to generate query params " + e.getMessage());
+            return new JongoError(database, Response.Status.BAD_REQUEST, e.getMessage());
+        }
         
         JongoResponse response = null;
         try {
@@ -385,17 +405,14 @@ public class RestController {
             response = new JongoError(database, ex);
         } catch (Exception ex){
             l.info("Received an Unhandled Exception " + ex.getMessage());
-            JongoResponse error = new JongoError(query, Response.Status.INTERNAL_SERVER_ERROR);
             response = new JongoError(query, Response.Status.INTERNAL_SERVER_ERROR);
         }
         
         if((results == null || results.isEmpty()) && response == null){
-            JongoResponse error = new JongoError(query, Response.Status.NOT_FOUND, "No results for " + query);
             response = new JongoError(query, Response.Status.NOT_FOUND, "No results for " + query);
         }
         
         if(response == null){
-            JongoResponse r = new JongoSuccess(query, results);
             response = new JongoSuccess(query, results);
         }
         return response;
