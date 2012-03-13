@@ -55,12 +55,8 @@ public class RestController {
         List<RowResponse> results = null;
         try {
             results = JDBCExecutor.getListOfTables(database);
-        } catch (SQLException ex) {
-            l.info("Received a SQLException " + ex.getMessage() + " with code " + ex.getSQLState());
-            response = new JongoError(database, ex);
-        } catch (Exception ex){
-            l.info("Received an Unhandled Exception " + ex.getMessage());
-            response = new JongoError(database, Response.Status.INTERNAL_SERVER_ERROR);
+        } catch (Throwable ex){
+            response = handleException(ex, database);
         }
         
         if(results == null && response == null){
@@ -89,12 +85,8 @@ public class RestController {
         List<RowResponse> results = null;
         try {
             results = JDBCExecutor.getTableMetaData(params);
-        } catch (SQLException ex) {
-            l.info("Received a SQLException " + ex.getMessage() + " with code " + ex.getSQLState());
-            response = new JongoError(database, ex);
-        } catch (Exception ex){
-            l.info("Received an Unhandled Exception " + ex.getMessage());
-            response = new JongoError(database, Response.Status.INTERNAL_SERVER_ERROR);
+        } catch (Throwable ex){
+            response = handleException(ex, table);
         }
         
         if(results == null && response == null){
@@ -108,8 +100,8 @@ public class RestController {
         return response;
     }
     
-    public JongoResponse getAllResources(final String table){
-        return null;
+    public JongoResponse getAllResources(final String table, final LimitParam limit, final OrderParam order){
+        return getResource(table, null, null, limit, order);
     }
     
     public JongoResponse getResource(final String table, final String customId, final String id, final LimitParam limit, final OrderParam order){
@@ -127,12 +119,8 @@ public class RestController {
         List<RowResponse> results = null;
         try{
             results = JDBCExecutor.get(params);
-        } catch (SQLException ex) {
-            l.info("Received a SQLException " + ex.getMessage() + " with code " + ex.getSQLState());
-            response = new JongoError(database, ex);
-        } catch (Exception ex){
-            l.info("Received an Unhandled Exception " + ex.getMessage());
-            response = new JongoError(database, Response.Status.INTERNAL_SERVER_ERROR);
+        } catch (Throwable ex){
+            response = handleException(ex, table);
         }
         
         if(results == null && response == null){
@@ -166,9 +154,6 @@ public class RestController {
         l.debug("Insert new " + database + "." + table + " with values: " + formParams);
         
         JongoResponse response = null;
-        if(formParams.isEmpty())
-            response = new JongoError(table, Response.Status.BAD_REQUEST, "No arguments given");
-        
         QueryParams params;
         try{
             params = QueryParams.valueOf(database, table, null, customId, formParams);
@@ -189,12 +174,8 @@ public class RestController {
         try {
             if(response == null)
                 result = JDBCExecutor.insert(params);
-        } catch (SQLException ex) {
-            l.info("Received a SQLException " + ex.getMessage() + " with code " + ex.getSQLState());
-            response = new JongoError(database, ex);
-        } catch (Exception ex){
-            l.info("Received an Unhandled Exception " + ex.getMessage());
-            response = new JongoError(null, Response.Status.INTERNAL_SERVER_ERROR);
+        } catch (Throwable ex){
+            response = handleException(ex, params.getTable());
         }
         
         if(result == 0 && response == null){
@@ -226,15 +207,8 @@ public class RestController {
         try {
             params.setParams(JongoUtils.getParamsFromJSON(jsonRequest));
             results = JDBCExecutor.update(params);
-        } catch (SQLException ex) {
-            l.info("Received a SQLException " + ex.getMessage() + " with code " + ex.getSQLState());
-            response = new JongoError(database, ex);
-        } catch (JongoBadRequestException ex){
-            l.info("Received a JongoBadRequestException " + ex.getMessage());
-            response = new JongoError(database, Response.Status.BAD_REQUEST, ex.getMessage());
-        } catch (Exception ex){
-            l.info("Received an Unhandled Exception " + ex.getMessage());
-            response = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
+        } catch (Throwable ex){
+            response = handleException(ex, table);
         }
         
         if(results == null && response == null){
@@ -263,12 +237,8 @@ public class RestController {
         int result = 0;
         try {
             result = JDBCExecutor.delete(params);
-        } catch (SQLException ex) {
-            l.info("Received a SQLException " + ex.getMessage() + " with code " + ex.getSQLState());
-            response = new JongoError(database, ex);
-        } catch (Exception ex){
-            l.info("Received an Unhandled Exception " + ex.getMessage());
-            response = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
+        } catch (Throwable ex){
+            response = handleException(ex, table);
         }
         
         if(result == 0 && response == null){
@@ -299,12 +269,8 @@ public class RestController {
         JongoResponse response = null;
         try {
             results = JDBCExecutor.findByColumn(params, JongoUtils.parseValue(arg));
-        } catch (SQLException ex) {
-            l.info("Received a SQLException " + ex.getMessage() + " with code " + ex.getSQLState());
-            response = new JongoError(database, ex);
-        } catch (Exception ex){
-            l.info("Received an Unhandled Exception " + ex.getMessage());
-            response = new JongoError(table, Response.Status.INTERNAL_SERVER_ERROR);
+        } catch (Throwable ex){
+            response = handleException(ex, table);
         }
         
         if((results == null || results.isEmpty()) && response == null ){
@@ -330,30 +296,16 @@ public class RestController {
                     try{
                         DynamicFinder df = DynamicFinder.valueOf(table, query);
                         results = JDBCExecutor.find(database, df, limit, order);
-                    } catch (SQLException ex) {
-                        l.info("Received a SQLException " + ex.getMessage() + " with code " + ex.getSQLState());
-                        response = new JongoError(database, ex);
-                    } catch (JongoBadRequestException ex){
-                        l.info("Received a JongoBadRequestException " + ex.getMessage());
-                        response = new JongoError(database, Response.Status.BAD_REQUEST, ex.getMessage());
-                    } catch (IllegalArgumentException ex){
-                        l.info("Received an Unhandled Exception " + ex.getMessage());
-                        response = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
+                    } catch (Throwable ex){
+                        response = handleException(ex, table);
                     }
                 }else{
                     String value = values.get(0);
                     try{
                         DynamicFinder df = DynamicFinder.valueOf(table, query, value);
                         results = JDBCExecutor.find(database, df, limit, order, JongoUtils.parseValue(value));
-                    } catch (SQLException ex) {
-                        l.info("Received a SQLException " + ex.getMessage() + " with code " + ex.getSQLState());
-                        response = new JongoError(database, ex);
-                    } catch (JongoBadRequestException ex){
-                        l.info("Received a JongoBadRequestException " + ex.getMessage());
-                        response = new JongoError(database, Response.Status.BAD_REQUEST, ex.getMessage());
-                    } catch (IllegalArgumentException ex){
-                        l.info("Received an Unhandled Exception " + ex.getMessage());
-                        response = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
+                    } catch (Throwable ex){
+                        response = handleException(ex, table);
                     }
                 }
 
@@ -361,15 +313,8 @@ public class RestController {
                 try{
                     DynamicFinder df = DynamicFinder.valueOf(table, query, values.toArray(new String []{}));
                     results = JDBCExecutor.find(database, df, limit, order, JongoUtils.parseValues(values));
-                } catch (SQLException ex) {
-                    l.info("Received a SQLException " + ex.getMessage() + " with code " + ex.getSQLState());
-                    response = new JongoError(database, ex);
-                } catch (JongoBadRequestException ex){
-                    l.info("Received a JongoBadRequestException " + ex.getMessage());
-                    response = new JongoError(database, Response.Status.BAD_REQUEST, ex.getMessage());
-                } catch (IllegalArgumentException ex){
-                    l.info("Received an Unhandled Exception " + ex.getMessage());
-                    response = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
+                } catch (Throwable ex){
+                    response = handleException(ex, table);
                 }
             }
             
@@ -390,12 +335,8 @@ public class RestController {
         List<RowResponse> results = null;
         try {
             results = JDBCExecutor.executeQuery(database, query, JongoUtils.parseValues(arguments));
-        } catch (SQLException ex) {
-            l.info("Received a SQLException " + ex.getMessage() + " with code " + ex.getSQLState());
-            response = new JongoError(database, ex);
-        } catch (Exception ex){
-            l.info("Received an Unhandled Exception " + ex.getMessage());
-            response = new JongoError(query, Response.Status.INTERNAL_SERVER_ERROR);
+        } catch (Throwable ex){
+            response = handleException(ex, query);
         }
         
         if((results == null || results.isEmpty()) && response == null){
@@ -404,6 +345,39 @@ public class RestController {
         
         if(response == null){
             response = new JongoSuccess(query, results);
+        }
+        return response;
+    }
+    
+    private JongoResponse handleException(final Throwable t, final String resource){
+        JongoResponse response;
+        StringBuilder b;
+        if(t instanceof SQLException){
+            SQLException ex = (SQLException)t;
+            b = new StringBuilder("Received a SQLException ");
+            b.append(ex.getMessage());
+            b.append(" state [");
+            b.append(ex.getSQLState());
+            b.append("] & code [");
+            b.append(ex.getErrorCode());
+            b.append("]");
+            l.info(b.toString());
+            response = new JongoError(resource, ex);
+        }else if(t instanceof JongoBadRequestException){
+            b = new StringBuilder("Received a JongoBadRequestException ");
+            b.append(t.getMessage());
+            l.info(b.toString());
+            response = new JongoError(resource, Response.Status.BAD_REQUEST, t.getMessage());
+        }else if(t instanceof IllegalArgumentException){
+            b = new StringBuilder("Received an IllegalArgumentException ");
+            b.append(t.getMessage());
+            l.info(b.toString());
+            response = new JongoError(resource, Response.Status.BAD_REQUEST, t.getMessage());
+        }else{
+            b = new StringBuilder("Received an Unhandled Exception ");
+            b.append(t.getMessage());
+            l.info(b.toString());
+            response = new JongoError(resource, Response.Status.INTERNAL_SERVER_ERROR);
         }
         return response;
     }
