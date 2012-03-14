@@ -256,6 +256,14 @@ public class RestController {
     public JongoResponse findByColumn(final String table, final String col, final String arg, final LimitParam limit, final OrderParam order){
         l.debug("Geting resource from " + database + "." + table + " with " + col + " value " + arg);
         
+        if(StringUtils.isEmpty(arg)){
+            return new JongoError(table, Response.Status.BAD_REQUEST, "Invalid argument " + arg);
+        }
+        
+        if(StringUtils.isEmpty(col)){
+            return new JongoError(table, Response.Status.BAD_REQUEST, "Invalid argument " + col);
+        }
+        
         List<RowResponse> results = null;
         
         QueryParams params;
