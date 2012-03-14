@@ -21,7 +21,6 @@ package org.jongo;
 import org.apache.http.NameValuePair;
 import org.jongo.rest.xstream.RowResponse;
 import org.jongo.mocks.JongoClient;
-import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.core.Response;
@@ -109,7 +108,7 @@ public class AppOnlineTests {
     }
     
     public void testOrdering(){
-        doTestPagingResponse(client.doGET("car?format=xml&idField=cid"), Response.Status.OK, 3, "model", "C2", "X5");
+        doTestPagingResponse(client.doGET("car?format=xml&idField=cid&sort=cid"), Response.Status.OK, 3, "model", "C2", "X5");
         doTestPagingResponse(client.doGET("car?format=xml&sort=year"), Response.Status.OK, 3, "model", "C2", "X5");
         doTestPagingResponse(client.doGET("car?format=xml&sort=year&dir=ASC"), Response.Status.OK, 3, "model", "C2", "X5");
         doTestPagingResponse(client.doGET("car?format=xml&sort=year&dir=DESC"), Response.Status.OK, 3, "model", "X5", "C2");
