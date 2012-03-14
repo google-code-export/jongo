@@ -329,24 +329,8 @@ public class RestController {
         return response;
     }
     
-    public JongoResponse executeStoredProcedure(final String query, final List<String> arguments){
-        l.debug("Executing Stored Procedure " + query);
-        JongoResponse response = null;
-        List<RowResponse> results = null;
-        try {
-            results = JDBCExecutor.executeQuery(database, query, JongoUtils.parseValues(arguments));
-        } catch (Throwable ex){
-            response = handleException(ex, query);
-        }
-        
-        if((results == null || results.isEmpty()) && response == null){
-            response = new JongoError(query, Response.Status.NOT_FOUND, "No results for " + query);
-        }
-        
-        if(response == null){
-            response = new JongoSuccess(query, results);
-        }
-        return response;
+    public JongoResponse executeStoredProcedure(final String query, final String json){
+        return new JongoError(query, Response.Status.SERVICE_UNAVAILABLE, "Not implemented");
     }
     
     private JongoResponse handleException(final Throwable t, final String resource){
