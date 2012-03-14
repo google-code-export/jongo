@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Create the database tables for the demo
+ * Create the database resources for the demo
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public class Demo {
@@ -115,8 +115,12 @@ public class Demo {
             
             run.update("SET TABLE maker READONLY TRUE");
             
+            //load the sp
+            run.update("CREATE FUNCTION simpleStoredProcedure () RETURNS TINYINT RETURN 1");
+            run.update("CREATE PROCEDURE insert_comment (IN car_id INTEGER, IN comment VARCHAR(255)) MODIFIES SQL DATA INSERT INTO comments VALUES (DEFAULT, car_id, comment)");
+            
         } catch (SQLException ex) {
-            l.error("Failed to create demo tables " + ex.getMessage());
+            l.error("Failed to create demo " + ex.getMessage());
         }
     }
     
@@ -124,6 +128,8 @@ public class Demo {
         QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource(database));
         l.info("Destroying Demo Tables in database " + database);
         try {
+            run.update("DROP FUNCTION simpleStoredProcedure");
+            run.update("DROP PROCEDURE insert_comment");
             run.update("DROP TABLE maker_stats");
             run.update("DROP TABLE sales_stats");
             run.update("DROP TABLE comments");
