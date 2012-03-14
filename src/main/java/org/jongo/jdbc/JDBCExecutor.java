@@ -162,7 +162,7 @@ public class JDBCExecutor {
         l.debug(query + " params: " + JongoUtils.varargToString(params));
         
         QueryRunner run = JDBCConnectionFactory.getQueryRunner(queryParams.getDatabase());
-        ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(false);
+        ResultSetHandler<List<RowResponse>> res = new JongoResultSetHandler(true);
         try {
             List<RowResponse> results = run.query(query, res, params);
             return results;
