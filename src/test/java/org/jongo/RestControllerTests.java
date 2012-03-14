@@ -17,10 +17,10 @@
  */
 package org.jongo;
 
-import com.sun.jersey.server.impl.application.WebApplicationContext;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import junit.framework.Assert;
 import org.jongo.config.JongoConfiguration;
 import org.jongo.demo.Demo;
@@ -85,7 +85,7 @@ public class RestControllerTests {
     }
     
     @Test
-    public void testGetResource(){
+    public void testReadResource(){
         
         JongoSuccess r = (JongoSuccess)controller.getResource("user", "id", "0", limit, order);
         testSuccessResponse(r, Response.Status.OK, 1);
@@ -127,10 +127,14 @@ public class RestControllerTests {
         
         r = (JongoSuccess)controller.getResource("car", "transmission", "Automatic", limit, order);
         testSuccessResponse(r, Response.Status.OK, 1);
+        
+        order.setColumn("id");
+        r = (JongoSuccess)controller.getAllResources("maker", limit, order);
+        testSuccessResponse(r, Response.Status.OK, 25);
     }
     
     @Test
-    public void testInsertResource(){
+    public void testCreateResource(){
         UserMock newMock = UserMock.getRandomInstance();
         JongoSuccess r = (JongoSuccess)controller.insertResource("user", "id", newMock.toJSON());
         testSuccessResponse(r, Response.Status.CREATED, 1);
@@ -145,6 +149,77 @@ public class RestControllerTests {
         r = (JongoSuccess)controller.getResource("user", "name", newMock.name, limit, order);
         testSuccessResponse(r, Response.Status.OK, 1);
         
+        JongoError err = (JongoError)controller.insertResource("user", "id", "");
+        testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
+        
+        err = (JongoError)controller.insertResource("user", "id", new HashMap<String,String>());
+        testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
+        
+        newMock = UserMock.getRandomInstance();
+        Map<String, String> wrongUserParams = newMock.toMap();
+        wrongUserParams.put("birthday", "0000"); // in wrong format
+        err = (JongoError)controller.insertResource("user", "id", wrongUserParams);
+        testErrorResponse(err, Response.Status.BAD_REQUEST, "42561", new Integer(-5561));
+        
+        wrongUserParams = newMock.toMap();
+        wrongUserParams.put("age", null); // age can be null
+        r = (JongoSuccess)controller.insertResource("user", "id", wrongUserParams);
+        testSuccessResponse(r, Response.Status.CREATED, 1);
+        
+        wrongUserParams = newMock.toMap();
+        wrongUserParams.put("age", ""); // age can't be empty
+        err = (JongoError)controller.insertResource("user", "id", wrongUserParams);
+        testErrorResponse(err, Response.Status.BAD_REQUEST, "22018", new Integer(-3438));
+        
+        wrongUserParams = newMock.toMap();
+        wrongUserParams.put("name", null); // name can't be null
+        err = (JongoError)controller.insertResource("user", "id", wrongUserParams);
+        testErrorResponse(err, Response.Status.BAD_REQUEST, "23502", new Integer(-10));
+        
+        wrongUserParams = newMock.toMap();
+        wrongUserParams.put("name", ""); // name can be empty
+        r = (JongoSuccess)controller.insertResource("user", "id", wrongUserParams);
+        testSuccessResponse(r, Response.Status.CREATED, 1);
+        r = (JongoSuccess)controller.getResource("user", "name", newMock.name, limit, order);
+        testSuccessResponse(r, Response.Status.OK, 1);
+        
+    }
+    
+    @Test
+    public void testUpdateResource(){
+        JongoSuccess r = (JongoSuccess)controller.updateResource("user", "id", "0", "{\"age\":\"90\"}");
+        testSuccessResponse(r, Response.Status.OK, 1);
+        
+        JongoError err = (JongoError)controller.updateResource("user", "id", "0", "{\"age\":\"\"}"); // age can't be empty
+        testErrorResponse(err, Response.Status.BAD_REQUEST, "22018", new Integer(-3438));
+        
+        err = (JongoError)controller.updateResource("user", "id", "0", "{\"age\":}"); // invalid json
+        testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
+        
+        err = (JongoError)controller.updateResource("user", "id", "0", "{\"age\":\"90\", \"birthday\":00X0}"); // invalid date
+        testErrorResponse(err, Response.Status.BAD_REQUEST, "22007", new Integer(-3407));
+        
+        r = (JongoSuccess)controller.updateResource("car", "cid", "0", "{\"model\":\"Test$%&·$&%·$/()=?¿Model\"}"); //custom id
+        testSuccessResponse(r, Response.Status.OK, 1);
+    }
+    
+    @Test
+    public void testRemoveResource(){
+        UserMock newMock = UserMock.getRandomInstance();
+        JongoSuccess r = (JongoSuccess)controller.insertResource("user", "id", newMock.toJSON());
+        testSuccessResponse(r, Response.Status.CREATED, 1);
+        
+        r = (JongoSuccess)controller.getResource("user", "name", newMock.name, limit, order);
+        testSuccessResponse(r, Response.Status.OK, 1);
+        
+        String id = getId(r, "id");
+        Assert.assertNotNull(id);
+        
+        r = (JongoSuccess)controller.deleteResource("user", "id", id);
+        testSuccessResponse(r, Response.Status.OK, 1);
+        
+        JongoError err = (JongoError)controller.deleteResource("user", "id", "");
+        testErrorResponse(err, Response.Status.BAD_REQUEST, "22018", new Integer(-3438));
     }
     
     private void testErrorResponse(JongoError err, Response.Status expectedStatus, String expectedSqlState, Integer expectedSqlCode){
@@ -161,5 +236,16 @@ public class RestControllerTests {
         Assert.assertEquals(expectedStatus, r.getStatus());
         Assert.assertTrue(r.isSuccess());
         Assert.assertEquals(expectedResults, rows.size());
+    }
+    
+    private String getId(final JongoSuccess response, final String id){
+        for(RowResponse row : response.getRows()){
+            for(String k : row.getColumns().keySet()){
+                if(k.equalsIgnoreCase(id)){
+                    return row.getColumns().get(k);
+                }
+            }
+        }
+        return null;
     }
 }
