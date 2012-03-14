@@ -18,14 +18,13 @@
 
 package org.jongo.jdbc;
 
+import java.sql.*;
 import org.jongo.handler.ResultSetMetaDataHandler;
 import org.jongo.handler.JongoResultSetHandler;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.JongoUtils;
 import org.jongo.config.DatabaseConfiguration;
@@ -204,8 +203,8 @@ public class JDBCExecutor {
         }
     }
     
-    public static List<RowResponse> executeQuery(final String database, final String queryName, final Object... params) throws SQLException {
-        throw new NotImplementedException();
+    public static List<RowResponse> executeQuery(final String database, final String queryName, final List<StoredProcedureParam> params) throws Exception {
+        throw new UnsupportedOperationException("Not Implemented");
     }
     
     public static void shutdown(){
