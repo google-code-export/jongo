@@ -70,7 +70,7 @@ public class JongoUtils {
     public static DateTime isDate(final String arg){
         if(arg == null) return null;
         DateTime ret = null;
-        DateTimeFormatter df = null;
+        DateTimeFormatter df;
         if(arg.contains("-")){
             df = ISODateTimeFormat.date();
         }else{
@@ -95,7 +95,7 @@ public class JongoUtils {
     public static DateTime isTime(final String arg){
         if(arg == null) return null;
         DateTime ret = null;
-        DateTimeFormatter df = null;
+        DateTimeFormatter df;
         if(arg.contains(":")){
             df = ISODateTimeFormat.time();
         }else{
@@ -228,6 +228,8 @@ public class JongoUtils {
      * @throws JongoBadRequestException if the JSON string is not readable.
      */
     public static Map<String, String> getParamsFromJSON(final String json) throws JongoBadRequestException{
+        if(StringUtils.isBlank(json))
+            throw new JongoBadRequestException("Invalid number of arguments for request " + json);
         // XStream needs the response to be nested inside an object it can understand
         final String formattedJson = "{\"request\":" + json + "}";
         XStream xStream = new XStream(new JettisonMappedXmlDriver());
