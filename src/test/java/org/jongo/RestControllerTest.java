@@ -121,6 +121,10 @@ public class RestControllerTest {
         err = (JongoError)controller.getResource(null, null, null, limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
+        // fails if there are no resources
+        err = (JongoError)controller.getResource("user", "id", "1999", limit, order);
+        testErrorResponse(err, Response.Status.NOT_FOUND, null, null);
+        
         // test a table with a custom column
         order.setColumn("cid");
         r = (JongoSuccess)controller.getResource("car", "cid", "1", limit, order);
