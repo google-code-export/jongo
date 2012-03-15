@@ -123,8 +123,8 @@ public class RestController {
             response = handleException(ex, table);
         }
         
-        if(results == null && response == null){
-            response = new JongoError(database, Response.Status.NO_CONTENT);
+        if(results.isEmpty() && response == null){
+            response = new JongoError(database, Response.Status.NOT_FOUND);
         }
         
         if(response == null){
