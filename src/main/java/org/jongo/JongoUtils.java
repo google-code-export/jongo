@@ -21,7 +21,9 @@ package org.jongo;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.security.MessageDigest;
 import java.util.*;
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang.StringUtils;
@@ -34,6 +36,7 @@ import org.jongo.exceptions.StartupException;
 import org.jongo.rest.xstream.JongoMapConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.misc.BASE64Encoder;
 
 /**
  * Collection of commonly used methods and constants.
@@ -270,5 +273,44 @@ public class JongoUtils {
                 map.put(k, v);
         }
         return map;
+    }
+    
+    public static synchronized String getMD5Base64(String input) {
+        MessageDigest digest = null;
+
+        try {
+            digest = MessageDigest.getInstance("MD5");
+        } catch (Exception ex) {
+            l.error(ex.getMessage());
+        }
+
+        if (digest == null)
+            return input;
+
+        try {
+            digest.update(input.getBytes("UTF-8"));
+        } catch (java.io.UnsupportedEncodingException ex) {
+            l.error(ex.getMessage());
+        }
+        
+        byte[] rawData = digest.digest();
+        BASE64Encoder bencoder = new BASE64Encoder();
+        return bencoder.encode(rawData);
+    }
+    
+    public static Integer getOctetLength(String input){
+        byte[] responseBytes;
+        int result = 0;
+        try {
+            responseBytes = input.getBytes("UTF-8");
+            result = responseBytes.length;
+        } catch ( UnsupportedEncodingException ex ) {
+            l.error(ex.getMessage());
+        }
+        return result;
+    }
+    
+    public static String getDateHeader(){
+        return new DateTime().toString(ISODateTimeFormat.dateTime());
     }
 }
