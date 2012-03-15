@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import org.jongo.JongoUtils;
 
 /**
  *
@@ -107,7 +108,15 @@ public class JongoError implements JongoResponse {
     public Response getResponse(final String format){
         String response = (format.equalsIgnoreCase("json")) ? this.toJSON() : this.toXML();
         String media = (format.equalsIgnoreCase("json")) ? MediaType.APPLICATION_JSON : MediaType.APPLICATION_XML;
-        return Response.status(this.status).entity(response).type(media).build();
+        String md5sum = JongoUtils.getMD5Base64(response);
+        Integer length = JongoUtils.getOctetLength(response);
+        return Response.status(this.status)
+                .entity(response)
+                .type(media)
+                .header("Date", JongoUtils.getDateHeader())
+                .header("Content-MD5", md5sum)
+                .header("Content-Length", length)
+                .build();
     }
 
     @Override
