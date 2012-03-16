@@ -163,7 +163,7 @@ public class RestController {
             response = handleException(ex, table);
         }
         
-        if(results == null && response == null){
+        if((results == null || results.isEmpty()) && response == null){
             response = new JongoError(table, Response.Status.NOT_FOUND);
         }
         
