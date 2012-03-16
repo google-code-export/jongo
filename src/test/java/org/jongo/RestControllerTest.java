@@ -30,6 +30,7 @@ import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
 import org.jongo.mocks.UserMock;
 import org.jongo.rest.xstream.JongoError;
+import org.jongo.rest.xstream.JongoHead;
 import org.jongo.rest.xstream.JongoSuccess;
 import org.jongo.rest.xstream.RowResponse;
 import org.junit.AfterClass;
@@ -67,13 +68,15 @@ public class RestControllerTest {
     @Test
     public void testGetDatabaseMetadata(){
         JongoSuccess r = (JongoSuccess)controller.getDatabaseMetadata();
-        testSuccessResponse(r, Response.Status.OK, 7);
+        testSuccessResponse(r, Response.Status.OK, 8);
     }
     
     @Test
     public void testGetResourceMetadata(){
-        JongoSuccess r = (JongoSuccess)controller.getResourceMetadata("user");
-        testSuccessResponse(r, Response.Status.OK, 6);
+        JongoHead r = (JongoHead)controller.getResourceMetadata("user");
+        Assert.assertEquals(Response.Status.OK, r.getStatus());
+        Assert.assertTrue(r.isSuccess());
+        Assert.assertEquals(6, r.getRows().size());
         
         JongoError err = (JongoError)controller.getResourceMetadata(null);
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
