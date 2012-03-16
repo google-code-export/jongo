@@ -93,12 +93,10 @@ public class JongoError implements JongoResponse {
     public String toJSON(){
         StringBuilder b = new StringBuilder("{");
         b.append("\"success\":");b.append(success);
-        b.append(",\"resource\":\"");b.append(resource);
-        b.append("\",\"httpCode\":");b.append(status);
         b.append(",\"message\":\"");b.append(message);
         if( sqlCode != null && sqlState != null){
             b.append(",\"SQLState\":\"");b.append(sqlState);
-            b.append(",\"SQLCode\":\"");b.append(sqlCode);
+            b.append("\",\"SQLCode\":\"");b.append(sqlCode);
         }
         b.append("\"}");
         return b.toString();
@@ -116,6 +114,7 @@ public class JongoError implements JongoResponse {
                 .header("Date", JongoUtils.getDateHeader())
                 .header("Content-MD5", md5sum)
                 .header("Content-Length", length)
+                .header("Content-Location", resource)
                 .build();
     }
 
