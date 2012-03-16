@@ -100,10 +100,53 @@ public class RestController {
         return response;
     }
     
+    /**
+     * Retrieves all resources from a given table ordered and limited.
+     * @param table the table or view to query
+     * @param limit a LimitParam object with the limit values
+     * @param order order an OrderParam object with the ordering values.
+     * @return Returns a JongoResponse with the values of the resource. If the resource is not available an error
+     * if the table is empty, we return a SuccessResponse with no values.
+     */
     public JongoResponse getAllResources(final String table, final LimitParam limit, final OrderParam order){
-        return getResource(table, null, null, limit, order);
+        l.debug("Geting all resources from " + database + "." + table);
+        
+        QueryParams params;
+        try{
+            params = QueryParams.valueOf(database, table, null, null, limit, order);
+        }catch (IllegalArgumentException e){
+            l.debug("Failed to generate query params " + e.getMessage());
+            return new JongoError(database, Response.Status.BAD_REQUEST, e.getMessage());
+        }
+        
+        JongoResponse response = null;
+        List<RowResponse> results = null;
+        try{
+            results = JDBCExecutor.get(params);
+        } catch (Throwable ex){
+            response = handleException(ex, table);
+        }
+        
+        if(results == null && response == null){
+            response = new JongoError(database, Response.Status.NOT_FOUND);
+        }
+        
+        if(response == null){
+            response = new JongoSuccess(database, results);
+        }
+        
+        return response;
     }
     
+    /**
+     * Retrieves one resource for the given id. 
+     * @param table the table or view to query
+     * @param customId the column defined to be the primary key. Defaults to "id"
+     * @param id the identification value of the resource.
+     * @param limit a LimitParam object with the limit values
+     * @param order an OrderParam object with the ordering values.
+     * @return Returns a JongoResponse with the values of the resource. If the resource is not available an error is returned.
+     */
     public JongoResponse getResource(final String table, final String customId, final String id, final LimitParam limit, final OrderParam order){
         l.debug("Geting resource from " + database + "." + table + " with id " + id);
         
