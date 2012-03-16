@@ -115,7 +115,7 @@ public class JongoConfiguration {
         Properties prop = new Properties();
         prop.setProperty(p_name_jongo_ip, "localhost");
         prop.setProperty(p_name_jongo_port, "8080");
-        prop.setProperty(p_name_jongo_allow_apps, "false");
+        prop.setProperty(p_name_jongo_allow_apps, "true");
         prop.setProperty(p_name_jongo_default_limit, "25");
         prop.setProperty(p_name_jongo_max_limit, "1000");
         prop.setProperty(p_name_jongo_allow_list_tables, "true");
