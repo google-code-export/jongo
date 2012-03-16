@@ -118,9 +118,6 @@ public class Usage  implements JongoResponse{
     public String toJSON(){
         StringBuilder b = new StringBuilder("{");
         b.append("\"success\":");b.append(isSuccess());
-        b.append(",\"count\":");b.append(1);
-        b.append(",\"resource\":\"");b.append(getResource());
-        b.append("\",\"code\":");b.append(getStatus().getStatusCode());
         b.append(",\"response\":{");
         b.append("\"total\":");b.append(total);
         b.append(",\"success\":");b.append(success);
@@ -163,6 +160,15 @@ public class Usage  implements JongoResponse{
     public Response getResponse(String format) {
         String response = (format.equalsIgnoreCase("json")) ? this.toJSON() : this.toXML();
         String media = (format.equalsIgnoreCase("json")) ? MediaType.APPLICATION_JSON : MediaType.APPLICATION_XML;
-        return Response.status(getStatus()).entity(response).type(media).build();
+        String md5sum = JongoUtils.getMD5Base64(response);
+        Integer length = JongoUtils.getOctetLength(response);
+        return Response.status(getStatus())
+                .entity(response)
+                .type(media)
+                .header("Date", JongoUtils.getDateHeader())
+                .header("Content-MD5", md5sum)
+                .header("Content-Length", length)
+                .header("Content-Location", "jongo")
+                .build();
     }
 }
