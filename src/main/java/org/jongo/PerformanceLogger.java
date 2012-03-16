@@ -52,8 +52,9 @@ public class PerformanceLogger {
         return instance;
     }
     
-    public void end(){
+    public long end(){
         this.end = System.nanoTime();
+        final long dur = TimeUnit.NANOSECONDS.toMillis(this.end - this.start);
         StringBuilder b = new StringBuilder("[");
         if(msg.length() > 0){
             b.append(msg);
@@ -61,9 +62,10 @@ public class PerformanceLogger {
         }
         b.append(code);
         b.append(":");
-        b.append(TimeUnit.NANOSECONDS.toMillis(this.end - this.start));
+        b.append(dur);
         b.append("]");
         l.debug(b.toString());
+        return dur;
     }
     
     public enum Code{
