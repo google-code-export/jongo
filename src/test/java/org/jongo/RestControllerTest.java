@@ -121,7 +121,7 @@ public class RestControllerTest {
         err = (JongoError)controller.getResource(null, null, null, limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
-        // fails if there are no resources
+        // fails if we try for a non-existing resource.
         err = (JongoError)controller.getResource("user", "id", "1999", limit, order);
         testErrorResponse(err, Response.Status.NOT_FOUND, null, null);
         
@@ -132,10 +132,20 @@ public class RestControllerTest {
         
         r = (JongoSuccess)controller.getResource("car", "transmission", "Automatic", limit, order);
         testSuccessResponse(r, Response.Status.OK, 1);
-        
-        order.setColumn("id");
-        r = (JongoSuccess)controller.getAllResources("maker", limit, order);
+    }
+    
+    @Test
+    public void testReadAllResources(){
+        limit = new LimitParam();
+        order = new OrderParam();
+        JongoSuccess r = (JongoSuccess)controller.getAllResources("maker", limit, order);
         testSuccessResponse(r, Response.Status.OK, 25);
+        
+        JongoError err = (JongoError)controller.getAllResources("no_exists", limit, order);
+        testErrorResponse(err, Response.Status.BAD_REQUEST, "42501", new Integer(-5501));
+        
+        r = (JongoSuccess)controller.getAllResources("empty", limit, order);
+        testSuccessResponse(r, Response.Status.OK, 0);
     }
     
     @Test
