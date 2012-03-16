@@ -38,6 +38,7 @@ public class Usage  implements JongoResponse{
     private BigInteger fail = BigInteger.ZERO;
     
     private BigInteger read = BigInteger.ZERO;
+    private BigInteger readAll = BigInteger.ZERO;
     private BigInteger create = BigInteger.ZERO;
     private BigInteger update = BigInteger.ZERO;
     private BigInteger delete = BigInteger.ZERO;
@@ -83,6 +84,12 @@ public class Usage  implements JongoResponse{
     public synchronized void addRead(final Long time, final Integer success){
         this.readTime = time;
         this.read = this.read.add(BigInteger.ONE);
+        addGeneral(success);
+    }
+    
+    public synchronized void addReadAll(final Long time, final Integer success){
+        this.readTime = time;
+        this.read = this.readAll.add(BigInteger.ONE);
         addGeneral(success);
     }
     
