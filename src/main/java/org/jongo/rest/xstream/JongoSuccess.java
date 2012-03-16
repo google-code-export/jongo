@@ -23,9 +23,7 @@ import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.joda.time.DateTime;
 import org.jongo.JongoUtils;
-import sun.security.provider.MD5;
 
 /**
  *
@@ -67,9 +65,9 @@ public class JongoSuccess implements JongoResponse{
         // It kept adding the response as an object and I want an array.
         StringBuilder b = new StringBuilder("{");
         b.append("\"success\":");b.append(success);
-        b.append(",\"count\":");b.append(rows.size());
-        b.append(",\"resource\":\"");b.append(resource);
-        b.append("\",\"code\":");b.append(status.getStatusCode());
+//        b.append(",\"count\":");b.append(rows.size());
+//        b.append(",\"resource\":\"");b.append(resource);
+//        b.append("\",\"code\":");b.append(status.getStatusCode());
         b.append(",\"response\":[ "); //this last space is important!
         for(RowResponse row : rows){
             b.append(row.toJSON());
@@ -92,6 +90,8 @@ public class JongoSuccess implements JongoResponse{
                 .header("Date", JongoUtils.getDateHeader())
                 .header("Content-MD5", md5sum)
                 .header("Content-Length", length)
+                .header("Content-Count", rows.size())
+                .header("Content-Location", resource)
                 .build();
     }
     
