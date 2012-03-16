@@ -25,10 +25,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.exceptions.JongoBadRequestException;
 import org.jongo.jdbc.*;
-import org.jongo.rest.xstream.JongoError;
-import org.jongo.rest.xstream.JongoResponse;
-import org.jongo.rest.xstream.JongoSuccess;
-import org.jongo.rest.xstream.RowResponse;
+import org.jongo.rest.xstream.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +75,7 @@ public class RestController {
             params = QueryParams.valueOf(database, table);
         }catch (IllegalArgumentException e){
             l.debug("Failed to generate query params " + e.getMessage());
-            return new JongoError(database, Response.Status.BAD_REQUEST, e.getMessage());
+            return new JongoError(table, Response.Status.BAD_REQUEST, e.getMessage());
         }
         
         JongoResponse response = null;
@@ -90,11 +87,11 @@ public class RestController {
         }
         
         if(results == null && response == null){
-            response = new JongoError(database, Response.Status.NO_CONTENT);
+            response = new JongoError(table, Response.Status.NO_CONTENT);
         }
         
         if(response == null){
-            response = new JongoSuccess(database, results);
+            response = new JongoHead(table, results);
         }
         
         return response;
@@ -116,7 +113,7 @@ public class RestController {
             params = QueryParams.valueOf(database, table, null, null, limit, order);
         }catch (IllegalArgumentException e){
             l.debug("Failed to generate query params " + e.getMessage());
-            return new JongoError(database, Response.Status.BAD_REQUEST, e.getMessage());
+            return new JongoError(table, Response.Status.BAD_REQUEST, e.getMessage());
         }
         
         JongoResponse response = null;
@@ -128,11 +125,11 @@ public class RestController {
         }
         
         if(results == null && response == null){
-            response = new JongoError(database, Response.Status.NOT_FOUND);
+            response = new JongoError(table, Response.Status.NOT_FOUND);
         }
         
         if(response == null){
-            response = new JongoSuccess(database, results);
+            response = new JongoSuccess(table, results);
         }
         
         return response;
@@ -155,7 +152,7 @@ public class RestController {
             params = QueryParams.valueOf(database, table, id, customId, limit, order);
         }catch (IllegalArgumentException e){
             l.debug("Failed to generate query params " + e.getMessage());
-            return new JongoError(database, Response.Status.BAD_REQUEST, e.getMessage());
+            return new JongoError(table, Response.Status.BAD_REQUEST, e.getMessage());
         }
         
         JongoResponse response = null;
@@ -167,11 +164,11 @@ public class RestController {
         }
         
         if(results.isEmpty() && response == null){
-            response = new JongoError(database, Response.Status.NOT_FOUND);
+            response = new JongoError(table, Response.Status.NOT_FOUND);
         }
         
         if(response == null){
-            response = new JongoSuccess(database, results);
+            response = new JongoSuccess(table, results);
         }
         
         return response;
@@ -187,7 +184,7 @@ public class RestController {
             response = insertResource(table, customId, params);
         } catch (JongoBadRequestException ex){
             l.info("Failed to parse JSON arguments " + ex.getMessage());
-            response = new JongoError(database, Response.Status.BAD_REQUEST, ex.getMessage());
+            response = new JongoError(table, Response.Status.BAD_REQUEST, ex.getMessage());
         }
         
         return response;
@@ -202,7 +199,7 @@ public class RestController {
             params = QueryParams.valueOf(database, table, null, customId, formParams);
         }catch (IllegalArgumentException e){
             l.debug("Failed to generate query params " + e.getMessage());
-            return new JongoError(database, Response.Status.BAD_REQUEST, e.getMessage());
+            return new JongoError(table, Response.Status.BAD_REQUEST, e.getMessage());
         }
         
         if(response == null)
@@ -244,7 +241,7 @@ public class RestController {
             params = QueryParams.valueOf(database, table, id, customId);
         }catch (IllegalArgumentException e){
             l.debug("Failed to generate query params " + e.getMessage());
-            return new JongoError(database, Response.Status.BAD_REQUEST, e.getMessage());
+            return new JongoError(table, Response.Status.BAD_REQUEST, e.getMessage());
         }
         
         try {
@@ -273,7 +270,7 @@ public class RestController {
             params = QueryParams.valueOf(database, table, id, customId);
         }catch (IllegalArgumentException e){
             l.debug("Failed to generate query params " + e.getMessage());
-            return new JongoError(database, Response.Status.BAD_REQUEST, e.getMessage());
+            return new JongoError(table, Response.Status.BAD_REQUEST, e.getMessage());
         }
         
         JongoResponse response = null;
@@ -314,7 +311,7 @@ public class RestController {
             params = QueryParams.valueOf(database, table, null, col, limit, order);
         }catch (IllegalArgumentException e){
             l.debug("Failed to generate query params " + e.getMessage());
-            return new JongoError(database, Response.Status.BAD_REQUEST, e.getMessage());
+            return new JongoError(table, Response.Status.BAD_REQUEST, e.getMessage());
         }
         
         JongoResponse response = null;
