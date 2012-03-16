@@ -70,7 +70,7 @@ public class AppOnlineTests {
     }
     
     public void testErrors(){
-        doTestResponse(client.doGET("user/999?format=xml"), Response.Status.OK, 0); // this user shouldn't exist. But we don't return an error!
+        doTestResponse(client.doGET("user/999?format=xml"), Response.Status.NOT_FOUND, 0);
         // let's try an update/insert with invalid data
         doTestResponse(client.doPUT("comments/0?format=xml", "{\"comment\":\"this should fail!\""), Response.Status.BAD_REQUEST, 0);
         doTestResponse(client.doPUT("pictures/0?format=xml", "{}"), Response.Status.BAD_REQUEST, 0);
