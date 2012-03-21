@@ -18,7 +18,6 @@
 
 package org.jongo;
 
-import org.jongo.config.JongoConfiguration;
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
@@ -37,12 +36,10 @@ public class Jongo {
     public static void main(String[] args) throws StartupException{
         l.info("Starting Jongo in Test Mode");
         
-        JongoConfiguration configuration = JongoUtils.loadConfiguration();
-        
         StringBuilder url = new StringBuilder("http://");
-        url.append(configuration.getIp());
+        url.append("localhost");
         url.append(":");
-        url.append(configuration.getPort());
+        url.append(8080);
         url.append("/");
         
         
