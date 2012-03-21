@@ -39,9 +39,6 @@ public class JongoConfiguration {
     
     private static final Logger l = LoggerFactory.getLogger(JongoConfiguration.class);
     
-    private static final String p_name_jongo_ip = "jongo.ip";
-    private static final String p_name_jongo_port = "jongo.port";
-    private static final String p_name_jongo_allow_apps = "jongo.allow.apps";
     private static final String p_name_jongo_default_limit = "jongo.default.limit";
     private static final String p_name_jongo_max_limit = "jongo.default.max.limit";
     private static final String p_name_jongo_allow_list_tables = "jongo.allow.database.metadata";
@@ -53,9 +50,6 @@ public class JongoConfiguration {
     
     private static final String propertiesFileName = "/org/jongo/jongo.properties";
     private static JongoConfiguration instance;
-    
-    private String ip;
-    private int port;
     
     private Integer limit;
     private Integer maxLimit;
@@ -72,7 +66,7 @@ public class JongoConfiguration {
     public static JongoConfiguration instanceOf(){
         if(instance == null){
             instance = new JongoConfiguration();
-            Properties prop = getProperties(instance);
+            Properties prop = getProperties();
             setProperties(instance, prop);
             
             if(demo){
@@ -93,15 +87,12 @@ public class JongoConfiguration {
     }
     
     private static void setProperties(JongoConfiguration instance, Properties prop){
-        instance.ip = prop.getProperty(p_name_jongo_ip);
-        instance.port = Integer.valueOf(prop.getProperty(p_name_jongo_port));
-        instance.appsEnabled = Boolean.valueOf(prop.getProperty(p_name_jongo_allow_apps));
         instance.limit = Integer.valueOf(prop.getProperty(p_name_jongo_default_limit));
         instance.maxLimit = Integer.valueOf(prop.getProperty(p_name_jongo_max_limit));
         instance.listTables = Boolean.valueOf(prop.getProperty(p_name_jongo_allow_list_tables));
     }
     
-    private static Properties getProperties(JongoConfiguration instance){
+    private static Properties getProperties(){
         Properties prop;
         if(demo){
             prop = loadDemoProperties();
@@ -113,9 +104,6 @@ public class JongoConfiguration {
     
     private static Properties loadDemoProperties(){
         Properties prop = new Properties();
-        prop.setProperty(p_name_jongo_ip, "localhost");
-        prop.setProperty(p_name_jongo_port, "8080");
-        prop.setProperty(p_name_jongo_allow_apps, "true");
         prop.setProperty(p_name_jongo_default_limit, "25");
         prop.setProperty(p_name_jongo_max_limit, "1000");
         prop.setProperty(p_name_jongo_allow_list_tables, "true");
@@ -193,14 +181,6 @@ public class JongoConfiguration {
     public JDBCDriver getDriver(final String database) {
         DatabaseConfiguration db = this.databases.get(database);
         return db.getDriver();
-    }
-
-    public String getIp() {
-        return ip;
-    }
-
-    public int getPort() {
-        return port;
     }
 
     public boolean areAppsEnabled() {
