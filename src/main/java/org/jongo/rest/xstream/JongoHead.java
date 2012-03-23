@@ -76,7 +76,7 @@ public class JongoHead implements JongoResponse {
     
     @Override
     public Response getResponse(MediaType format) {
-        String response = (format.toString().equals(MediaType.APPLICATION_XML)) ? this.toXML() : this.toJSON();
+        String response = (format.isCompatible(MediaType.valueOf(MediaType.APPLICATION_XML))) ? this.toXML() : this.toJSON();
         return Response.status(this.status)
                 .entity(response) // leave this in case the client can handle HEAD with content.
                 .type(format)
