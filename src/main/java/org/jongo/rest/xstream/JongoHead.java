@@ -75,12 +75,11 @@ public class JongoHead implements JongoResponse {
     }
     
     @Override
-    public Response getResponse(final String format){
-        String response = (format.equalsIgnoreCase("json")) ? this.toJSON() : this.toXML();
-        String media = (format.equalsIgnoreCase("json")) ? MediaType.APPLICATION_JSON : MediaType.APPLICATION_XML;
+    public Response getResponse(MediaType format) {
+        String response = (format.toString().equals(MediaType.APPLICATION_XML)) ? this.toXML() : this.toJSON();
         return Response.status(this.status)
                 .entity(response) // leave this in case the client can handle HEAD with content.
-                .type(media)
+                .type(format)
                 .header("Date", JongoUtils.getDateHeader())
                 .header("Content-Location", resource)
                 .header(StringUtils.capitalize(resource), this.toHeader())
