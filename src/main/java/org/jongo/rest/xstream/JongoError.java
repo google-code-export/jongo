@@ -103,14 +103,13 @@ public class JongoError implements JongoResponse {
     }
     
     @Override
-    public Response getResponse(final String format){
-        String response = (format.equalsIgnoreCase("json")) ? this.toJSON() : this.toXML();
-        String media = (format.equalsIgnoreCase("json")) ? MediaType.APPLICATION_JSON : MediaType.APPLICATION_XML;
+    public Response getResponse(MediaType format) {
+        String response = (format.toString().equals(MediaType.APPLICATION_XML)) ? this.toXML() : this.toJSON();
         String md5sum = JongoUtils.getMD5Base64(response);
         Integer length = JongoUtils.getOctetLength(response);
         return Response.status(this.status)
                 .entity(response)
-                .type(media)
+                .type(format)
                 .header("Date", JongoUtils.getDateHeader())
                 .header("Content-MD5", md5sum)
                 .header("Content-Length", length)

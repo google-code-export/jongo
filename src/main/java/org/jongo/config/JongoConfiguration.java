@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.commons.lang.StringUtils;
+import org.jongo.JongoShutdown;
 import org.jongo.demo.Demo;
 import org.jongo.enums.JDBCDriver;
 import org.jongo.exceptions.StartupException;
@@ -48,7 +49,6 @@ public class JongoConfiguration {
     private static final String p_prefix_db_password = ".jdbc.password";
     private static final String p_prefix_db_url = ".jdbc.url";
     
-    private static final String propertiesFileName = "/org/jongo/jongo.properties";
     private static JongoConfiguration instance;
     
     private Integer limit;
@@ -66,13 +66,18 @@ public class JongoConfiguration {
     public static JongoConfiguration instanceOf(){
         if(instance == null){
             instance = new JongoConfiguration();
-            Properties prop = getProperties();
+            Properties prop = getProperties(instance);
             setProperties(instance, prop);
+            
+            l.debug("Registering the shutdown hook");
+            Runtime.getRuntime().addShutdownHook(new JongoShutdown());
             
             if(demo){
                 l.debug("Loading demo configuration with memory databases");
                 instance.databases = Demo.getDemoDatabasesConfiguration();
+                Demo.generateDemoDatabases(instance.getDatabases());
             }else{
+                l.debug("Loading configuration");
                 try {
                     instance.databases = getDatabaseConfigurations(prop);
                 } catch (StartupException ex) {
@@ -92,12 +97,12 @@ public class JongoConfiguration {
         instance.listTables = Boolean.valueOf(prop.getProperty(p_name_jongo_allow_list_tables));
     }
     
-    private static Properties getProperties(){
+    private static Properties getProperties(JongoConfiguration conf){
         Properties prop;
         if(demo){
             prop = loadDemoProperties();
         }else{
-            prop = loadProperties();
+            prop = loadProperties(conf);
         }
         return prop;
     }
@@ -110,17 +115,23 @@ public class JongoConfiguration {
         return prop;
     }
     
-    private static Properties loadProperties(){
+    private static Properties loadProperties(JongoConfiguration conf){
         Properties prop = new Properties();
-        InputStream in = JongoConfiguration.class.getClass().getResourceAsStream(propertiesFileName);
+        InputStream in = JongoConfiguration.class.getClass().getResourceAsStream("/org/jongo/jongo.properties");
 
         if(in == null){
-            l.warn("Couldn't load configuration file " + propertiesFileName);
+            l.warn("Couldn't load configuration file /org/jongo/jongo.properties");
             in = JongoConfiguration.class.getClass().getResourceAsStream("/jongo.properties");
-            if(in == null){
-                l.error("Couldn't load configuration file /jongo.properties quitting");
-                System.exit(1);
-            }
+        }
+        
+        if(in == null){
+            l.error("Couldn't load configuration file /jongo.properties");
+            in = conf.getClass().getClassLoader().getResourceAsStream("jongo.properties");
+        }
+        
+        if(in == null){
+            l.error("Couldn't load configuration file jongo.properties quitting");
+            System.exit(1);
         }
 
         try {
@@ -128,7 +139,7 @@ public class JongoConfiguration {
                 prop.load(in);
             }
         } catch (IOException ex) {
-            l.error("Failed to load " + propertiesFileName, ex);
+            l.error("Failed to load configuration", ex);
             System.exit(1);
         }finally{
             try {
