@@ -65,6 +65,7 @@ public class JongoClient {
             HttpURLConnection con = (HttpURLConnection) new URL(jongoUrl + url).openConnection();
             con.setRequestMethod(method);
             con.setDoOutput(true);
+            con.setRequestProperty("Accept", MediaType.APPLICATION_XML);
             BufferedReader r = null;
             
             if(con.getResponseCode() != Response.Status.OK.getStatusCode()){
@@ -95,6 +96,7 @@ public class JongoClient {
         try {
             HttpURLConnection con = (HttpURLConnection) new URL(jongoUrl + url).openConnection();
             con.setRequestMethod(method);
+            con.setRequestProperty("Accept", MediaType.APPLICATION_XML);
             con.setRequestProperty("Content-Type", MediaType.APPLICATION_JSON);
             con.setRequestProperty("Content-Length", "" + Integer.toString(jsonParameters.getBytes().length));
             con.setDoOutput(true);
@@ -141,6 +143,7 @@ public class JongoClient {
         try {
             HttpURLConnection con = (HttpURLConnection) new URL(jongoUrl + url).openConnection();
             con.setRequestMethod("POST");
+            con.setRequestProperty("Accept", MediaType.APPLICATION_XML);
             con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             con.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
             con.setDoOutput(true);

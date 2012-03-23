@@ -52,8 +52,8 @@ public class AppOnlineTests {
         List<UserMock> users = getTestValues();
         List<UserMock> createdusers = new ArrayList<UserMock>();
         for(UserMock user : users){
-            doTestResponse(client.doPOST("user?format=xml", user.toNameValuePair()), Response.Status.CREATED, 1);
-            createdusers.addAll(doTestResponse(client.doGET("user/name/" + user.name + "?format=xml"), Response.Status.OK, 1));
+            doTestResponse(client.doPOST("user", user.toNameValuePair()), Response.Status.CREATED, 1);
+            createdusers.addAll(doTestResponse(client.doGET("user/name/" + user.name), Response.Status.OK, 1));
         }
         
         assertEquals(createdusers.size(), 3);
@@ -61,70 +61,70 @@ public class AppOnlineTests {
         for(UserMock user : createdusers){
             //generate a new user to update all the values on an existing user
             UserMock newMock = UserMock.getRandomInstance();
-            doTestResponse(client.doPUT("user/" + user.id + "?format=xml", newMock.toJSON()), Response.Status.OK, 1);
-            UserMock comingUser = doTestResponse(client.doGET("user/" + user.id + "?format=xml"), Response.Status.OK, 1).get(0);
+            doTestResponse(client.doPUT("user/" + user.id, newMock.toJSON()), Response.Status.OK, 1);
+            UserMock comingUser = doTestResponse(client.doGET("user/" + user.id), Response.Status.OK, 1).get(0);
             assertEquals(newMock.name, comingUser.name);
             // now delete them
-            doTestResponse(client.doDELETE("user/" + user.id + "?format=xml"), Response.Status.OK, 1);
+            doTestResponse(client.doDELETE("user/" + user.id), Response.Status.OK, 1);
         }
     }
     
     public void testErrors(){
-        doTestResponse(client.doGET("user/999?format=xml"), Response.Status.NOT_FOUND, 0);
+        doTestResponse(client.doGET("user/999"), Response.Status.NOT_FOUND, 0);
         // let's try an update/insert with invalid data
-        doTestResponse(client.doPUT("comments/0?format=xml", "{\"comment\":\"this should fail!\""), Response.Status.BAD_REQUEST, 0);
-        doTestResponse(client.doPUT("pictures/0?format=xml", "{}"), Response.Status.BAD_REQUEST, 0);
-        doTestResponse(client.doPUT("pictures/0?format=xml", ""), Response.Status.BAD_REQUEST, 0);
-        doTestResponse(client.doPOST("pictures?format=xml", "{}"), Response.Status.BAD_REQUEST, 0);
-        doTestResponse(client.doPOST("pictures?format=xml", ""), Response.Status.BAD_REQUEST, 0);
-        doTestResponse(client.doPOST("pictures?format=xml", new ArrayList<NameValuePair>()), Response.Status.BAD_REQUEST, 0);
+        doTestResponse(client.doPUT("comments/0", "{\"comment\":\"this should fail!\""), Response.Status.BAD_REQUEST, 0);
+        doTestResponse(client.doPUT("pictures/0", "{}"), Response.Status.BAD_REQUEST, 0);
+        doTestResponse(client.doPUT("pictures/0", ""), Response.Status.BAD_REQUEST, 0);
+        doTestResponse(client.doPOST("pictures", "{}"), Response.Status.BAD_REQUEST, 0);
+        doTestResponse(client.doPOST("pictures", ""), Response.Status.BAD_REQUEST, 0);
+        doTestResponse(client.doPOST("pictures", new ArrayList<NameValuePair>()), Response.Status.BAD_REQUEST, 0);
         // in the demo, by default, maker is not writtable
-        doTestResponse(client.doPOST("maker?format=xml", "{\"maker\":\"this should fail!\",\"id\":1}"), Response.Status.BAD_REQUEST, 0);
-        doTestResponse(client.doPUT("maker/0?format=xml", "{\"maker\":\"this should fail!\"}"), Response.Status.BAD_REQUEST, 0);
+        doTestResponse(client.doPOST("maker", "{\"maker\":\"this should fail!\",\"id\":1}"), Response.Status.BAD_REQUEST, 0);
+        doTestResponse(client.doPUT("maker/0", "{\"maker\":\"this should fail!\"}"), Response.Status.BAD_REQUEST, 0);
         // table is not in Jongo
-        doTestResponse(client.doPOST("notInJongo?format=xml", "{\"comment\":\"this should fail!\",\"cid\":1}"), Response.Status.BAD_REQUEST, 0);
-        doTestResponse(client.doPUT("notInJongo/0?format=xml", "{\"comment\":\"this should fail!\"}"), Response.Status.BAD_REQUEST, 0);
+        doTestResponse(client.doPOST("notInJongo", "{\"comment\":\"this should fail!\",\"cid\":1}"), Response.Status.BAD_REQUEST, 0);
+        doTestResponse(client.doPUT("notInJongo/0", "{\"comment\":\"this should fail!\"}"), Response.Status.BAD_REQUEST, 0);
     }
     
     public void testDynamicFinders(){
-        doTestResponse(client.doGET("user/dynamic/findAllByAgeBetween?args=18&args=99&format=xml"), Response.Status.OK, 2);
-        doTestResponse(client.doGET("user/dynamic/findAllByBirthdayBetween?args=1992-01-01&args=1992-12-31&format=xml"), Response.Status.OK, 1);
-        doTestResponse(client.doGET("car/dynamic/findAllByFuelIsNull?format=xml&sort=cid"), Response.Status.OK, 1);
-        doTestResponse(client.doGET("car/dynamic/findAllByFuelIsNotNull?format=xml&sort=cid"), Response.Status.OK, 2);
-        doTestResponse(client.doGET("user/dynamic/findAllByCreditGreaterThan?args=0&format=xml"), Response.Status.OK, 1);
-        doTestResponse(client.doGET("user/dynamic/findAllByCreditGreaterThanEquals?args=0&format=xml"), Response.Status.OK, 2);
-        doTestResponse(client.doGET("user/dynamic/findAllByCreditLessThan?args=0&format=xml"), Response.Status.NOT_FOUND, 0);
-        doTestResponse(client.doGET("user/dynamic/findAllByCreditLessThanEquals?args=0&format=xml"), Response.Status.OK, 1);
-        doTestResponse(client.doGET("sales_stats/dynamic/findAllByLast_updateBetween?args=2000-01-01T00:00:00.000Z&args=2000-06-01T23:55:00.000Z&format=xml"), Response.Status.OK, 6);
+        doTestResponse(client.doGET("user/dynamic/findAllByAgeBetween?args=18&args=99"), Response.Status.OK, 2);
+        doTestResponse(client.doGET("user/dynamic/findAllByBirthdayBetween?args=1992-01-01&args=1992-12-31"), Response.Status.OK, 1);
+        doTestResponse(client.doGET("car/dynamic/findAllByFuelIsNull?sort=cid"), Response.Status.OK, 1);
+        doTestResponse(client.doGET("car/dynamic/findAllByFuelIsNotNull?sort=cid"), Response.Status.OK, 2);
+        doTestResponse(client.doGET("user/dynamic/findAllByCreditGreaterThan?args=0"), Response.Status.OK, 1);
+        doTestResponse(client.doGET("user/dynamic/findAllByCreditGreaterThanEquals?args=0"), Response.Status.OK, 2);
+        doTestResponse(client.doGET("user/dynamic/findAllByCreditLessThan?args=0"), Response.Status.NOT_FOUND, 0);
+        doTestResponse(client.doGET("user/dynamic/findAllByCreditLessThanEquals?args=0"), Response.Status.OK, 1);
+        doTestResponse(client.doGET("sales_stats/dynamic/findAllByLast_updateBetween?args=2000-01-01T00:00:00.000Z&args=2000-06-01T23:55:00.000Z"), Response.Status.OK, 6);
     }
     
     public void testPaging(){
-        doTestPagingResponse(client.doGET("maker_stats?format=xml"), Response.Status.OK, 25, "id", "0", "24");
-        doTestPagingResponse(client.doGET("maker_stats?format=xml&limit=notAllowed"), Response.Status.OK, 25, "id", "0", "24");
-        doTestPagingResponse(client.doGET("maker_stats?format=xml&offset=50"), Response.Status.OK, 25, "id", "0", "24");
-        doTestPagingResponse(client.doGET("maker_stats?format=xml&limit=50"), Response.Status.OK, 50, "id", "0", "49");
-        doTestPagingResponse(client.doGET("maker_stats?format=xml&limit=50&offset=50"), Response.Status.OK, 50, "id", "50", "99");
-        doTestResponse(client.doGET("maker_stats?format=xml&limit=50&offset=15550"), Response.Status.OK, 0);
+        doTestPagingResponse(client.doGET("maker_stats"), Response.Status.OK, 25, "id", "0", "24");
+        doTestPagingResponse(client.doGET("maker_stats?limit=notAllowed"), Response.Status.OK, 25, "id", "0", "24");
+        doTestPagingResponse(client.doGET("maker_stats?offset=50"), Response.Status.OK, 25, "id", "0", "24");
+        doTestPagingResponse(client.doGET("maker_stats?limit=50"), Response.Status.OK, 50, "id", "0", "49");
+        doTestPagingResponse(client.doGET("maker_stats?limit=50&offset=50"), Response.Status.OK, 50, "id", "50", "99");
+        doTestResponse(client.doGET("maker_stats?limit=50&offset=15550"), Response.Status.OK, 0);
     }
     
     public void testOrdering(){
-        doTestPagingResponse(client.doGET("car?format=xml&idField=cid&sort=cid"), Response.Status.OK, 3, "model", "C2", "X5");
-        doTestPagingResponse(client.doGET("car?format=xml&sort=year"), Response.Status.OK, 3, "model", "C2", "X5");
-        doTestPagingResponse(client.doGET("car?format=xml&sort=year&dir=ASC"), Response.Status.OK, 3, "model", "C2", "X5");
-        doTestPagingResponse(client.doGET("car?format=xml&sort=year&dir=DESC"), Response.Status.OK, 3, "model", "X5", "C2");
-        doTestPagingResponse(client.doGET("car?format=xml&sort=maker&dir=ASC"), Response.Status.OK, 3, "maker", "BMW", "FIAT");
-        doTestPagingResponse(client.doGET("car?format=xml&sort=maker&dir=ASC"), Response.Status.OK, 3, "model", "X5", "500");
-        doTestPagingResponse(client.doGET("car?format=xml&sort=maker&dir=DESC"), Response.Status.OK, 3, "maker", "FIAT", "BMW");
-        doTestPagingResponse(client.doGET("car?format=xml&sort=maker&dir=DESC"), Response.Status.OK, 3, "model", "500", "X5");
-        doTestPagingResponse(client.doGET("car?format=xml&sort=maker&dir=ASC&limit=1"), Response.Status.OK, 1, "model", "X5", "X5");
-        doTestPagingResponse(client.doGET("car?format=xml&sort=maker&dir=DESC&limit=2"), Response.Status.OK, 2, "model", "500", "C2");
-        doTestPagingResponse(client.doGET("car?format=xml&sort=maker&dir=DESC&limit=2&offset=1"), Response.Status.OK, 2, "model", "C2", "X5");
+        doTestPagingResponse(client.doGET("car?idField=cid&sort=cid"), Response.Status.OK, 3, "model", "C2", "X5");
+        doTestPagingResponse(client.doGET("car?sort=year"), Response.Status.OK, 3, "model", "C2", "X5");
+        doTestPagingResponse(client.doGET("car?sort=year&dir=ASC"), Response.Status.OK, 3, "model", "C2", "X5");
+        doTestPagingResponse(client.doGET("car?sort=year&dir=DESC"), Response.Status.OK, 3, "model", "X5", "C2");
+        doTestPagingResponse(client.doGET("car?sort=maker&dir=ASC"), Response.Status.OK, 3, "maker", "BMW", "FIAT");
+        doTestPagingResponse(client.doGET("car?sort=maker&dir=ASC"), Response.Status.OK, 3, "model", "X5", "500");
+        doTestPagingResponse(client.doGET("car?sort=maker&dir=DESC"), Response.Status.OK, 3, "maker", "FIAT", "BMW");
+        doTestPagingResponse(client.doGET("car?sort=maker&dir=DESC"), Response.Status.OK, 3, "model", "500", "X5");
+        doTestPagingResponse(client.doGET("car?sort=maker&dir=ASC&limit=1"), Response.Status.OK, 1, "model", "X5", "X5");
+        doTestPagingResponse(client.doGET("car?sort=maker&dir=DESC&limit=2"), Response.Status.OK, 2, "model", "500", "C2");
+        doTestPagingResponse(client.doGET("car?sort=maker&dir=DESC&limit=2&offset=1"), Response.Status.OK, 2, "model", "C2", "X5");
     }
     
     public void testSQLInject(){
-        doTestResponse(client.doPUT("user/0?format=xml", "{\"name\":\"anything' OR 'x'='x'\"}"), Response.Status.OK, 1);
-        doTestResponse(client.doGET("user/name/bar%20AND%20age%3D30?format=xml"), Response.Status.NOT_FOUND, 0);
-        doTestResponse(client.doGET("user/name/bar%3B%20DROP%20TABLE%20user%3B%20--?format=xml"), Response.Status.NOT_FOUND, 0);
+        doTestResponse(client.doPUT("user/0", "{\"name\":\"anything' OR 'x'='x'\"}"), Response.Status.OK, 1);
+        doTestResponse(client.doGET("user/name/bar%20AND%20age%3D30"), Response.Status.NOT_FOUND, 0);
+        doTestResponse(client.doGET("user/name/bar%3B%20DROP%20TABLE%20user%3B%20--"), Response.Status.NOT_FOUND, 0);
     }
     
     public List<UserMock> getTestValues(){
