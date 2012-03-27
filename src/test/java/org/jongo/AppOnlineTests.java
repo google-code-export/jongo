@@ -18,17 +18,16 @@
 
 package org.jongo;
 
-import org.apache.http.NameValuePair;
-import org.jongo.rest.xstream.RowResponse;
-import org.jongo.mocks.JongoClient;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.core.Response;
+import org.apache.http.NameValuePair;
+import org.jongo.mocks.JongoClient;
 import org.jongo.mocks.UserMock;
 import org.jongo.rest.xstream.JongoError;
 import org.jongo.rest.xstream.JongoResponse;
 import org.jongo.rest.xstream.JongoSuccess;
-
+import org.jongo.rest.xstream.Row;
 import static org.junit.Assert.*;
 
 /**
@@ -142,11 +141,11 @@ public class AppOnlineTests {
         assertEquals(r.getStatus(), expectedStatus);
         if(r instanceof JongoSuccess){
             JongoSuccess s = (JongoSuccess)r;
-            List<RowResponse> rows = s.getRows();
+            List<Row> rows = s.getRows();
             assertTrue(s.isSuccess());
             assertEquals(rows.size(), expectedCount);
-            for(RowResponse row : rows){
-                users.add(UserMock.instanceOf(row.getColumns()));
+            for(Row row : rows){
+                users.add(UserMock.instanceOf(row.getCells()));
             }
         }else{
             JongoError e = (JongoError)r;
@@ -160,12 +159,12 @@ public class AppOnlineTests {
         assertEquals(r.getStatus(), expectedStatus);
         if(r instanceof JongoSuccess){
             JongoSuccess s = (JongoSuccess)r;
-            List<RowResponse> rows = s.getRows();
+            List<Row> rows = s.getRows();
             int lastIndex = s.getRows().size() - 1;
             assertTrue(s.isSuccess());
             assertEquals(rows.size(), expectedCount);
-            assertEquals(first, rows.get(0).getColumns().get(col));
-            assertEquals(last, rows.get(lastIndex).getColumns().get(col));
+            assertEquals(first, rows.get(0).getCells().get(col));
+            assertEquals(last, rows.get(lastIndex).getCells().get(col));
         }else{
             JongoError e = (JongoError)r;
             assertFalse(e.isSuccess());
