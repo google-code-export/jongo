@@ -18,7 +18,6 @@
 
 package org.jongo.rest.xstream;
 
-import com.thoughtworks.xstream.XStream;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -36,8 +35,6 @@ public class JongoSuccess implements JongoResponse{
     private final List<RowResponse> rows;
     private final String resource;
     
-    private static final XStream xStream = initializeXStream(); 
-    
     public JongoSuccess(String resource, List<RowResponse> results, Response.Status status) {
         this.resource = resource;
         this.rows = results;
@@ -52,23 +49,21 @@ public class JongoSuccess implements JongoResponse{
     
     @Override
     public String toXML(){
-        return xStream.toXML(this);
+        StringBuilder b = new StringBuilder("<response><success>");
+        b.append(success);b.append("</success><resource>");
+        b.append(resource);b.append("</resource><rows>");
+        for(RowResponse r : rows)
+            b.append(r.toXML());
+        b.append("</rows></response>");
+        return b.toString();
     }
     
-    public static JongoSuccess fromXML(final String xml){
-        return (JongoSuccess)xStream.fromXML(xml);
-    }
-    
+ 
     @Override
     public String toJSON(){
-        // I really tried to use XStream to generate the JSON, but it simply didn't do what I wanted. 
-        // It kept adding the response as an object and I want an array.
         StringBuilder b = new StringBuilder("{");
         b.append("\"success\":");b.append(success);
-//        b.append(",\"count\":");b.append(rows.size());
-//        b.append(",\"resource\":\"");b.append(resource);
-//        b.append("\",\"code\":");b.append(status.getStatusCode());
-        b.append(",\"response\":[ "); //this last space is important!
+        b.append(",\"cells\":[ "); //this last space is important!
         for(RowResponse row : rows){
             b.append(row.toJSON());
             b.append(",");
@@ -81,30 +76,15 @@ public class JongoSuccess implements JongoResponse{
     @Override
     public Response getResponse(MediaType format) {
         String response = (format.isCompatible(MediaType.valueOf(MediaType.APPLICATION_XML))) ? this.toXML() : this.toJSON();
-        String md5sum = JongoUtils.getMD5Base64(response);
-        Integer length = JongoUtils.getOctetLength(response);
         return Response.status(this.status)
                 .entity(response)
                 .type(format)
                 .header("Date", JongoUtils.getDateHeader())
-                .header("Content-MD5", md5sum)
-                .header("Content-Length", length)
                 .header("Content-Count", rows.size())
                 .header("Content-Location", resource)
                 .build();
     }
     
-    private static XStream initializeXStream(){
-        XStream xStreamInstance = new XStream();
-        xStreamInstance.setMode(XStream.NO_REFERENCES);
-        xStreamInstance.autodetectAnnotations(false);
-        xStreamInstance.alias("response", JongoSuccess.class);
-        xStreamInstance.alias("row", RowResponse.class);
-        xStreamInstance.registerConverter(new JongoMapConverter());
-        xStreamInstance.aliasAttribute(RowResponse.class, "roi", "roi");
-        return xStreamInstance;
-    }
-
     @Override
     public String getResource() {
         return resource;
