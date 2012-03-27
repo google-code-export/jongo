@@ -30,7 +30,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.jongo.rest.xstream.RowResponse;
+import org.jongo.rest.xstream.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * Handles a ResultSet and convert it to a List of RowResponse
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
-public class JongoResultSetHandler implements ResultSetHandler<List<RowResponse>> {
+public class JongoResultSetHandler implements ResultSetHandler<List<Row>> {
     
     private final boolean all;
     
@@ -59,18 +59,18 @@ public class JongoResultSetHandler implements ResultSetHandler<List<RowResponse>
      * @throws SQLException
      */
     @Override
-    public List<RowResponse> handle(ResultSet rs) throws SQLException {
-        List<RowResponse> results = new ArrayList<RowResponse>();
+    public List<Row> handle(ResultSet rs) throws SQLException {
+        List<Row> results = new ArrayList<Row>();
         int rowId = 0;
         if(all){
             while (rs.next()) {
                 Map<String, String> map = resultSetToMap(rs);
-                if(map != null) results.add(new RowResponse(rowId++, map));
+                if(map != null) results.add(new Row(rowId++, map));
             }
         }else{
             rs.next();
             Map<String, String> map = resultSetToMap(rs);
-            if(map != null) results.add(new RowResponse(rowId++, map));
+            if(map != null) results.add(new Row(rowId++, map));
         }
         return results;
     }
