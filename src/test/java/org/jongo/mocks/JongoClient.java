@@ -27,9 +27,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.jongo.rest.xstream.JongoError;
+import org.jongo.XmlXstreamTest;
 import org.jongo.rest.xstream.JongoResponse;
-import org.jongo.rest.xstream.JongoSuccess;
 
 /**
  *
@@ -80,9 +79,9 @@ public class JongoClient {
                 rawresponse.append("\n");
             }
             try{
-                response = JongoSuccess.fromXML(rawresponse.toString());
+                response = XmlXstreamTest.successFromXML(rawresponse.toString());
             }catch(Exception e){
-                response = JongoError.fromXML(rawresponse.toString());
+                response = XmlXstreamTest.errorFromXML(rawresponse.toString());
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -124,9 +123,9 @@ public class JongoClient {
             }
             
             try{
-                response = JongoSuccess.fromXML(rawresponse.toString());
+                response = XmlXstreamTest.successFromXML(rawresponse.toString());
             }catch(Exception e){
-                response = JongoError.fromXML(rawresponse.toString());
+                response = XmlXstreamTest.errorFromXML(rawresponse.toString());
             }
             
         } catch (Exception ex) {
@@ -169,9 +168,9 @@ public class JongoClient {
             }
             
             try{
-                response = JongoSuccess.fromXML(rawresponse.toString());
+                response = XmlXstreamTest.successFromXML(rawresponse.toString());
             }catch(Exception e){
-                response = JongoError.fromXML(rawresponse.toString());
+                response = XmlXstreamTest.errorFromXML(rawresponse.toString());
             }
             
         } catch (Exception ex) {
