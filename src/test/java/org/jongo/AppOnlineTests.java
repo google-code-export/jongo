@@ -138,7 +138,6 @@ public class AppOnlineTests {
     private List<UserMock> doTestResponse(JongoResponse r, Response.Status expectedStatus, int expectedCount){
         List<UserMock> users = new ArrayList<UserMock>();
         assertNotNull(r);
-        assertEquals(r.getStatus(), expectedStatus);
         if(r instanceof JongoSuccess){
             JongoSuccess s = (JongoSuccess)r;
             List<Row> rows = s.getRows();
@@ -156,7 +155,6 @@ public class AppOnlineTests {
     
     private void doTestPagingResponse(JongoResponse r, Response.Status expectedStatus, int expectedCount, String col, String first, String last){
         assertNotNull(r);
-        assertEquals(r.getStatus(), expectedStatus);
         if(r instanceof JongoSuccess){
             JongoSuccess s = (JongoSuccess)r;
             List<Row> rows = s.getRows();
