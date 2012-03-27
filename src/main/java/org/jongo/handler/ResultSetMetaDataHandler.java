@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.dbutils.ResultSetHandler;
-import org.jongo.rest.xstream.RowResponse;
+import org.jongo.rest.xstream.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,13 +34,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
-public class ResultSetMetaDataHandler implements ResultSetHandler<List<RowResponse>> {
+public class ResultSetMetaDataHandler implements ResultSetHandler<List<Row>> {
 
     private static final Logger l = LoggerFactory.getLogger(ResultSetMetaDataHandler.class);
 
     @Override
-    public List<RowResponse> handle(ResultSet rs) throws SQLException {
-        List<RowResponse> results = new ArrayList<RowResponse>();
+    public List<Row> handle(ResultSet rs) throws SQLException {
+        List<Row> results = new ArrayList<Row>();
         int rowId = 0;
         ResultSetMetaData metaData = rs.getMetaData();
         Map<String,String> map = null;
@@ -59,7 +59,7 @@ public class ResultSetMetaDataHandler implements ResultSetHandler<List<RowRespon
 //            map.put("schema_name", metaData.getSchemaName(i));
 //            map.put("column_type", String.valueOf(metaData.getColumnType(i)));
  
-            if(map != null) results.add(new RowResponse(rowId++, map));
+            if(map != null) results.add(new Row(rowId++, map));
         }
         return results;
     }

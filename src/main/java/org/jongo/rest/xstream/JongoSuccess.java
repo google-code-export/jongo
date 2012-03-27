@@ -32,16 +32,16 @@ public class JongoSuccess implements JongoResponse{
     
     private final boolean success = true;
     private final Response.Status status;
-    private final List<RowResponse> rows;
+    private final List<Row> rows;
     private final String resource;
     
-    public JongoSuccess(String resource, List<RowResponse> results, Response.Status status) {
+    public JongoSuccess(String resource, List<Row> results, Response.Status status) {
         this.resource = resource;
         this.rows = results;
         this.status = status;
     }
     
-    public JongoSuccess(String resource, List<RowResponse> results) {
+    public JongoSuccess(String resource, List<Row> results) {
         this.resource = resource;
         this.rows = results;
         this.status = Response.Status.OK;
@@ -52,7 +52,7 @@ public class JongoSuccess implements JongoResponse{
         StringBuilder b = new StringBuilder("<response><success>");
         b.append(success);b.append("</success><resource>");
         b.append(resource);b.append("</resource><rows>");
-        for(RowResponse r : rows)
+        for(Row r : rows)
             b.append(r.toXML());
         b.append("</rows></response>");
         return b.toString();
@@ -64,7 +64,7 @@ public class JongoSuccess implements JongoResponse{
         StringBuilder b = new StringBuilder("{");
         b.append("\"success\":");b.append(success);
         b.append(",\"cells\":[ "); //this last space is important!
-        for(RowResponse row : rows){
+        for(Row row : rows){
             b.append(row.toJSON());
             b.append(",");
         }
@@ -90,7 +90,7 @@ public class JongoSuccess implements JongoResponse{
         return resource;
     }
 
-    public List<RowResponse> getRows() {
+    public List<Row> getRows() {
         return rows;
     }
 

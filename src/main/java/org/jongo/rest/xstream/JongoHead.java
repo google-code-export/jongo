@@ -31,17 +31,17 @@ import org.jongo.JongoUtils;
 public class JongoHead implements JongoResponse {
     private final boolean success = true;
     private final Response.Status status;
-    private final List<RowResponse> rows;
+    private final List<Row> rows;
     private final String resource;
     
     
-    public JongoHead(String resource, List<RowResponse> results, Response.Status status) {
+    public JongoHead(String resource, List<Row> results, Response.Status status) {
         this.resource = resource;
         this.rows = results;
         this.status = status;
     }
     
-    public JongoHead(String resource, List<RowResponse> results) {
+    public JongoHead(String resource, List<Row> results) {
         this.resource = resource;
         this.rows = results;
         this.status = Response.Status.OK;
@@ -52,7 +52,7 @@ public class JongoHead implements JongoResponse {
         StringBuilder b = new StringBuilder("<response><success>");
         b.append(success);b.append("</success><resource>");
         b.append(resource);b.append("</resource><rows>");
-        for(RowResponse r : rows)
+        for(Row r : rows)
             b.append(r.toXML());
         b.append("</rows></response>");
         return b.toString();
@@ -65,7 +65,7 @@ public class JongoHead implements JongoResponse {
         StringBuilder b = new StringBuilder("{");
         b.append("\"success\":");b.append(success);
         b.append(",\"response\":[ "); //this last space is important!
-        for(RowResponse row : rows){
+        for(Row row : rows){
             b.append(row.toJSON());
             b.append(",");
         }
@@ -91,7 +91,7 @@ public class JongoHead implements JongoResponse {
         return resource;
     }
 
-    public List<RowResponse> getRows() {
+    public List<Row> getRows() {
         return rows;
     }
 
@@ -107,7 +107,7 @@ public class JongoHead implements JongoResponse {
     
     private String toHeader(){
         final List<String> args = new ArrayList<String>();
-        for(RowResponse row : rows){
+        for(Row row : rows){
             final String columnname = row.getCells().get("columnName");
             final String columntype = row.getCells().get("columnType");
             final String columnsize = row.getCells().get("columnSize");

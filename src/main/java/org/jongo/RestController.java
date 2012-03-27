@@ -49,7 +49,7 @@ public class RestController {
         l.debug("Obtaining metadata for " + database);
         JongoResponse response = null;
         
-        List<RowResponse> results = null;
+        List<Row> results = null;
         try {
             results = JDBCExecutor.getListOfTables(database);
         } catch (Throwable ex){
@@ -79,7 +79,7 @@ public class RestController {
         }
         
         JongoResponse response = null;
-        List<RowResponse> results = null;
+        List<Row> results = null;
         try {
             results = JDBCExecutor.getTableMetaData(params);
         } catch (Throwable ex){
@@ -117,7 +117,7 @@ public class RestController {
         }
         
         JongoResponse response = null;
-        List<RowResponse> results = null;
+        List<Row> results = null;
         try{
             results = JDBCExecutor.get(params);
         } catch (Throwable ex){
@@ -156,7 +156,7 @@ public class RestController {
         }
         
         JongoResponse response = null;
-        List<RowResponse> results = null;
+        List<Row> results = null;
         try{
             results = JDBCExecutor.get(params);
         } catch (Throwable ex){
@@ -223,8 +223,8 @@ public class RestController {
         }
 
         if(response == null){
-            List<RowResponse> results = new ArrayList<RowResponse>();
-            results.add(new RowResponse(0));
+            List<Row> results = new ArrayList<Row>();
+            results.add(new Row(0));
             response = new JongoSuccess(null, results, Response.Status.CREATED);
         }
         return response;
@@ -234,7 +234,7 @@ public class RestController {
         l.debug("Update record " + id + " in table " + database + "." + table + " with values: " + jsonRequest);
         JongoResponse response = null;
         
-        List<RowResponse> results = null;
+        List<Row> results = null;
         
         QueryParams params;
         try{
@@ -286,8 +286,8 @@ public class RestController {
         }
 
         if(response == null){
-            List<RowResponse> results = new ArrayList<RowResponse>();
-            results.add(new RowResponse(0));
+            List<Row> results = new ArrayList<Row>();
+            results.add(new Row(0));
             response = new JongoSuccess(table, results, Response.Status.OK);
         }
         return response;
@@ -304,7 +304,7 @@ public class RestController {
             return new JongoError(table, Response.Status.BAD_REQUEST, "Invalid argument " + col);
         }
         
-        List<RowResponse> results = null;
+        List<Row> results = null;
         
         QueryParams params;
         try{
@@ -335,7 +335,7 @@ public class RestController {
         l.debug("Find resource from " + database + "." + table + " with " + query);
         
         JongoResponse response = null;
-        List<RowResponse> results = null;
+        List<Row> results = null;
         if(query == null){
             response = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
         }else{

@@ -23,17 +23,17 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
-public class RowResponse {
+public class Row {
 
     private final int roi;
     private final Map<String, String> cells;// = new HashMap<String, String>();
 
-    public RowResponse(int roi) {
+    public Row(int roi) {
         this.roi = roi;
         this.cells = new HashMap<String, String>();
     }
 
-    public RowResponse(int roi, Map<String, String> columns) {
+    public Row(int roi, Map<String, String> columns) {
         this.roi = roi;
         this.cells = columns;
     }
