@@ -17,7 +17,6 @@
  */
 package org.jongo.rest.xstream;
 
-import com.thoughtworks.xstream.XStream;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
@@ -35,7 +34,6 @@ public class JongoHead implements JongoResponse {
     private final List<RowResponse> rows;
     private final String resource;
     
-    private static final XStream xStream = initializeXStream(); 
     
     public JongoHead(String resource, List<RowResponse> results, Response.Status status) {
         this.resource = resource;
@@ -51,11 +49,13 @@ public class JongoHead implements JongoResponse {
     
     @Override
     public String toXML(){
-        return xStream.toXML(this);
-    }
-    
-    public static JongoSuccess fromXML(final String xml){
-        return (JongoSuccess)xStream.fromXML(xml);
+        StringBuilder b = new StringBuilder("<response><success>");
+        b.append(success);b.append("</success><resource>");
+        b.append(resource);b.append("</resource><rows>");
+        for(RowResponse r : rows)
+            b.append(r.toXML());
+        b.append("</rows></response>");
+        return b.toString();
     }
     
     @Override
@@ -86,17 +86,6 @@ public class JongoHead implements JongoResponse {
                 .build();
     }
     
-    private static XStream initializeXStream(){
-        XStream xStreamInstance = new XStream();
-        xStreamInstance.setMode(XStream.NO_REFERENCES);
-        xStreamInstance.autodetectAnnotations(false);
-        xStreamInstance.alias("response", JongoSuccess.class);
-        xStreamInstance.alias("row", RowResponse.class);
-        xStreamInstance.registerConverter(new JongoMapConverter());
-        xStreamInstance.aliasAttribute(RowResponse.class, "roi", "roi");
-        return xStreamInstance;
-    }
-
     @Override
     public String getResource() {
         return resource;
@@ -119,9 +108,9 @@ public class JongoHead implements JongoResponse {
     private String toHeader(){
         final List<String> args = new ArrayList<String>();
         for(RowResponse row : rows){
-            final String columnname = row.getColumns().get("columnName");
-            final String columntype = row.getColumns().get("columnType");
-            final String columnsize = row.getColumns().get("columnSize");
+            final String columnname = row.getCells().get("columnName");
+            final String columntype = row.getCells().get("columnType");
+            final String columnsize = row.getCells().get("columnSize");
             StringBuilder b = new StringBuilder(columnname);
             b.append("=");
             b.append(columntype);
