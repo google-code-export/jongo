@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
+import org.jongo.config.JongoConfiguration;
 import org.jongo.exceptions.JongoBadRequestException;
 import org.jongo.jdbc.*;
 import org.jongo.rest.xstream.*;
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
 public class RestController {
     
     private static final Logger l = LoggerFactory.getLogger(RestController.class);
+    private static final JongoConfiguration conf = JongoConfiguration.instanceOf();
     
     private final String database;
     
@@ -48,6 +50,9 @@ public class RestController {
     public JongoResponse getDatabaseMetadata(){
         l.debug("Obtaining metadata for " + database);
         JongoResponse response = null;
+        
+        if(!conf.getDatabases().contains(database))
+            return new JongoError(database, Response.Status.NOT_FOUND, "Database doesn't exists or is not registered in jongo");
         
         List<Row> results = null;
         try {
