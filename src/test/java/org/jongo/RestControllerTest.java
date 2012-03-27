@@ -55,7 +55,6 @@ public class RestControllerTest {
     public static void setUp() throws StartupException{
         System.setProperty("environment", "demo");
         JongoConfiguration configuration = JongoUtils.loadConfiguration();
-        Demo.generateDemoDatabases(configuration.getDatabases());
     }
 
     @AfterClass
@@ -69,6 +68,10 @@ public class RestControllerTest {
     public void testGetDatabaseMetadata(){
         JongoSuccess r = (JongoSuccess)controller.getDatabaseMetadata();
         testSuccessResponse(r, Response.Status.OK, 8);
+        
+        RestController controller2 = new RestController("noway");
+        JongoError err = (JongoError)controller2.getDatabaseMetadata();
+        testErrorResponse(err, Response.Status.NOT_FOUND, null, null);
     }
     
     @Test
