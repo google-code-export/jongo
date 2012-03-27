@@ -81,6 +81,11 @@ public class RestControllerTest {
         Assert.assertTrue(r.isSuccess());
         Assert.assertEquals(6, r.getRows().size());
         
+        r = (JongoHead)controller.getResourceMetadata("MAKER_STATS_2010");
+        Assert.assertEquals(Response.Status.OK, r.getStatus());
+        Assert.assertTrue(r.isSuccess());
+        Assert.assertEquals(3, r.getRows().size());
+        
         JongoError err = (JongoError)controller.getResourceMetadata(null);
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
@@ -152,6 +157,10 @@ public class RestControllerTest {
         
         r = (JongoSuccess)controller.getAllResources("empty", limit, order);
         testSuccessResponse(r, Response.Status.OK, 0);
+        
+        // test a view
+        r = (JongoSuccess)controller.getAllResources("maker_stats_2010", new LimitParam(1000),  new OrderParam("month"));
+        testSuccessResponse(r, Response.Status.OK, 744);
     }
     
     @Test
