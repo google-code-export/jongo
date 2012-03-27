@@ -186,6 +186,9 @@ public class RestControllerTest {
         
         err = (JongoError)controller.findByDynamicFinder("user","", Arrays.asList(new String [] {"0"}), limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
+        
+        JongoSuccess r = (JongoSuccess)controller.findByDynamicFinder("maker_stats_2010", "findAllByMakerLikeAndMonthLessThanEquals", Arrays.asList(new String [] {"A%", "4"}), new LimitParam(1000), new OrderParam("month"));
+        testSuccessResponse(r, Response.Status.OK, 24); // 6 makers * 4 months
     }
     
     @Test
@@ -259,6 +262,9 @@ public class RestControllerTest {
         
         r = (JongoSuccess)controller.updateResource("car", "cid", "0", "{\"model\":\"Test$%&·$&%·$/()=?¿Model\"}"); //custom id
         testSuccessResponse(r, Response.Status.OK, 1);
+        
+        r = (JongoSuccess)controller.updateResource("maker_stats_2010", "month", "3", "{\"sales\":0}"); // this view can change
+        testSuccessResponse(r, Response.Status.OK, 1);
     }
     
     @Test
@@ -287,6 +293,9 @@ public class RestControllerTest {
         
         r = (JongoSuccess)controller.findByColumn("comments","car_id","2", limit, order);
         testSuccessResponse(r, Response.Status.OK, 1);
+        
+        r = (JongoSuccess)controller.findByColumn("maker_stats_2010","maker","FIAT", limit, new OrderParam("month"));
+        testSuccessResponse(r, Response.Status.OK, 12);
         
         JongoError err = (JongoError)controller.findByColumn("comments","car_id","1", limit, order);
         testErrorResponse(err, Response.Status.NOT_FOUND, null, null);
