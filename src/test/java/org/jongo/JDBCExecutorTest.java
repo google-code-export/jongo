@@ -29,10 +29,11 @@ import org.jongo.jdbc.JDBCExecutor;
 import org.jongo.jdbc.QueryParams;
 import org.jongo.mocks.DummyQueryParamsFactory;
 import org.jongo.mocks.UserMock;
-import org.jongo.rest.xstream.RowResponse;
-import org.junit.Test;
-import org.junit.*;
+import org.jongo.rest.xstream.Row;
+import org.junit.AfterClass;
 import static org.junit.Assert.*;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  *
@@ -58,13 +59,13 @@ public class JDBCExecutorTest {
     public void testGet() throws SQLException{
         QueryParams q = DummyQueryParamsFactory.getUser();
         q.setId("0");
-        List<RowResponse> rs = JDBCExecutor.get(q);
-        RowResponse r = rs.get(0);
-        assertEquals("30", r.getColumns().get("AGE"));
+        List<Row> rs = JDBCExecutor.get(q);
+        Row r = rs.get(0);
+        assertEquals("30", r.getCells().get("AGE"));
         q.setId("1");
         rs = JDBCExecutor.get(q);
         r = rs.get(0);
-        assertEquals("33", r.getColumns().get("AGE"));
+        assertEquals("33", r.getCells().get("AGE"));
         q.setId("");
         rs = JDBCExecutor.get(q);
         assertEquals(2, rs.size());
@@ -83,19 +84,19 @@ public class JDBCExecutorTest {
             createdusers.add(u);
             q = DummyQueryParamsFactory.getUser();
             q.setIdField("name");
-            List<RowResponse> rs = JDBCExecutor.findByColumn(q, u.name);
-            RowResponse row = rs.get(0);
-            assertEquals(String.valueOf(u.age), row.getColumns().get("AGE"));
+            List<Row> rs = JDBCExecutor.findByColumn(q, u.name);
+            Row row = rs.get(0);
+            assertEquals(String.valueOf(u.age), row.getCells().get("AGE"));
             q = DummyQueryParamsFactory.getUser();
-            q.setId(row.getColumns().get("ID"));
+            q.setId(row.getCells().get("ID"));
             q.setParam("age", "99");
             q.setParam("credit", "1.99");
             rs = JDBCExecutor.update(q);
             row = rs.get(0);
-            assertEquals("99", row.getColumns().get("AGE"));
-            assertEquals(u.name, row.getColumns().get("NAME"));
+            assertEquals("99", row.getCells().get("AGE"));
+            assertEquals(u.name, row.getCells().get("NAME"));
             q = DummyQueryParamsFactory.getUser();
-            q.setId(row.getColumns().get("ID"));
+            q.setId(row.getCells().get("ID"));
             r = JDBCExecutor.delete(q);
             assertEquals(1, r);
         }
@@ -156,13 +157,13 @@ public class JDBCExecutorTest {
     public void testUpdate() throws SQLException{
         QueryParams q = DummyQueryParamsFactory.getUser();
         q.setId("0");
-        List<RowResponse> rs = JDBCExecutor.get(q);
-        RowResponse row = rs.get(0);
-        assertEquals("foo", row.getColumns().get("NAME"));
+        List<Row> rs = JDBCExecutor.get(q);
+        Row row = rs.get(0);
+        assertEquals("foo", row.getCells().get("NAME"));
         q.setParam("name", "fooer");
         rs = JDBCExecutor.update(q);
         row = rs.get(0);
-        assertEquals("fooer", row.getColumns().get("NAME"));
+        assertEquals("fooer", row.getCells().get("NAME"));
         
         //test for empty QueryParams
         q = new QueryParams();
@@ -186,8 +187,8 @@ public class JDBCExecutorTest {
         q.setParam("age", null);
         rs = JDBCExecutor.update(q);
         row = rs.get(0);
-        assertEquals("fooer", row.getColumns().get("NAME"));
-        assertEquals(null, row.getColumns().get("AGE"));
+        assertEquals("fooer", row.getCells().get("NAME"));
+        assertEquals(null, row.getCells().get("AGE"));
         
         //test for empty value
         q.setId("0");
@@ -195,8 +196,8 @@ public class JDBCExecutorTest {
         q.setParam("name", "");
         rs = JDBCExecutor.update(q);
         row = rs.get(0);
-        assertEquals("", row.getColumns().get("NAME"));
-        assertEquals("35", row.getColumns().get("AGE"));
+        assertEquals("", row.getCells().get("NAME"));
+        assertEquals("35", row.getCells().get("AGE"));
         
         //test with a readonly table
         q = DummyQueryParamsFactory.getMakerTable();
