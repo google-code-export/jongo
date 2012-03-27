@@ -44,8 +44,7 @@ public class JDBCExecutorTest {
     @BeforeClass
     public static void setUp() throws StartupException{
         System.setProperty("environment", "demo");
-        JongoConfiguration configuration = JongoUtils.loadConfiguration();
-        Demo.generateDemoDatabases(configuration.getDatabases());
+        JongoUtils.loadConfiguration();
     }
     
     @AfterClass
