@@ -18,22 +18,24 @@
 
 package org.jongo;
 
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.MessageDigest;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.jongo.config.JongoConfiguration;
 import org.jongo.exceptions.JongoBadRequestException;
 import org.jongo.exceptions.StartupException;
-import org.jongo.rest.xstream.JongoMapConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.misc.BASE64Encoder;
@@ -233,21 +235,13 @@ public class JongoUtils {
     public static Map<String, String> getParamsFromJSON(final String json) throws JongoBadRequestException{
         if(StringUtils.isBlank(json))
             throw new JongoBadRequestException("Invalid number of arguments for request " + json);
-        // XStream needs the response to be nested inside an object it can understand
-        final String formattedJson = "{\"request\":" + json + "}";
-        XStream xStream = new XStream(new JettisonMappedXmlDriver());
-        xStream.setMode(XStream.NO_REFERENCES);
-        xStream.registerConverter(new JongoMapConverter());
-        xStream.alias("request", HashMap.class);
-        try{
-            Map<String, String> ret = (Map<String, String>)xStream.fromXML(formattedJson);
-            if(ret.isEmpty()){
-                throw new JongoBadRequestException("Invalid number of arguments for request " + json);
-            }
+        try {
+            Map<String, String> ret = new ObjectMapper().readValue(json, new TypeReference<Map<String, String>>(){});
             return ret;
-        }catch(Exception e){
-            throw new JongoBadRequestException(e.getMessage());
+        } catch (Exception ex) {
+            throw new JongoBadRequestException(ex.getMessage());
         }
+            
     }
     
     public static JongoConfiguration loadConfiguration() throws StartupException{
