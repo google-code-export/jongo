@@ -79,7 +79,6 @@ public class JongoSuccess implements JongoResponse{
         return Response.status(this.status)
                 .entity(response)
                 .type(format)
-                .header("Date", JongoUtils.getDateHeader())
                 .header("Content-Count", rows.size())
                 .header("Content-Location", resource)
                 .build();

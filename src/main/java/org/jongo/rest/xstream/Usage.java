@@ -166,14 +166,9 @@ public class Usage  implements JongoResponse{
     @Override
     public Response getResponse(MediaType format) {
         String response = (format.isCompatible(MediaType.valueOf(MediaType.APPLICATION_XML))) ? this.toXML() : this.toJSON();
-        String md5sum = JongoUtils.getMD5Base64(response);
-        Integer length = JongoUtils.getOctetLength(response);
         return Response.status(getStatus())
                 .entity(response)
                 .type(format)
-                .header("Date", JongoUtils.getDateHeader())
-                .header("Content-MD5", md5sum)
-                .header("Content-Length", length)
                 .header("Content-Location", "jongo")
                 .build();
     }
