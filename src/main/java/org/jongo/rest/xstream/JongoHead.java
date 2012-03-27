@@ -60,8 +60,6 @@ public class JongoHead implements JongoResponse {
     
     @Override
     public String toJSON(){
-        // I really tried to use XStream to generate the JSON, but it simply didn't do what I wanted. 
-        // It kept adding the response as an object and I want an array.
         StringBuilder b = new StringBuilder("{");
         b.append("\"success\":");b.append(success);
         b.append(",\"response\":[ "); //this last space is important!
@@ -80,7 +78,6 @@ public class JongoHead implements JongoResponse {
         return Response.status(this.status)
                 .entity(response) // leave this in case the client can handle HEAD with content.
                 .type(format)
-                .header("Date", JongoUtils.getDateHeader())
                 .header("Content-Location", resource)
                 .header(StringUtils.capitalize(resource), this.toHeader())
                 .build();
