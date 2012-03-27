@@ -18,7 +18,6 @@
 
 package org.jongo.rest.xstream;
 
-import com.thoughtworks.xstream.XStream;
 import java.sql.SQLException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -30,8 +29,6 @@ import org.jongo.JongoUtils;
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public class JongoError implements JongoResponse {
-    
-    private static final XStream xStream = initializeXStream();
     
     private final String resource;
     private final boolean success = false;
@@ -71,24 +68,20 @@ public class JongoError implements JongoResponse {
         this.sqlState = ex.getSQLState();
         this.sqlCode = ex.getErrorCode();
     }
-    
-    private static XStream initializeXStream(){
-        XStream xStreamInstance = new XStream();
-        xStreamInstance.setMode(XStream.NO_REFERENCES);
-        xStreamInstance.autodetectAnnotations(false);
-        xStreamInstance.alias("response", JongoError.class);
-        return xStreamInstance;
-    }
-    
+
     @Override
     public String toXML(){
-        return xStream.toXML(this);
+        StringBuilder b = new StringBuilder("<response><success>");
+        b.append(success);b.append("</success><message>");
+        b.append(message);b.append("</message>");
+        if( sqlCode != null && sqlState != null){
+            b.append("<sqlState>");b.append(sqlState);b.append("</sqlState>");
+            b.append("<sqlCode>");b.append(sqlCode);b.append("</sqlCode>");
+        }
+        b.append("</response>");
+        return b.toString();
     }
-    
-    public static JongoError fromXML(final String xml){
-        return (JongoError)xStream.fromXML(xml);
-    }
-    
+
     @Override
     public String toJSON(){
         StringBuilder b = new StringBuilder("{");
