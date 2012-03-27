@@ -32,10 +32,10 @@ import org.jongo.mocks.UserMock;
 import org.jongo.rest.xstream.JongoError;
 import org.jongo.rest.xstream.JongoHead;
 import org.jongo.rest.xstream.JongoSuccess;
-import org.jongo.rest.xstream.RowResponse;
+import org.jongo.rest.xstream.Row;
 import org.junit.AfterClass;
-import org.junit.Test;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -240,6 +240,9 @@ public class RestControllerTest {
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
         err = (JongoError)controller.updateResource("user", "id", "0", "{\"age\":\"90\", \"birthday\":00X0}"); // invalid date
+        testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
+        
+        err = (JongoError)controller.updateResource("user", "id", "0", "{\"age\":\"90\", \"birthday\":\"00X0\"}"); // invalid date
         testErrorResponse(err, Response.Status.BAD_REQUEST, "22007", new Integer(-3407));
         
         r = (JongoSuccess)controller.updateResource("car", "cid", "0", "{\"model\":\"Test$%&·$&%·$/()=?¿Model\"}"); //custom id
@@ -299,7 +302,7 @@ public class RestControllerTest {
     }
     
     private void testSuccessResponse(JongoSuccess r, Response.Status expectedStatus, int expectedResults){
-        List<RowResponse> rows = r.getRows();
+        List<Row> rows = r.getRows();
         Assert.assertEquals(expectedStatus, r.getStatus());
         Assert.assertTrue(r.isSuccess());
         Assert.assertEquals(expectedResults, rows.size());
@@ -311,10 +314,10 @@ public class RestControllerTest {
     }
     
     private String getId(final JongoSuccess response, final String id){
-        for(RowResponse row : response.getRows()){
-            for(String k : row.getColumns().keySet()){
+        for(Row row : response.getRows()){
+            for(String k : row.getCells().keySet()){
                 if(k.equalsIgnoreCase(id)){
-                    return row.getColumns().get(k);
+                    return row.getCells().get(k);
                 }
             }
         }
