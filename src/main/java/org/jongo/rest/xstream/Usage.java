@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Jongo.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jongo;
+package org.jongo.rest.xstream;
 
 import java.math.BigInteger;
 import javax.ws.rs.core.MediaType;
@@ -24,7 +24,7 @@ import javax.ws.rs.core.Response.Status;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormat;
-import org.jongo.rest.xstream.JongoResponse;
+import org.jongo.JongoUtils;
 
 /**
  * A singleton which holds usage data for the current running instance.
