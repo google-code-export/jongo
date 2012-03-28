@@ -17,6 +17,7 @@
  */
 package org.jongo.config.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.jongo.config.AbstractDatabaseConfiguration;
 import org.jongo.config.DatabaseConfiguration;
 import org.jongo.enums.JDBCDriver;
@@ -61,11 +62,26 @@ public class MySQLConfiguration extends AbstractDatabaseConfiguration implements
      */
     @Override
     public String getFirstRowQuery(final String table) {
+        if(StringUtils.isBlank(table))
+            throw new IllegalArgumentException("Table name can't be blank, empty or null");
         return "SELECT * FROM " + table + " LIMIT 1";
     }
 
     @Override
     public String getListOfTablesQuery() {
         return "SHOW TABLES";
+    }
+    
+    @Override
+    public boolean isValid() {
+        if(super.isValid()){
+            if(!StringUtils.startsWith(url, "jdbc:mysql://")){
+                l.warn("Invalid JDBC URL. Check your configuration.");
+                return false;
+            }
+            return true;
+        }else{
+            return false;
+        }
     }
 }
