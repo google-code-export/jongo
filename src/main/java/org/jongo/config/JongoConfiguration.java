@@ -55,8 +55,6 @@ public class JongoConfiguration {
     private Integer maxLimit;
     private boolean listTables;
     
-    private boolean appsEnabled;
-    
     private Map<String, DatabaseConfiguration> databases = null;
     
     private static final boolean demo = (System.getProperty("environment") != null && System.getProperty("environment").equalsIgnoreCase("demo")); 
@@ -194,10 +192,6 @@ public class JongoConfiguration {
         return db.getDriver();
     }
 
-    public boolean areAppsEnabled() {
-        return appsEnabled;
-    }
-    
     public boolean isDemoModeActive(){
         return demo;
     }
