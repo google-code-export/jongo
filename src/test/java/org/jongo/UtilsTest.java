@@ -164,8 +164,8 @@ public class UtilsTest {
         DatabaseConfiguration c = AbstractDatabaseConfiguration.instanceOf("test1", JDBCDriver.HSQLDB, "k", "k", "jdbc");
         assertEquals(c.getSelectAllFromTableQuery("table", l, o), "SELECT * FROM table ORDER BY id ASC LIMIT 25 OFFSET 0");
         c = AbstractDatabaseConfiguration.instanceOf("test1", JDBCDriver.ORACLE, "k", "k", "jdbc");
-        assertEquals(c.getSelectAllFromTableQuery("t", l, o), "SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY id ASC )AS ROW_NUMBER, t .* FROM t ) k WHERE ROW_NUMBER <=25 AND ROW_NUMBER >=  0");
-        assertEquals(c.getSelectAllFromTableQuery("t", "id", l, o), "SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY id ASC )AS ROW_NUMBER, t .* FROM t WHERE id= ? ) k WHERE ROW_NUMBER <=25 AND ROW_NUMBER >=  0");
+        assertEquals(c.getSelectAllFromTableQuery("t", l, o), "SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY id ASC )AS ROW_NUMBER, t.* FROM t ) k WHERE ROW_NUMBER BETWEEN 25 AND 0");
+        assertEquals(c.getSelectAllFromTableQuery("t", "id", l, o), "SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY id ASC )AS ROW_NUMBER, t.* FROM t WHERE id= ? ) k WHERE ROW_NUMBER BETWEEN 25 AND 0");
     }
     
     @Test
