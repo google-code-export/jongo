@@ -38,13 +38,6 @@ public interface DatabaseConfiguration {
     public void loadDriver();
     
     /**
-     * Creates a query which returns all objects from a table
-     * @param table the name of the table to query
-     * @return the query String, i.e. SELECT * FROM foo
-     */
-    public String getSelectAllFromTableQuery(final String table);
-    
-    /**
      * Creates a query which returns all objects from a table with the given
      * limit and order parameters.
      * @param table the name of the table to query
@@ -53,15 +46,6 @@ public interface DatabaseConfiguration {
      * @return the query String, i.e. SELECT * FROM foo ORDER BY id LIMIT 25 OFFSET 0
      */
     public String getSelectAllFromTableQuery(final String table, LimitParam limit, OrderParam order);
-    
-    /**
-     * Creates a parameterized query which returns all objects from a table
-     * using a custom column value.
-     * @param table the name of the table to query
-     * @param idCol the name of the column to use in the query
-     * @return the query String, i.e. SELECT * FROM foo WHERE bar = ?
-     */
-    public String getSelectAllFromTableQuery(final String table, final String idCol);
     
     /**
      * Creates a parameterized query which returns all objects from a table with the given

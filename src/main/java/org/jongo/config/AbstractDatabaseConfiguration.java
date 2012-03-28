@@ -66,12 +66,6 @@ public abstract class AbstractDatabaseConfiguration {
         return c;
     }
     
-    public String getSelectAllFromTableQuery(final String table){
-        final StringBuilder query = new StringBuilder("SELECT * FROM ");
-        query.append(table);
-        return query.toString();
-    }
-    
     public String getSelectAllFromTableQuery(final String table, LimitParam limit, OrderParam order){
         final StringBuilder query = new StringBuilder("SELECT * FROM ");
         query.append(table);
@@ -100,15 +94,6 @@ public abstract class AbstractDatabaseConfiguration {
         query.append(limit.getLimit());
         query.append(" OFFSET ");
         query.append(limit.getStart());
-        return query.toString();
-    }
-    
-    public String getSelectAllFromTableQuery(final String table, final String idCol){
-        final StringBuilder query = new StringBuilder("SELECT * FROM ");
-        query.append(table);
-        query.append(" WHERE ");
-        query.append(idCol);
-        query.append(" = ?");
         return query.toString();
     }
     
