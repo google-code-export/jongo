@@ -18,7 +18,6 @@
 
 package org.jongo;
 
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.MessageDigest;
@@ -206,28 +205,6 @@ public class JongoUtils {
     }
     
     /**
-     * Read the folder "apps" and returns a List with the directories under it
-     * @return a List of String with the name of directories under "apps"
-     */
-    public static List<String> getListOfApps(){
-        List<String> apps = new ArrayList<String>();
-        
-        File appsDir = new File("apps");
-        
-        if(appsDir.listFiles() == null){
-            l.warn("Failed to read the apps folder. Does it exists?");
-        }else{
-            for(File dir : appsDir.listFiles()){
-                if(dir.isDirectory()){
-                    apps.add(dir.getName());
-                }
-            }
-        }
-        
-        return apps;
-    }
-    
-    /**
      * Reads a String in JSON format and returns a MultivaluedMap representation of it.
      * @return a MultivaluedMap with the keys/values as represented by the incoming JSON string.
      * @throws JongoBadRequestException if the JSON string is not readable.
@@ -260,6 +237,9 @@ public class JongoUtils {
     }
     
     public static Map<String, String> hashMapOf(final MultivaluedMap<String, String> mv){
+        if(mv == null)
+            throw new IllegalArgumentException("Invalid null argument");
+        
         Map<String, String> map = new HashMap<String, String>();
         for(String k : mv.keySet()){
             String v = mv.getFirst(k);
@@ -269,30 +249,28 @@ public class JongoUtils {
         return map;
     }
     
-    public static synchronized String getMD5Base64(String input) {
-        MessageDigest digest = null;
+    public static String getMD5Base64(String input) {
+        if(input == null)
+            throw new IllegalArgumentException("Invalid null argument");
 
+        String ret = "";
         try {
-            digest = MessageDigest.getInstance("MD5");
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            digest.update(input.getBytes("UTF-8"));
+            byte[] rawData = digest.digest();
+            BASE64Encoder bencoder = new BASE64Encoder();
+            ret = bencoder.encode(rawData);
         } catch (Exception ex) {
             l.error(ex.getMessage());
         }
-
-        if (digest == null)
-            return input;
-
-        try {
-            digest.update(input.getBytes("UTF-8"));
-        } catch (java.io.UnsupportedEncodingException ex) {
-            l.error(ex.getMessage());
-        }
         
-        byte[] rawData = digest.digest();
-        BASE64Encoder bencoder = new BASE64Encoder();
-        return bencoder.encode(rawData);
+        return ret;
     }
     
     public static Integer getOctetLength(String input){
+        if(input == null)
+            throw new IllegalArgumentException("Invalid null argument");
+        
         byte[] responseBytes;
         int result = 0;
         try {
