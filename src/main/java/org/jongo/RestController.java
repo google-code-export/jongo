@@ -339,29 +339,21 @@ public class RestController {
     public JongoResponse findByDynamicFinder(final String table, final String query, final List<String> values, final LimitParam limit, final OrderParam order){
         l.debug("Find resource from " + database + "." + table + " with " + query);
         
+        if(values == null)
+            throw new IllegalArgumentException("Invalid null argument");
+        
         JongoResponse response = null;
         List<Row> results = null;
         if(query == null){
             response = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
         }else{
             if(values.isEmpty()){
-                if(values.isEmpty()){
-                    try{
-                        DynamicFinder df = DynamicFinder.valueOf(table, query);
-                        results = JDBCExecutor.find(database, df, limit, order);
-                    } catch (Throwable ex){
-                        response = handleException(ex, table);
-                    }
-                }else{
-                    String value = values.get(0);
-                    try{
-                        DynamicFinder df = DynamicFinder.valueOf(table, query, value);
-                        results = JDBCExecutor.find(database, df, limit, order, JongoUtils.parseValue(value));
-                    } catch (Throwable ex){
-                        response = handleException(ex, table);
-                    }
+                try{
+                    DynamicFinder df = DynamicFinder.valueOf(table, query);
+                    results = JDBCExecutor.find(database, df, limit, order);
+                } catch (Throwable ex){
+                    response = handleException(ex, table);
                 }
-
             }else{
                 try{
                     DynamicFinder df = DynamicFinder.valueOf(table, query, values.toArray(new String []{}));
