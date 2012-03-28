@@ -1,0 +1,39 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package org.jongo;
+
+import org.junit.AfterClass;
+import static org.junit.Assert.assertTrue;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+/**
+ *
+ * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ */
+public class PerformanceLoggerTest {
+    
+    public PerformanceLoggerTest() {
+    }
+
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+    }
+    
+    @Test
+    public void testLogger(){
+        PerformanceLogger p = PerformanceLogger.start(PerformanceLogger.Code.UNK);
+        Long t = p.end();
+        assertTrue(t.equals(0L));
+        
+        p = PerformanceLogger.start(PerformanceLogger.Code.UNK, "Test");
+        t = p.end();
+        assertTrue(t.equals(0L));
+    }
+}
