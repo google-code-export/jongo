@@ -20,18 +20,20 @@ package org.jongo;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.util.Map;
 import javax.ws.rs.core.MultivaluedMap;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.jongo.config.AbstractDatabaseConfiguration;
 import org.jongo.config.DatabaseConfiguration;
+import org.jongo.config.JongoConfiguration;
 import org.jongo.enums.JDBCDriver;
+import org.jongo.exceptions.StartupException;
 import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
-import org.junit.Before;
 import static org.junit.Assert.*;
-
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -43,6 +45,12 @@ public class UtilsTest {
     @Before
     public void setUp(){
         System.setProperty("environment","demo");
+    }
+    
+    @Test
+    public void testJongoUtils(){
+        JongoUtils u = new JongoUtils(); 
+        assertNotNull(u);
     }
     
     @Test
@@ -158,5 +166,65 @@ public class UtilsTest {
         c = AbstractDatabaseConfiguration.instanceOf("test1", JDBCDriver.ORACLE, "k", "k", "jdbc");
         assertEquals(c.getSelectAllFromTableQuery("t", l, o), "SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY id ASC )AS ROW_NUMBER, t .* FROM t ) k WHERE ROW_NUMBER <=25 AND ROW_NUMBER >=  0");
         assertEquals(c.getSelectAllFromTableQuery("t", "id", l, o), "SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY id ASC )AS ROW_NUMBER, t .* FROM t WHERE id= ? ) k WHERE ROW_NUMBER <=25 AND ROW_NUMBER >=  0");
+    }
+    
+    @Test
+    public void testGetMD5Base64(){
+        try{
+            JongoUtils.getMD5Base64(null);
+        }catch(IllegalArgumentException e){
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+        String t = JongoUtils.getMD5Base64("");
+        assertTrue(t.equals("1B2M2Y8AsgTpgAmY7PhCfg=="));
+        t = JongoUtils.getMD5Base64("xxxxxxxxxxxxxxxxx");
+        assertTrue(t.equals("PvgoOWefBe8mDjrJgt6TzQ=="));
+    }
+    
+    @Test
+    public void getOctetLength(){
+        try{
+            JongoUtils.getOctetLength(null);
+        }catch(Exception e){
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+        Integer t = JongoUtils.getOctetLength("");
+        assertTrue(t.equals(0));
+        t = JongoUtils.getOctetLength("xxxxxxxxxxxxxxxxx");
+        assertTrue(t.equals(17));
+    }
+    
+    @Test
+    public void testHashMapOf(){
+        try{
+            JongoUtils.hashMapOf(null);
+        }catch(Exception e){
+            assertTrue(e instanceof IllegalArgumentException);
+        }
+        
+        MultivaluedMap<String, String> m = new MultivaluedMapImpl();
+        Map<String, String> map = JongoUtils.hashMapOf(m);
+        assertTrue(map.isEmpty());
+        
+        m.add("t1", "kkk");
+        map = JongoUtils.hashMapOf(m);
+        assertFalse(map.isEmpty());
+        assertEquals(1, map.size());
+        
+        m.add("t2", "");
+        map = JongoUtils.hashMapOf(m);
+        assertFalse(map.isEmpty());
+        assertEquals(1, map.size());
+    }
+    
+    @Test
+    public void testLoadConfiguration() throws StartupException{
+        System.setProperty("environment", "demo");
+        JongoConfiguration conf = JongoUtils.loadConfiguration();
+        assertTrue(conf.isDemoModeActive());
+        
+        System.setProperty("environment", "");
+        conf = JongoUtils.loadConfiguration();
+        assertTrue(conf.isDemoModeActive());
     }
 }
