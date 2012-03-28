@@ -30,11 +30,6 @@ public class PerformanceLogger {
     private Long start;
     private Long end;
     
-    private PerformanceLogger(){
-        this.code = Code.UNK;
-        this.msg = "";
-    }
-    
     private PerformanceLogger(final Code code, final String msg){
         this.code = code;
         this.msg = msg;
