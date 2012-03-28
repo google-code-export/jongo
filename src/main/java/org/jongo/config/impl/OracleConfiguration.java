@@ -17,6 +17,7 @@
  */
 package org.jongo.config.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.jongo.config.AbstractDatabaseConfiguration;
 import org.jongo.config.DatabaseConfiguration;
 import org.jongo.enums.JDBCDriver;
@@ -59,42 +60,50 @@ public class OracleConfiguration extends AbstractDatabaseConfiguration implement
 
     @Override
     public String getFirstRowQuery(String table) {
+        if(StringUtils.isBlank(table))
+            throw new IllegalArgumentException("Table name can't be blank, empty or null");
         return "SELECT * FROM " + table + " WHERE rownum = 0";
     }
     
     @Override
     public String getSelectAllFromTableQuery(final String table, LimitParam limit, OrderParam order){
+        if(StringUtils.isBlank(table) || limit == null || order == null)
+            throw new IllegalArgumentException("Invalid argument");
+        
         final StringBuilder query = new StringBuilder("SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY ");
         query.append(order.getNotNullColumn());
         query.append(" ");
         query.append(order.getDirection());
         query.append(" )AS ROW_NUMBER, ");
         query.append(table);
-        query.append(" .* FROM ");
+        query.append(".* FROM ");
         query.append(table);
-        query.append(" ) k WHERE ROW_NUMBER <=");
+        query.append(" ) k WHERE ROW_NUMBER BETWEEN ");
         query.append(limit.getLimit());
-        query.append(" AND ROW_NUMBER >=  ");
+        query.append(" AND ");
         query.append(limit.getStart());
         return query.toString();
     }
     
     @Override
     public String getSelectAllFromTableQuery(final String table, final String idCol, LimitParam limit, OrderParam order){
+        if(StringUtils.isBlank(table) || StringUtils.isBlank(idCol) || limit == null || order == null)
+            throw new IllegalArgumentException("Invalid argument");
+        
         final StringBuilder query = new StringBuilder("SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY ");
         query.append(order.getNotNullColumn());
         query.append(" ");
         query.append(order.getDirection());
         query.append(" )AS ROW_NUMBER, ");
         query.append(table);
-        query.append(" .* FROM ");
+        query.append(".* FROM ");
         query.append(table);
         query.append(" WHERE ");
         query.append(idCol);
         
-        query.append("= ? ) k WHERE ROW_NUMBER <=");
+        query.append("= ? ) k WHERE ROW_NUMBER BETWEEN ");
         query.append(limit.getLimit());
-        query.append(" AND ROW_NUMBER >=  ");
+        query.append(" AND ");
         query.append(limit.getStart());
         return query.toString();
     }
@@ -106,6 +115,9 @@ public class OracleConfiguration extends AbstractDatabaseConfiguration implement
     
     @Override
     public String wrapDynamicFinderQuery(final DynamicFinder finder, LimitParam limit, OrderParam order){
+        if(finder == null || limit == null || order == null)
+            throw new IllegalArgumentException("Invalid argument");
+        
         final String [] parts = finder.getSql().split("WHERE");
         final StringBuilder query = new StringBuilder("SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY ");
         query.append(order.getNotNullColumn());
@@ -117,11 +129,24 @@ public class OracleConfiguration extends AbstractDatabaseConfiguration implement
         query.append(finder.getTable());
         query.append(" WHERE ");
         query.append(parts[1]);
-        query.append(" ) k WHERE ROW_NUMBER <=");
+        query.append(" ) k WHERE ROW_NUMBER BETWEEN ");
         query.append(limit.getLimit());
-        query.append(" AND ROW_NUMBER >=  ");
+        query.append(" AND ");
         query.append(limit.getStart());
         return query.toString();
+    }
+    
+    @Override
+    public boolean isValid() {
+        if(super.isValid()){
+            if(!StringUtils.startsWith(url, "jdbc:oracle:thin:")){
+                l.warn("Invalid JDBC URL. Check your configuration.");
+                return false;
+            }
+            return true;
+        }else{
+            return false;
+        }
     }
     
 }
