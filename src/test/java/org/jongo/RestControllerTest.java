@@ -17,10 +17,7 @@
  */
 package org.jongo;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javax.ws.rs.core.Response;
 import junit.framework.Assert;
 import org.jongo.config.JongoConfiguration;
@@ -62,6 +59,25 @@ public class RestControllerTest {
         System.setProperty("environment", "demo");
         JongoConfiguration configuration = JongoUtils.loadConfiguration();
         Demo.destroyDemoDatabases(configuration.getDatabases());
+    }
+    
+    @Test
+    public void testRestController(){
+        try{
+            new RestController(null);
+        }catch(Exception e){
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+        }
+        try{
+            new RestController("");
+        }catch(Exception e){
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+        }
+        try{
+            new RestController(" ");
+        }catch(Exception e){
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+        }
     }
     
     @Test
@@ -136,6 +152,12 @@ public class RestControllerTest {
         err = (JongoError)controller.getResource("user", "id", "1999", limit, order);
         testErrorResponse(err, Response.Status.NOT_FOUND, null, null);
         
+        err = (JongoError)controller.getResource("user", "id", "not an integer", limit, order);
+        testErrorResponse(err, Response.Status.BAD_REQUEST, "22018", -3438);
+        
+        err = (JongoError)controller.getResource("user", "name", "1999", limit, order);
+        testErrorResponse(err, Response.Status.NOT_FOUND, null, null);
+        
         // test a table with a custom column
         order.setColumn("cid");
         r = (JongoSuccess)controller.getResource("car", "cid", "1", limit, order);
@@ -154,6 +176,12 @@ public class RestControllerTest {
         
         JongoError err = (JongoError)controller.getAllResources("no_exists", limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, "42501", new Integer(-5501));
+        
+        err = (JongoError)controller.getAllResources("", limit, order);
+        testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
+        
+        err = (JongoError)controller.getAllResources(null, limit, order);
+        testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
         r = (JongoSuccess)controller.getAllResources("empty", limit, order);
         testSuccessResponse(r, Response.Status.OK, 0);
@@ -184,11 +212,38 @@ public class RestControllerTest {
         err = (JongoError)controller.findByDynamicFinder("user","findAllByCreditLessThhhhan", Arrays.asList(new String [] {"0"}), limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
+        err = (JongoError)controller.findByDynamicFinder("user","findAllByCreditLessThhhhan", Arrays.asList(new String [] {""}), limit, order);
+        testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
+        
         err = (JongoError)controller.findByDynamicFinder("user","", Arrays.asList(new String [] {"0"}), limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
-        JongoSuccess r = (JongoSuccess)controller.findByDynamicFinder("maker_stats_2010", "findAllByMakerLikeAndMonthLessThanEquals", Arrays.asList(new String [] {"A%", "4"}), new LimitParam(1000), new OrderParam("month"));
-        testSuccessResponse(r, Response.Status.OK, 24); // 6 makers * 4 months
+        err = (JongoError)controller.findByDynamicFinder("user", null, Arrays.asList(new String [] {"0"}), limit, order);
+        testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
+        
+        err = (JongoError)controller.findByDynamicFinder("","", Arrays.asList(new String [] {"0"}), limit, order);
+        testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
+        
+        err = (JongoError)controller.findByDynamicFinder(null,"", Arrays.asList(new String [] {"0"}), limit, order);
+        testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
+        
+        err = (JongoError)controller.findByDynamicFinder("",null, Arrays.asList(new String [] {"0"}), limit, order);
+        testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
+        
+        err = (JongoError)controller.findByDynamicFinder(null,null, Arrays.asList(new String [] {"0"}), limit, order);
+        testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
+        
+        err = (JongoError)controller.findByDynamicFinder("user","findAllByCreditLessThan", new ArrayList<String>(), limit, order);
+        testErrorResponse(err, Response.Status.BAD_REQUEST, "S1000", -424);
+        
+        try{
+        controller.findByDynamicFinder("user","findAllByCreditLessThan", null, limit, order);
+        }catch(Exception e){
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+        }
+        
+        limit = new LimitParam(1000); order = new OrderParam("month");
+        testDynamicFinder("maker_stats_2010", "findAllByMakerLikeAndMonthLessThanEquals", 24, "A%", "4");
     }
     
     @Test
@@ -211,6 +266,18 @@ public class RestControllerTest {
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
         err = (JongoError)controller.insertResource("user", "id", new HashMap<String,String>());
+        testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
+        
+        err = (JongoError)controller.insertResource("", "id", new HashMap<String,String>());
+        testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
+        
+        err = (JongoError)controller.insertResource(null, "id", new HashMap<String,String>());
+        testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
+        
+        err = (JongoError)controller.insertResource("user", "", new HashMap<String,String>());
+        testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
+        
+        err = (JongoError)controller.insertResource("user", null, new HashMap<String,String>());
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
         newMock = UserMock.getRandomInstance();
@@ -240,7 +307,6 @@ public class RestControllerTest {
         testSuccessResponse(r, Response.Status.CREATED, 1);
         r = (JongoSuccess)controller.getResource("user", "name", newMock.name, limit, order);
         testSuccessResponse(r, Response.Status.OK, 1);
-        
     }
     
     @Test
@@ -259,6 +325,12 @@ public class RestControllerTest {
         
         err = (JongoError)controller.updateResource("user", "id", "0", "{\"age\":\"90\", \"birthday\":\"00X0\"}"); // invalid date
         testErrorResponse(err, Response.Status.BAD_REQUEST, "22007", new Integer(-3407));
+        
+        err = (JongoError)controller.updateResource(null, "id", "0", "{\"age\":\"90\"}");
+        testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
+        
+        err = (JongoError)controller.updateResource("user", "id", "9999", "{\"age\":\"90\"}");
+        testErrorResponse(err, Response.Status.NO_CONTENT, null, null);
         
         r = (JongoSuccess)controller.updateResource("car", "cid", "0", "{\"model\":\"Test$%&·$&%·$/()=?¿Model\"}"); //custom id
         testSuccessResponse(r, Response.Status.OK, 1);
@@ -284,6 +356,15 @@ public class RestControllerTest {
         
         JongoError err = (JongoError)controller.deleteResource("user", "id", "");
         testErrorResponse(err, Response.Status.BAD_REQUEST, "22018", new Integer(-3438));
+        
+        err = (JongoError)controller.deleteResource("user", "id", null);
+        testErrorResponse(err, Response.Status.BAD_REQUEST, "22018", new Integer(-3438));
+        
+        err = (JongoError)controller.deleteResource("user", "", "32");
+        testErrorResponse(err, Response.Status.NO_CONTENT, null, null);
+        
+        err = (JongoError)controller.deleteResource(null, "", "32");
+        testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
     }
     
     @Test
