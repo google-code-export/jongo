@@ -61,10 +61,6 @@ public class RestController {
             response = handleException(ex, database);
         }
         
-        if(results == null && response == null){
-            response = new JongoError(database, Response.Status.NO_CONTENT);
-        }
-        
         if(response == null){
             response = new JongoSuccess(database, results);
         }
@@ -217,8 +213,7 @@ public class RestController {
         JongoResponse response = null;
         int result = 0;
         try {
-            if(response == null)
-                result = JDBCExecutor.insert(params);
+            result = JDBCExecutor.insert(params);
         } catch (Throwable ex){
             response = handleException(ex, params.getTable());
         }
@@ -342,31 +337,32 @@ public class RestController {
         if(values == null)
             throw new IllegalArgumentException("Invalid null argument");
         
+        if(query == null)
+            return new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
+        
         JongoResponse response = null;
         List<Row> results = null;
-        if(query == null){
-            response = new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
-        }else{
-            if(values.isEmpty()){
-                try{
-                    DynamicFinder df = DynamicFinder.valueOf(table, query);
-                    results = JDBCExecutor.find(database, df, limit, order);
-                } catch (Throwable ex){
-                    response = handleException(ex, table);
-                }
-            }else{
-                try{
-                    DynamicFinder df = DynamicFinder.valueOf(table, query, values.toArray(new String []{}));
-                    results = JDBCExecutor.find(database, df, limit, order, JongoUtils.parseValues(values));
-                } catch (Throwable ex){
-                    response = handleException(ex, table);
-                }
+        
+        if(values.isEmpty()){
+            try{
+                DynamicFinder df = DynamicFinder.valueOf(table, query);
+                results = JDBCExecutor.find(database, df, limit, order);
+            } catch (Throwable ex){
+                response = handleException(ex, table);
             }
-            
-            if((results == null || results.isEmpty()) && response == null){
-                response = new JongoError(table, Response.Status.NOT_FOUND, "No results for " + query);
+        }else{
+            try{
+                DynamicFinder df = DynamicFinder.valueOf(table, query, values.toArray(new String []{}));
+                results = JDBCExecutor.find(database, df, limit, order, JongoUtils.parseValues(values));
+            } catch (Throwable ex){
+                response = handleException(ex, table);
             }
         }
+        
+        if((results == null || results.isEmpty()) && response == null){
+            response = new JongoError(table, Response.Status.NOT_FOUND, "No results for " + query);
+        }
+        
         if(response == null){
             response =  new JongoSuccess(table, results);
         }
