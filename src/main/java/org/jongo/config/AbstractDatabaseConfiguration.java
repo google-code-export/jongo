@@ -67,6 +67,8 @@ public abstract class AbstractDatabaseConfiguration {
     }
     
     public String getSelectAllFromTableQuery(final String table, LimitParam limit, OrderParam order){
+        if(StringUtils.isBlank(table) || limit == null || order == null)
+            throw new IllegalArgumentException("Invalid argument");
         final StringBuilder query = new StringBuilder("SELECT * FROM ");
         query.append(table);
         query.append(" ORDER BY ");
@@ -81,6 +83,8 @@ public abstract class AbstractDatabaseConfiguration {
     }
     
     public String getSelectAllFromTableQuery(final String table, final String idCol, LimitParam limit, OrderParam order){
+        if(StringUtils.isBlank(table) || StringUtils.isBlank(idCol) || limit == null || order == null)
+            throw new IllegalArgumentException("Invalid argument");
         final StringBuilder query = new StringBuilder("SELECT * FROM ");
         query.append(table);
         query.append(" WHERE ");
@@ -98,6 +102,8 @@ public abstract class AbstractDatabaseConfiguration {
     }
     
     public String getInsertQuery(final String table, final Map<String,String> params){
+        if(StringUtils.isBlank(table) || params == null)
+            throw new IllegalArgumentException("Invalid argument");
         final StringBuilder query = new StringBuilder("INSERT INTO ");
         query.append(table);
         query.append("(");
@@ -109,6 +115,8 @@ public abstract class AbstractDatabaseConfiguration {
     }
     
     public String getUpdateQuery(final String table, final String key, final Map<String,String> params){
+        if(StringUtils.isBlank(table) || StringUtils.isBlank(key) || params == null)
+            throw new IllegalArgumentException("Invalid argument");
         final StringBuilder query = new StringBuilder("UPDATE ");
         query.append(table);
         query.append(" SET ");
@@ -125,6 +133,8 @@ public abstract class AbstractDatabaseConfiguration {
     }
     
     public String getDeleteQuery(final String table, final String key){
+        if(StringUtils.isBlank(table) || StringUtils.isBlank(key))
+            throw new IllegalArgumentException("Invalid argument");
          final StringBuilder query = new StringBuilder("DELETE FROM ");
          query.append(table);
          query.append(" WHERE ");
@@ -134,6 +144,8 @@ public abstract class AbstractDatabaseConfiguration {
     }
     
     public String getFirstRowQuery(String table) {
+        if(StringUtils.isBlank(table))
+            throw new IllegalArgumentException("Table name can't be blank, empty or null");
         final StringBuilder query = new StringBuilder("SELECT * FROM ");
         query.append(table);
         query.append(" FETCH FIRST 1 ROW ONLY");
@@ -141,6 +153,8 @@ public abstract class AbstractDatabaseConfiguration {
     }
     
     public String wrapDynamicFinderQuery(final DynamicFinder finder, final LimitParam limit, final OrderParam order){
+        if(finder == null || limit == null || order == null)
+            throw new IllegalArgumentException("Invalid argument");
         final StringBuilder query = new StringBuilder(finder.getSql());
         query.append(" ORDER BY ");
         query.append(order.getNotNullColumn());
