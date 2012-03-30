@@ -186,8 +186,9 @@ public class QueryParams {
 
     public void setParams(Map<String, String> params) {
         this.params = new HashMap<String,String>();
-        for(final String k : params.keySet()){
-            final String v = params.get(k);
+        for(final Map.Entry<String, String> entry : params.entrySet()){
+            final String k = entry.getKey(); 
+            final String v = entry.getValue();
             if(v != null)
                 this.params.put(k, v);
         }
