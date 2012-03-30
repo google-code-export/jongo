@@ -36,7 +36,7 @@ import org.junit.runners.Suite;
     org.jongo.config.AbstractDatabaseConfigurationTest.class,
     org.jongo.config.impl.HSQLDBConfigurationTest.class,
     org.jongo.config.impl.MySQLConfigurationTest.class,
-    org.jongo.config.impl.OracleConfigurationTest.class,
+    org.jongo.config.impl.OracleConfigurationTest.class
 })
 public class JongoOfflineTestSuite {
 
