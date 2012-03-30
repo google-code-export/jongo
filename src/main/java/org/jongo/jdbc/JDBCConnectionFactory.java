@@ -60,6 +60,7 @@ public class JDBCConnectionFactory {
                 GenericObjectPool pool = new GenericObjectPool(null, 5);
                 ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(dbcfg.getUrl(), dbcfg.getUsername(), dbcfg.getPassword());
                 PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, pool, null, null, false, true);
+                poolableConnectionFactory.hashCode();
                 instance.connectionPool.put(dbname, pool);
             }
         }
