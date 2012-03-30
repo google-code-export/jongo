@@ -44,10 +44,10 @@ public class Usage {
     private BigInteger update = BigInteger.ZERO;
     private BigInteger delete = BigInteger.ZERO;
     
-    private Long readTime = new Long(0);
-    private Long createTime = new Long(0);
-    private Long updateTime = new Long(0);
-    private Long deleteTime = new Long(0);
+    private Long readTime = Long.valueOf(0L);
+    private Long createTime = Long.valueOf(0L);
+    private Long updateTime = Long.valueOf(0L);
+    private Long deleteTime = Long.valueOf(0L);
     
     private BigInteger dynamic = BigInteger.ZERO;
     private BigInteger query = BigInteger.ZERO;
