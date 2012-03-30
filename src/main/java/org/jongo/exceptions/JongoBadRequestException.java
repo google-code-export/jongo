@@ -17,7 +17,6 @@
  */
 package org.jongo.exceptions;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.jongo.rest.xstream.JongoError;
 import org.jongo.rest.xstream.JongoResponse;
@@ -42,9 +41,9 @@ public class JongoBadRequestException extends Exception {
         this.resource = resource;
     }
     
-    public Response getResponse(final MediaType format){
+    public Response getResponse(){
         JongoResponse error = new JongoError(this.resource, Response.Status.BAD_REQUEST.getStatusCode(), this.getMessage());
-        return error.getResponse(format);
+        return error.getResponse();
     }
 
     public String getResource() {
