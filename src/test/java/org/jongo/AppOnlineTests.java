@@ -141,14 +141,12 @@ public class AppOnlineTests {
         if(r instanceof JongoSuccess){
             JongoSuccess s = (JongoSuccess)r;
             List<Row> rows = s.getRows();
-            assertTrue(s.isSuccess());
             assertEquals(rows.size(), expectedCount);
             for(Row row : rows){
                 users.add(UserMock.instanceOf(row.getCells()));
             }
         }else{
             JongoError e = (JongoError)r;
-            assertFalse(e.isSuccess());
         }
         return users;
     }
@@ -159,7 +157,6 @@ public class AppOnlineTests {
             JongoSuccess s = (JongoSuccess)r;
             List<Row> rows = s.getRows();
             int lastIndex = s.getRows().size() - 1;
-            assertTrue(s.isSuccess());
             assertEquals(rows.size(), expectedCount);
             assertEquals(first, rows.get(0).getCells().get(col));
             assertEquals(last, rows.get(lastIndex).getCells().get(col));
