@@ -21,8 +21,8 @@ package org.jongo.demo;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
-import java.util.logging.Level;
 import org.apache.commons.dbutils.QueryRunner;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -105,11 +105,11 @@ public class Demo {
             DateTime dt;// = isofmt.parseDateTime("2012-01-16T13:34:00.000Z");
             for(int year = 2000; year < 2012; year++){
                 for (int month = 1; month <= 12; month++){
-                    int val = 500 + (int)(Math.random() * ((2000 - 500) + 1));
+                    int val = 1910 + new Random().nextInt(100);
                     dt = isofmt.parseDateTime(year + "-" + month + "-01T01:00:00.000Z");
                     run.update("INSERT INTO sales_stats (year, month, sales, last_update) VALUES (?,?,?,?)", year, month, val, fmt.print(dt));
                     for(CarMaker maker: CarMaker.values()){
-                        val = (int)(Math.random() * ((100 - 0) + 1));
+                        val = new Random().nextInt(100);
                         run.update("INSERT INTO maker_stats (year, month, sales, maker, last_update) VALUES (?,?,?,?,?)", year, month, val, maker.name(), fmt.print(dt));
                     }
                 }
