@@ -19,23 +19,25 @@
 package org.jongo.rest.xstream;
 
 import java.sql.SQLException;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.jongo.JongoUtils;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
+@XmlRootElement(name="response")
 public class JongoError implements JongoResponse {
     
-    private final String resource;
-    private final boolean success = false;
-    private final Integer status;
-    private final String message;
-    private final String sqlState;
-    private final Integer sqlCode;
+    private String resource;
+    private boolean success = false;
+    private Integer status;
+    private String message;
+    private String sqlState;
+    private Integer sqlCode;
+    
+    public JongoError(){}
 
     public JongoError(String resource, Response.Status status) {
         this.resource = resource;
@@ -70,39 +72,8 @@ public class JongoError implements JongoResponse {
     }
 
     @Override
-    public String toXML(){
-        StringBuilder b = new StringBuilder("<response><success>");
-        b.append(success);b.append("</success><message>");
-        b.append(message);b.append("</message>");
-        if( sqlCode != null && sqlState != null){
-            b.append("<sqlState>");b.append(sqlState);b.append("</sqlState>");
-            b.append("<sqlCode>");b.append(sqlCode);b.append("</sqlCode>");
-        }
-        b.append("</response>");
-        return b.toString();
-    }
-
-    @Override
-    public String toJSON(){
-        StringBuilder b = new StringBuilder("{");
-        b.append("\"success\":");b.append(success);
-        b.append(",\"message\":\"");b.append(message);
-        if( sqlCode != null && sqlState != null){
-            b.append(",\"SQLState\":\"");b.append(sqlState);
-            b.append("\",\"SQLCode\":\"");b.append(sqlCode);
-        }
-        b.append("\"}");
-        return b.toString();
-    }
-    
-    @Override
-    public Response getResponse(MediaType format) {
-        String response = (format.isCompatible(MediaType.valueOf(MediaType.APPLICATION_XML))) ? this.toXML() : this.toJSON();
-        return Response.status(this.status)
-                .entity(response)
-                .type(format)
-                .header("Content-Location", resource)
-                .build();
+    public Response getResponse() {
+        return Response.status(getStatus()).entity(this).build();
     }
 
     @Override
@@ -130,5 +101,9 @@ public class JongoError implements JongoResponse {
 
     public String getSqlState() {
         return sqlState;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 }

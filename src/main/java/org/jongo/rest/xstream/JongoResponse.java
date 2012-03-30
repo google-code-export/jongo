@@ -18,7 +18,6 @@
 
 package org.jongo.rest.xstream;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -30,7 +29,5 @@ public interface JongoResponse {
     public String getResource();
     public Status getStatus();
     public boolean isSuccess();
-    public String toJSON();
-    public String toXML();
-    public Response getResponse(final MediaType format);
+    public Response getResponse();
 }

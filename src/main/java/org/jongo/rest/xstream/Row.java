@@ -25,8 +25,10 @@ import org.apache.commons.lang.StringUtils;
  */
 public class Row {
 
-    private final int roi;
-    private final Map<String, String> cells;// = new HashMap<String, String>();
+    private int roi;
+    private Map<String, String> cells;// = new HashMap<String, String>();
+    
+    public Row(){}
 
     public Row(int roi) {
         this.roi = roi;
@@ -85,4 +87,14 @@ public class Row {
         b.append("</cells></row>");
         return b.toString();
     }
+
+    public void setCells(Map<String, String> cells) {
+        this.cells = cells;
+    }
+
+    public void setRoi(int roi) {
+        this.roi = roi;
+    }
+    
+    
 }
