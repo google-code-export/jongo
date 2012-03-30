@@ -18,12 +18,18 @@
 package org.jongo;
 
 import com.thoughtworks.xstream.XStream;
-import java.sql.SQLException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import junit.framework.Assert;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import org.codehaus.jackson.map.AnnotationIntrospector;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.ObjectWriter;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import org.jongo.mocks.JongoMapConverter;
 import org.jongo.rest.xstream.JongoError;
 import org.jongo.rest.xstream.JongoSuccess;
@@ -49,36 +55,36 @@ public class XmlXstreamTest {
     public static void tearDownClass() throws Exception {
     }
     
-    @Test
-    public void testSuccessToXML(){
-        Map<String, String> m1 = new HashMap<String, String>();
-        List<Row> rows = new ArrayList<Row>();
-        
-        m1.put("id", "1");m1.put("name", "test1");m1.put("age", "56");
-        rows.add(new Row(1, m1));
-        
-        m1 = new HashMap<String, String>();
-        m1.put("id", "2");m1.put("name", "test2");m1.put("age", "526");
-        
-        rows.add(new Row(1, m1));
-        
-        JongoSuccess s = new JongoSuccess("test", rows);
-        System.out.println(s.toXML());
-        s = successFromXML(s.toXML());
-        Assert.assertTrue(s.isSuccess());
-    }
-    
-    @Test
-    public void testErrorToXML(){
-        JongoError s = new JongoError("grrr", 500, "grrrr error");
-        System.out.println(s.toXML());
-        s = errorFromXML(s.toXML());
-        Assert.assertFalse(s.isSuccess());
-        s = new JongoError("grrr", new SQLException("grrr", "GR101", 54333));
-        System.out.println(s.toXML());
-        s = errorFromXML(s.toXML());
-        Assert.assertFalse(s.isSuccess());
-    }
+//    @Test
+//    public void testSuccessToXML(){
+//        Map<String, String> m1 = new HashMap<String, String>();
+//        List<Row> rows = new ArrayList<Row>();
+//        
+//        m1.put("id", "1");m1.put("name", "test1");m1.put("age", "56");
+//        rows.add(new Row(1, m1));
+//        
+//        m1 = new HashMap<String, String>();
+//        m1.put("id", "2");m1.put("name", "test2");m1.put("age", "526");
+//        
+//        rows.add(new Row(1, m1));
+//        
+//        JongoSuccess s = new JongoSuccess("test", rows);
+//        System.out.println(s.toXML());
+//        s = successFromXML(s.toXML());
+//        Assert.assertTrue(s.isSuccess());
+//    }
+//    
+//    @Test
+//    public void testErrorToXML(){
+//        JongoError s = new JongoError("grrr", 500, "grrrr error");
+//        System.out.println(s.toXML());
+//        s = errorFromXML(s.toXML());
+//        Assert.assertFalse(s.isSuccess());
+//        s = new JongoError("grrr", new SQLException("grrr", "GR101", 54333));
+//        System.out.println(s.toXML());
+//        s = errorFromXML(s.toXML());
+//        Assert.assertFalse(s.isSuccess());
+//    }
     
     public static JongoSuccess successFromXML(final String xml){
         XStream xStreamInstance = new XStream();
@@ -97,5 +103,65 @@ public class XmlXstreamTest {
         xStreamInstance.autodetectAnnotations(false);
         xStreamInstance.alias("response", JongoError.class);
         return (JongoError)xStreamInstance.fromXML(xml);
+    }
+    
+    @Test
+    public void testJAX(){
+        Map<String, String> m1 = new HashMap<String, String>();
+        List<Row> rows = new ArrayList<Row>();
+        
+        m1.put("id", "1");m1.put("name", "test1");m1.put("age", "56");
+        rows.add(new Row(1, m1));
+        
+        m1 = new HashMap<String, String>();
+        m1.put("id", "2");m1.put("name", "test2");m1.put("age", "526");
+        
+        rows.add(new Row(1, m1));
+        JongoSuccess s = new JongoSuccess("test", rows);
+        prettyPrintJSONObject(s,"");
+    }
+    
+    public void printJSONObject(final Object obj, final String message){
+        System.out.println(message);
+        try {
+            final ObjectMapper mapper = new ObjectMapper();
+            final AnnotationIntrospector introspector = new JaxbAnnotationIntrospector();
+            mapper.getDeserializationConfig().setAnnotationIntrospector(introspector);
+            mapper.getSerializationConfig().setAnnotationIntrospector(introspector);
+            mapper.getSerializationConfig().setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
+            StringWriter jsonStringRequest = new StringWriter();
+            mapper.writeValue(jsonStringRequest, obj);
+            System.out.println(jsonStringRequest.toString());
+            jsonStringRequest.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    public void prettyPrintJSONObject(final Object obj, final String message){
+        System.out.println(message);
+        try {
+            final ObjectMapper mapper = new ObjectMapper();
+            ObjectWriter writer = mapper.defaultPrettyPrintingWriter();
+            final AnnotationIntrospector introspector = new JaxbAnnotationIntrospector();
+            mapper.getDeserializationConfig().setAnnotationIntrospector(introspector);
+            mapper.getSerializationConfig().setAnnotationIntrospector(introspector);
+            mapper.getSerializationConfig().setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
+            System.out.println(writer.writeValueAsString(obj));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    public void printXMLObject(final Object obj, final String message){
+        System.out.println(message);
+        try {
+            JAXBContext context = JAXBContext.newInstance(obj.getClass());
+            final Marshaller marshaller = context.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            marshaller.marshal(obj, System.out);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 }
