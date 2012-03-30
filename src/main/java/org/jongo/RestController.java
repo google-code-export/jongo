@@ -338,7 +338,7 @@ public class RestController {
             throw new IllegalArgumentException("Invalid null argument");
         
         if(query == null)
-            return new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query " + query);
+            return new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query");
         
         JongoResponse response = null;
         List<Row> results = null;
