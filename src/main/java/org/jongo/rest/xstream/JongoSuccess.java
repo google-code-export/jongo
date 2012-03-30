@@ -19,21 +19,23 @@
 package org.jongo.rest.xstream;
 
 import java.util.List;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.jongo.JongoUtils;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
+@XmlRootElement(name="response")
 public class JongoSuccess implements JongoResponse{
     
-    private final boolean success = true;
-    private final Response.Status status;
-    private final List<Row> rows;
-    private final String resource;
+    private boolean success = true;
+    private Response.Status status;
+    private List<Row> rows;
+    private String resource;
+    
+    public JongoSuccess(){}
     
     public JongoSuccess(String resource, List<Row> results, Response.Status status) {
         this.resource = resource;
@@ -48,40 +50,8 @@ public class JongoSuccess implements JongoResponse{
     }
     
     @Override
-    public String toXML(){
-        StringBuilder b = new StringBuilder("<response><success>");
-        b.append(success);b.append("</success><resource>");
-        b.append(resource);b.append("</resource><rows>");
-        for(Row r : rows)
-            b.append(r.toXML());
-        b.append("</rows></response>");
-        return b.toString();
-    }
-    
- 
-    @Override
-    public String toJSON(){
-        StringBuilder b = new StringBuilder("{");
-        b.append("\"success\":");b.append(success);
-        b.append(",\"cells\":[ "); //this last space is important!
-        for(Row row : rows){
-            b.append(row.toJSON());
-            b.append(",");
-        }
-        b.deleteCharAt(b.length() - 1);
-        b.append("]}");
-        return b.toString();
-    }
-    
-    @Override
-    public Response getResponse(MediaType format) {
-        String response = (format.isCompatible(MediaType.valueOf(MediaType.APPLICATION_XML))) ? this.toXML() : this.toJSON();
-        return Response.status(this.status)
-                .entity(response)
-                .type(format)
-                .header("Content-Count", rows.size())
-                .header("Content-Location", resource)
-                .build();
+    public Response getResponse() {
+        return Response.status(this.status).entity(this).build();
     }
     
     @Override
@@ -102,4 +72,22 @@ public class JongoSuccess implements JongoResponse{
     public boolean isSuccess() {
         return success;
     }
+
+    public void setResource(String resource) {
+        this.resource = resource;
+    }
+
+    public void setRows(List<Row> rows) {
+        this.rows = rows;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+    
+    
 }

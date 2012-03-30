@@ -18,19 +18,20 @@
 package org.jongo.rest.xstream;
 
 import java.math.BigInteger;
-import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormat;
-import org.jongo.JongoUtils;
 
 /**
  * A singleton which holds usage data for the current running instance.
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
-public class Usage  implements JongoResponse{
+public class Usage {
     
     private DateTime start;
     private BigInteger total = BigInteger.ZERO;
@@ -120,56 +121,95 @@ public class Usage  implements JongoResponse{
         this.query = this.query.add(BigInteger.ONE);
         addGeneral(success);
     }
+
+    public BigInteger getCreate() {
+        return create;
+    }
+
+    public Long getCreateTime() {
+        return createTime;
+    }
+
+    public BigInteger getDelete() {
+        return delete;
+    }
+
+    public Long getDeleteTime() {
+        return deleteTime;
+    }
+
+    public BigInteger getDynamic() {
+        return dynamic;
+    }
+
+    public BigInteger getFail() {
+        return fail;
+    }
+
+    public BigInteger getQuery() {
+        return query;
+    }
+
+    public BigInteger getRead() {
+        return read;
+    }
+
+    public BigInteger getReadAll() {
+        return readAll;
+    }
+
+    public Long getReadTime() {
+        return readTime;
+    }
+
+    public DateTime getStart() {
+        return start;
+    }
+
+    public BigInteger getSuccess() {
+        return success;
+    }
+
+    public BigInteger getTotal() {
+        return total;
+    }
+
+    public BigInteger getUpdate() {
+        return update;
+    }
+
+    public Long getUpdateTime() {
+        return updateTime;
+    }
     
-    @Override
-    public String toJSON(){
-        StringBuilder b = new StringBuilder("{");
-        b.append("\"success\":");b.append(isSuccess());
-        b.append(",\"response\":{");
-        b.append("\"total\":");b.append(total);
-        b.append(",\"success\":");b.append(success);
-        b.append(",\"fail\":");b.append(fail);
-        b.append(",\"create\":");b.append(create);
-        b.append(",\"read\":");b.append(read);
-        b.append(",\"update\":");b.append(update);
-        b.append(",\"delete\":");b.append(delete);
-        b.append(",\"createTime\":");b.append(createTime);
-        b.append(",\"readTime\":");b.append(readTime);
-        b.append(",\"updateTime\":");b.append(updateTime);
-        b.append(",\"deleteTime\":");b.append(deleteTime);
-        b.append(",\"dynamic\":");b.append(dynamic);
-        b.append(",\"query\":");b.append(query);
-        b.append("}}");
-        return b.toString();
+    private Map<String, String> generateCells(){
+        Map<String, String> map = new HashMap<String, String>();
+        
+        map.put("uptime", getUptime());
+        map.put("succeeded", getSuccess().toString());
+        map.put("failed", getFail().toString());
+        map.put("total", getTotal().toString());
+        
+        map.put("reads", getRead().toString());
+        map.put("readalls", getReadAll().toString());
+        map.put("inserts", getCreate().toString());
+        map.put("updates", getUpdate().toString());
+        map.put("deletes", getDelete().toString());
+        
+        map.put("read-time", getReadTime().toString());
+        map.put("create-time", getCreateTime().toString());
+        map.put("update-time", getUpdateTime().toString());
+        map.put("delete-time", getDeleteTime().toString());
+        
+        return map;
     }
     
-    @Override
-    public String getResource() {
-        return "stats";
-    }
-
-    @Override
-    public Status getStatus() {
-        return Response.Status.OK;
-    }
-
-    @Override
-    public boolean isSuccess() {
-        return true;
-    }
-
-    @Override
-    public String toXML() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Response getResponse(MediaType format) {
-        String response = (format.isCompatible(MediaType.valueOf(MediaType.APPLICATION_XML))) ? this.toXML() : this.toJSON();
-        return Response.status(getStatus())
-                .entity(response)
-                .type(format)
-                .header("Content-Location", "jongo")
-                .build();
+        
+    public JongoResponse getUsageData(){
+        Map<String, String> cells = generateCells();
+        List<Row> rows = new ArrayList<Row>();
+        rows.add(new Row(1, cells));
+        JongoResponse res = new JongoSuccess("stats", rows);
+        return res;
     }
 }
