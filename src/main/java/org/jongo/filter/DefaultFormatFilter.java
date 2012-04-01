@@ -86,12 +86,20 @@ public class DefaultFormatFilter implements ContainerResponseFilter, JongoFormat
         return mime;
     }
     
+    private boolean isXMLCompatible(final MediaType mime){
+        if(mime.isWildcardType())
+            return false;
+        if(mime.isCompatible(MediaType.valueOf(MediaType.APPLICATION_XML)))
+            return true;
+        return false;
+    }
+    
     private Response formatSuccessResponse(final JongoSuccess response, final MediaType mime, final Integer status) {
         String res;
         l.debug("Formatting Success Response");
-        if(mime.isCompatible(MediaType.valueOf(MediaType.APPLICATION_XML))){
+        if(isXMLCompatible(mime)){
             StringBuilder b = new StringBuilder("<response><success>");
-            b.append(response.getStatus());b.append("</success><resource>");
+            b.append(response.isSuccess());b.append("</success><resource>");
             b.append(response.getResource());b.append("</resource><rows>");
             for(Row r : response.getRows()){
                 b.append("<row roi=\"");
@@ -113,7 +121,7 @@ public class DefaultFormatFilter implements ContainerResponseFilter, JongoFormat
             res = b.toString();
         }else{
             StringBuilder b = new StringBuilder("{");
-            b.append("\"success\":");b.append(response.getStatus());
+            b.append("\"success\":");b.append(response.isSuccess());
             b.append(",\"cells\":[ "); //this last space is important!
             for(Row r : response.getRows()){
                 List<String> args = new ArrayList<String>();
@@ -151,7 +159,7 @@ public class DefaultFormatFilter implements ContainerResponseFilter, JongoFormat
     private Response formatErrorResponse(final JongoError response, final MediaType mime, final Integer status) {
         String res;
         l.debug("Formatting Error Response");
-        if(mime.isCompatible(MediaType.valueOf(MediaType.APPLICATION_XML))){
+        if(isXMLCompatible(mime)){
             StringBuilder b = new StringBuilder("<response><success>");
             b.append(response.isSuccess());b.append("</success><message>");
             b.append(response.getMessage());b.append("</message>");
