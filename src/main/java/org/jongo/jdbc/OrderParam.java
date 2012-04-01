@@ -62,12 +62,6 @@ public class OrderParam {
         this.column = StringUtils.deleteWhitespace(col);
     }
     
-//    public String getNotNullColumn() {
-//        if(column == null)
-//            return "id";
-//        return column;
-//    }
-
     public String getColumn() {
         return column;
     }
@@ -76,19 +70,19 @@ public class OrderParam {
         return direction;
     }
     
-    public static OrderParam valueOf(final MultivaluedMap<String, String> formParams){
-        String sort = formParams.getFirst("sort");
-        String dir = formParams.getFirst("dir");
-        String colId = formParams.getFirst("customId");
+    public static OrderParam valueOf(final MultivaluedMap<String, String> pathParams){
+        return valueOf(pathParams, "id");
+    }
+    
+    public static OrderParam valueOf(final MultivaluedMap<String, String> pathParams, final String pk){
+        String sort = pathParams.getFirst("sort");
+        String dir = pathParams.getFirst("dir");
         
-        if(StringUtils.isEmpty(sort)) sort = "id";
         if(StringUtils.isEmpty(dir)) dir = "ASC";
         
         OrderParam instance;
-        if(sort.equals(colId)){
-            instance = new OrderParam(sort, dir);
-        }else if(!StringUtils.isEmpty(colId)){
-            instance = new OrderParam(colId, dir);
+        if(StringUtils.isEmpty(sort)){
+            instance = new OrderParam(pk, dir);
         }else{
             instance = new OrderParam(sort, dir);
         }
