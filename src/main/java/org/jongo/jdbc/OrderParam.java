@@ -33,7 +33,7 @@ public class OrderParam {
     private String direction;
     
     public OrderParam(){
-        this.column = null;
+        this.column = "id";
         this.direction = ASC;
     }
     
@@ -62,11 +62,11 @@ public class OrderParam {
         this.column = StringUtils.deleteWhitespace(col);
     }
     
-    public String getNotNullColumn() {
-        if(column == null)
-            return "id";
-        return column;
-    }
+//    public String getNotNullColumn() {
+//        if(column == null)
+//            return "id";
+//        return column;
+//    }
 
     public String getColumn() {
         return column;
@@ -79,16 +79,18 @@ public class OrderParam {
     public static OrderParam valueOf(final MultivaluedMap<String, String> formParams){
         String sort = formParams.getFirst("sort");
         String dir = formParams.getFirst("dir");
+        String colId = formParams.getFirst("customId");
         
-        OrderParam instance = null;
-        if(StringUtils.isBlank(sort)){
-            instance = new OrderParam();
+        if(StringUtils.isEmpty(sort)) sort = "id";
+        if(StringUtils.isEmpty(dir)) dir = "ASC";
+        
+        OrderParam instance;
+        if(sort.equals(colId)){
+            instance = new OrderParam(sort, dir);
+        }else if(!StringUtils.isEmpty(colId)){
+            instance = new OrderParam(colId, dir);
         }else{
-            if(StringUtils.isBlank(dir)){
-                instance = new OrderParam(sort);
-            }else{
-                instance = new OrderParam(sort, dir);
-            }
+            instance = new OrderParam(sort, dir);
         }
         
         return instance;
@@ -105,7 +107,7 @@ public class OrderParam {
     @Override
     public String toString(){
         StringBuilder b = new StringBuilder("{OrderParam:{column:\"");
-        b.append(getNotNullColumn());
+        b.append(getColumn());
         b.append("\", direction:\"");
         b.append(direction);
         b.append("\"}}");
