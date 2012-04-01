@@ -335,7 +335,7 @@ public class RestControllerTest {
         r = (JongoSuccess)controller.updateResource("car", "cid", "0", "{\"model\":\"Test$%&·$&%·$/()=?¿Model\"}"); //custom id
         testSuccessResponse(r, Response.Status.OK, 1);
         
-        r = (JongoSuccess)controller.updateResource("maker_stats_2010", "month", "3", "{\"sales\":0}"); // this view can change
+        r = (JongoSuccess)controller.updateResource("maker_stats_2010", "month", "3", "{\"sales\":0}");
         testSuccessResponse(r, Response.Status.OK, 1);
     }
     
