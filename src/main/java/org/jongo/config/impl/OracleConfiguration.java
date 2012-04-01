@@ -71,7 +71,7 @@ public class OracleConfiguration extends AbstractDatabaseConfiguration implement
             throw new IllegalArgumentException("Invalid argument");
         
         final StringBuilder query = new StringBuilder("SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY ");
-        query.append(order.getNotNullColumn());
+        query.append(order.getColumn());
         query.append(" ");
         query.append(order.getDirection());
         query.append(" )AS ROW_NUMBER, ");
@@ -91,7 +91,7 @@ public class OracleConfiguration extends AbstractDatabaseConfiguration implement
             throw new IllegalArgumentException("Invalid argument");
         
         final StringBuilder query = new StringBuilder("SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY ");
-        query.append(order.getNotNullColumn());
+        query.append(order.getColumn());
         query.append(" ");
         query.append(order.getDirection());
         query.append(" )AS ROW_NUMBER, ");
@@ -120,7 +120,7 @@ public class OracleConfiguration extends AbstractDatabaseConfiguration implement
         
         final String [] parts = finder.getSql().split("WHERE");
         final StringBuilder query = new StringBuilder("SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY ");
-        query.append(order.getNotNullColumn());
+        query.append(order.getColumn());
         query.append(" ");
         query.append(order.getDirection());
         query.append(" )AS ROW_NUMBER, ");
