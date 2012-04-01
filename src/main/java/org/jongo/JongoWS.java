@@ -55,7 +55,7 @@ public interface JongoWS {
      * @return the resource if it's found, or a 404 if it's not.
      */
     public Response get(String database, String resource, String pk, String id, UriInfo ui);
-    public Response getAll(String database, String resource, UriInfo ui);
+    public Response getAll(String database, String resource, String pk, UriInfo ui);
     public Response find(String database, String resource, String col, String arg, UriInfo ui);
     public Response findBy(String database, String resource, String query, List<String> args, UriInfo ui);
     public Response insert(String database, String resource, String pk, String jsonRequest);
