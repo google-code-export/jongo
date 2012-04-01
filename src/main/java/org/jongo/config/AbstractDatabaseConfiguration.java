@@ -72,7 +72,7 @@ public abstract class AbstractDatabaseConfiguration {
         final StringBuilder query = new StringBuilder("SELECT * FROM ");
         query.append(table);
         query.append(" ORDER BY ");
-        query.append(order.getNotNullColumn());
+        query.append(order.getColumn());
         query.append(" ");
         query.append(order.getDirection());
         query.append(" LIMIT ");
@@ -91,7 +91,7 @@ public abstract class AbstractDatabaseConfiguration {
         query.append(idCol);
         query.append(" = ?");
         query.append(" ORDER BY ");
-        query.append(order.getNotNullColumn());
+        query.append(order.getColumn());
         query.append(" ");
         query.append(order.getDirection());
         query.append(" LIMIT ");
@@ -157,7 +157,7 @@ public abstract class AbstractDatabaseConfiguration {
             throw new IllegalArgumentException("Invalid argument");
         final StringBuilder query = new StringBuilder(finder.getSql());
         query.append(" ORDER BY ");
-        query.append(order.getNotNullColumn());
+        query.append(order.getColumn());
         query.append(" ");
         query.append(order.getDirection());
         query.append(" LIMIT ");
