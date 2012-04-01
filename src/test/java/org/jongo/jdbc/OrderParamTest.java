@@ -55,16 +55,15 @@ public class OrderParamTest {
         assertTrue(op.getColumn().equals("id"));
         assertEquals("DESC", op.getDirection());
         
-        formParams.add("customId", "tableId");
-        op = OrderParam.valueOf(formParams);
+        op = OrderParam.valueOf(formParams, "tableId");
         assertNotNull(op);
         assertTrue(op.getColumn().equals("tableId"));
         assertEquals("DESC", op.getDirection());
         
         formParams.add("sort", "anotherColumn");
-        op = OrderParam.valueOf(formParams);
+        op = OrderParam.valueOf(formParams, "tableId");
         assertNotNull(op);
-        assertTrue(op.getColumn().equals("tableId"));
+        assertEquals("anotherColumn", op.getColumn());
         assertEquals("DESC", op.getDirection());
         
         formParams = new MultivaluedMapImpl();
@@ -76,7 +75,7 @@ public class OrderParamTest {
         
         formParams = new MultivaluedMapImpl();
         formParams.add("customId", "anotherColumn");
-        op = OrderParam.valueOf(formParams);
+        op = OrderParam.valueOf(formParams, "anotherColumn");
         assertNotNull(op);
         assertEquals("anotherColumn", op.getColumn());
         assertEquals("ASC", op.getDirection());
