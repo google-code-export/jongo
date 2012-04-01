@@ -34,8 +34,8 @@ public class QueryParams {
     private String id;
     private String idField = "id";
     private Map<String, String> params = new HashMap<String, String>();
-    private LimitParam limit = new LimitParam();
-    private OrderParam order = new OrderParam();
+    private LimitParam limit;
+    private OrderParam order;
     
     public QueryParams(){}
 
@@ -86,7 +86,7 @@ public class QueryParams {
         }
         
         if(order == null){
-            p.setOrder(new OrderParam());
+            p.setOrder(new OrderParam(p.getIdField()));
         }else{
             p.setOrder(order);
         }
