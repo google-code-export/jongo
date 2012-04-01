@@ -28,14 +28,14 @@ public class DummyQueryParamsFactory {
     public static final String database = "demo1";
     
     public static QueryParams getUser(){
-        QueryParams q = new QueryParams();
+        QueryParams q = QueryParams.valueOf(database, "user");
         q.setDatabase(database);
         q.setTable("user");
         return q;
     }
     
     public static QueryParams getMakerTable(){
-        QueryParams q = new QueryParams();
+        QueryParams q = QueryParams.valueOf(database, "maker");
         q.setDatabase(database);
         q.setTable("maker");
         return q;
