@@ -18,18 +18,20 @@
 package org.jongo;
 
 import com.thoughtworks.xstream.XStream;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
+import junit.framework.Assert;
 import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.codehaus.jackson.type.TypeReference;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
+import org.jongo.jdbc.StoredProcedureParam;
 import org.jongo.mocks.JongoMapConverter;
 import org.jongo.rest.xstream.JongoError;
 import org.jongo.rest.xstream.JongoSuccess;
@@ -106,7 +108,7 @@ public class XmlXstreamTest {
     }
     
     @Test
-    public void testJAX(){
+    public void testJAX() throws Exception{
         Map<String, String> m1 = new HashMap<String, String>();
         List<Row> rows = new ArrayList<Row>();
         
@@ -118,24 +120,32 @@ public class XmlXstreamTest {
         
         rows.add(new Row(1, m1));
         JongoSuccess s = new JongoSuccess("test", rows);
-        prettyPrintJSONObject(s,"");
+        
+        List<StoredProcedureParam> ps = new ArrayList<StoredProcedureParam>();
+        ps.add(new StoredProcedureParam("car_id", "1", false, 1, "INTEGER"));
+        ps.add(new StoredProcedureParam("dfgdf", "", true, 2, "VARCHAR"));
+        StoredProcedureParam p = new StoredProcedureParam("car_id", "1", false, 1, "INTEGER");
+        final ObjectMapper mapper = new ObjectMapper();
+        String k = mapper.writeValueAsString(ps);
+        System.out.println(k);
+        printXMLObject(p,"");
+        List<StoredProcedureParam> ret = new ObjectMapper().readValue(k, new TypeReference<List<StoredProcedureParam>>(){});
+        System.out.println(ret);
+        
+        
     }
     
-    public void printJSONObject(final Object obj, final String message){
+    public String printJSONObject(final Object obj, final String message){
         System.out.println(message);
         try {
             final ObjectMapper mapper = new ObjectMapper();
-            final AnnotationIntrospector introspector = new JaxbAnnotationIntrospector();
-            mapper.getDeserializationConfig().setAnnotationIntrospector(introspector);
-            mapper.getSerializationConfig().setAnnotationIntrospector(introspector);
-            mapper.getSerializationConfig().setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
-            StringWriter jsonStringRequest = new StringWriter();
-            mapper.writeValue(jsonStringRequest, obj);
-            System.out.println(jsonStringRequest.toString());
-            jsonStringRequest.close();
+            String k = mapper.writeValueAsString(obj);
+            System.out.println(k);
+            return k;
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+        return null;
     }
     
     public void prettyPrintJSONObject(final Object obj, final String message){
