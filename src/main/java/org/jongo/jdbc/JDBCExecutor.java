@@ -18,17 +18,20 @@
 
 package org.jongo.jdbc;
 
+import java.math.BigDecimal;
 import java.sql.*;
-import org.jongo.handler.ResultSetMetaDataHandler;
-import org.jongo.handler.JongoResultSetHandler;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.JongoUtils;
 import org.jongo.config.DatabaseConfiguration;
 import org.jongo.config.JongoConfiguration;
+import org.jongo.handler.JongoResultSetHandler;
+import org.jongo.handler.ResultSetMetaDataHandler;
 import org.jongo.rest.xstream.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -203,8 +206,28 @@ public class JDBCExecutor {
         }
     }
     
-    public static List<Row> executeQuery(final String database, final String queryName, final List<StoredProcedureParam> params) throws Exception {
-        throw new UnsupportedOperationException("Not Implemented");
+    public static List<Row> executeQuery(final String database, final String queryName, final List<StoredProcedureParam> params) throws SQLException {
+        l.debug("Executing stored procedure " + database + "." + queryName);
+        QueryRunner run = JDBCConnectionFactory.getQueryRunner(database);
+        final String call = JongoUtils.getCallableStatementCallString(queryName, params.size());
+        Connection conn = run.getDataSource().getConnection();
+        CallableStatement cs = conn.prepareCall(call);
+        final List<StoredProcedureParam> outParams = addParameters(cs, params);
+        List<Row> rows = new ArrayList<Row>();
+        if(cs.execute()){
+            l.debug("Got a result set " + queryName);
+            ResultSet rs = cs.getResultSet();
+            JongoResultSetHandler handler = new JongoResultSetHandler(true);
+            rows = handler.handle(rs);
+        }else if(!outParams.isEmpty()){
+            l.debug("No result set, but we are expecting OUT values from " + queryName);
+            Map<String, String> results = new HashMap<String, String>();
+            for(StoredProcedureParam p : outParams){
+                results.put(p.getName(), cs.getString(p.getIndex())); // thank $deity we only return strings
+            }
+            rows.add(new Row(0, results));
+        }
+        return rows;
     }
     
     public static void shutdown(){
@@ -232,5 +255,40 @@ public class JDBCExecutor {
         } catch (SQLException ex) {
             throw ex;
         }
+    }
+    
+    private static List<StoredProcedureParam> addParameters(final CallableStatement cs, final List<StoredProcedureParam> params) throws SQLException{
+        List<StoredProcedureParam> outParams = new ArrayList<StoredProcedureParam>();
+        int i = 1;
+        for(StoredProcedureParam p : params){
+            final Integer sqlType = p.getType();
+            if(p.isOutParameter()){
+                cs.registerOutParameter(i++, sqlType);
+                outParams.add(p);
+            }else{
+                switch(sqlType){
+                    case Types.BIGINT:
+                    case Types.INTEGER:
+                    case Types.TINYINT:
+//                    case Types.NUMERIC:
+                        cs.setInt(i++, Integer.valueOf(p.getValue())); break;
+                    case Types.DATE:
+                        cs.setDate(i++, (Date)JongoUtils.parseValue(p.getValue())); break;
+                    case Types.TIME:
+                        cs.setTime(i++, (Time)JongoUtils.parseValue(p.getValue())); break;
+                    case Types.TIMESTAMP:
+                        cs.setTimestamp(i++, (Timestamp)JongoUtils.parseValue(p.getValue())); break;
+                    case Types.DECIMAL:
+                        cs.setBigDecimal(i++, (BigDecimal)JongoUtils.parseValue(p.getValue())); break;
+                    case Types.DOUBLE:
+                        cs.setDouble(i++, Double.valueOf(p.getValue())); break;
+                    case Types.FLOAT:
+                        cs.setLong(i++, Long.valueOf(p.getValue())); break;
+                    default:
+                        cs.setString(i++, p.getValue()); break;
+                }
+            }
+        }
+        return outParams;
     }
 }
