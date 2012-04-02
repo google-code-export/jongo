@@ -26,7 +26,8 @@ public enum JDBCDriver {
     HSQLDB      ("org.hsqldb.jdbcDriver"),
     MySQL       ("com.mysql.jdbc.Driver"),
     PostgreSQL  ("org.postgresql.Driver"),
-    ORACLE      ("oracle.jdbc.driver.OracleDriver");
+    ORACLE      ("oracle.jdbc.driver.OracleDriver"),
+    MSSQL       ("net.sourceforge.jtds.jdbc.Driver");
     
     private final String name;
     
