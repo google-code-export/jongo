@@ -35,6 +35,7 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.jongo.config.JongoConfiguration;
 import org.jongo.exceptions.JongoBadRequestException;
 import org.jongo.exceptions.StartupException;
+import org.jongo.jdbc.StoredProcedureParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.misc.BASE64Encoder;
@@ -218,7 +219,17 @@ public class JongoUtils {
         } catch (Exception ex) {
             throw new JongoBadRequestException(ex.getMessage());
         }
-            
+    }
+    
+    public static List<StoredProcedureParam> getStoredProcedureParamsFromJSON(final String json) throws JongoBadRequestException{
+        if(StringUtils.isBlank(json))
+            throw new JongoBadRequestException("Invalid number of arguments for request " + json);
+        try {
+            List<StoredProcedureParam> ret = new ObjectMapper().readValue(json, new TypeReference<List<StoredProcedureParam>>(){});
+            return ret;
+        } catch (Exception ex) {
+            throw new JongoBadRequestException(ex.getMessage());
+        }
     }
     
     public static JongoConfiguration loadConfiguration() throws StartupException{
