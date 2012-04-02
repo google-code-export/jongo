@@ -69,9 +69,11 @@ public class DefaultFormatFilter implements ContainerResponseFilter, JongoFormat
     }
     
     private void setHeadersToResponse(ContainerResponse cr1, final Object entity){
-        cr1.getHttpHeaders().add(HttpHeaders.DATE, JongoUtils.getDateHeader());
-        cr1.getHttpHeaders().add("Content-MD5", JongoUtils.getMD5Base64(entity.toString()));
-        cr1.getHttpHeaders().add(HttpHeaders.CONTENT_LENGTH, JongoUtils.getOctetLength(entity.toString()));
+        if(entity != null){
+            cr1.getHttpHeaders().add(HttpHeaders.DATE, JongoUtils.getDateHeader());
+            cr1.getHttpHeaders().add("Content-MD5", JongoUtils.getMD5Base64(entity.toString()));
+            cr1.getHttpHeaders().add(HttpHeaders.CONTENT_LENGTH, JongoUtils.getOctetLength(entity.toString()));
+        }
     }
     
     private MediaType getMediaTypeFromRequest(final ContainerRequest cr){
