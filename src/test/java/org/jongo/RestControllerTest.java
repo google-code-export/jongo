@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response;
 import junit.framework.Assert;
 import org.jongo.config.JongoConfiguration;
 import org.jongo.demo.Demo;
+import org.jongo.exceptions.JongoBadRequestException;
 import org.jongo.exceptions.StartupException;
 import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
@@ -52,6 +53,7 @@ public class RestControllerTest {
     public static void setUp() throws StartupException{
         System.setProperty("environment", "demo");
         JongoConfiguration configuration = JongoUtils.loadConfiguration();
+        Demo.generateDemoDatabases(configuration.getDatabases());
     }
 
     @AfterClass
@@ -392,6 +394,30 @@ public class RestControllerTest {
         
         err = (JongoError)controller.findByColumn("","id","0", limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
+    }
+    
+    @Test
+    public void testSimpleFunction() throws JongoBadRequestException{
+        JongoSuccess r = (JongoSuccess)controller.executeStoredProcedure("simpleStoredProcedure", "[]");
+        testSuccessResponse(r, Response.Status.OK, 1);
+        
+    }
+    
+    @Test
+    public void testSimpleStoredProcedure()throws JongoBadRequestException{
+        String json = "[{\"value\":4,\"name\":\"car_id\",\"outParameter\":false,\"type\":\"INTEGER\",\"index\":1},{\"value\":\"This is a comment\",\"name\":\"comment\",\"outParameter\":false,\"type\":\"VARCHAR\",\"index\":2}]";
+        JongoUtils.getStoredProcedureParamsFromJSON(json);
+        JongoSuccess r = (JongoSuccess)controller.executeStoredProcedure("insert_comment", json);
+        testSuccessResponse(r, Response.Status.OK, 0);
+    }
+    
+    @Test
+    public void testComplexStoredProcedure() throws JongoBadRequestException{
+        String json = "[{\"value\":2010,\"name\":\"in_year\",\"outParameter\":false,\"type\":\"INTEGER\",\"index\":1},{\"name\":\"out_total\",\"outParameter\":true,\"type\":\"INTEGER\",\"index\":2}]";
+        JongoUtils.getStoredProcedureParamsFromJSON(json);
+        JongoSuccess r = (JongoSuccess)controller.executeStoredProcedure("get_year_sales", json);
+        testSuccessResponse(r, Response.Status.OK, 1);
+        Assert.assertEquals("12", r.getRows().get(0).getCells().get("out_total"));
     }
     
     private void testErrorResponse(JongoError err, Response.Status expectedStatus, String expectedSqlState, Integer expectedSqlCode){
