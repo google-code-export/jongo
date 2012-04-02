@@ -223,30 +223,36 @@ public class JDBCExecutorTest {
     }
             
     @Test
-    public void testStoredProcedure() throws SQLException, JongoBadRequestException {
+    public void testSimpleFunction() throws SQLException, JongoBadRequestException {
         List<StoredProcedureParam> params = new ArrayList<StoredProcedureParam>();
         List<Row> rows = JDBCExecutor.executeQuery("demo1", "simpleStoredProcedure", params);
         assertEquals(1, rows.size());
-        
+    }
+    
+    @Test
+    public void testSimpleStoredProcedure() throws JongoBadRequestException, SQLException{
+        List<StoredProcedureParam> params = new ArrayList<StoredProcedureParam>();
         QueryParams q = QueryParams.valueOf("demo1", "comments");
         List<Row> rs = JDBCExecutor.get(q);
         assertEquals(3, rs.size());
         
         params.add(new StoredProcedureParam("car_id", "1", false, 1, "INTEGER"));
         params.add(new StoredProcedureParam("comment", "grrrr asdsa  asd asd asda asdd )/(&&/($%/(&$=)/&/$·/(&", false, 2, "VARCHAR"));
-        rows = JDBCExecutor.executeQuery("demo1", "insert_comment", params);
+        List<Row> rows = JDBCExecutor.executeQuery("demo1", "insert_comment", params);
         assertEquals(0, rows.size());
         
         rs = JDBCExecutor.get(q);
         assertEquals(4, rs.size());
-        
+    }
+    
+    @Test
+    public void testComplexStoredProcedure() throws JongoBadRequestException, SQLException{
+        List<StoredProcedureParam> params = new ArrayList<StoredProcedureParam>();
         params = new ArrayList<StoredProcedureParam>();
         params.add(new StoredProcedureParam("in_year", "2010", false, 1, "INTEGER"));
         params.add(new StoredProcedureParam("out_total", "", true, 2, "INTEGER"));
-        rows = JDBCExecutor.executeQuery("demo1", "get_year_sales", params);
+        List<Row> rows = JDBCExecutor.executeQuery("demo1", "get_year_sales", params);
         assertEquals(1, rows.size());
-        assertEquals(12, rows.get(0).getCells().get("out_total"));
-        
+        assertEquals("12", rows.get(0).getCells().get("out_total"));
     }
-    
 }
