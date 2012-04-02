@@ -236,6 +236,11 @@ public class JongoUtils {
         return configuration;
     }
     
+    /**
+     * Generates a HashMap with the first value of a MultivaluedMap because working with this "maps" is a PITA.
+     * @param mv the MultivaluedMap with the keys and values
+     * @return a Map (Hash) with the first value corresponding to the key.
+     */
     public static Map<String, String> hashMapOf(final MultivaluedMap<String, String> mv){
         if(mv == null)
             throw new IllegalArgumentException("Invalid null argument");
@@ -249,6 +254,11 @@ public class JongoUtils {
         return map;
     }
     
+    /**
+     * Generates a Base64-encoded binary MD5 sum of the content of the response as described by rfc1864
+     * @param input the string
+     * @return Base64-encoded binary MD5 sum of the string
+     */
     public static String getMD5Base64(String input) {
         if(input == null)
             throw new IllegalArgumentException("Invalid null argument");
@@ -267,6 +277,11 @@ public class JongoUtils {
         return ret;
     }
     
+    /**
+     * The length of the request body in octets (8-bit bytes)
+     * @param input the string
+     * @return an Integer with the length of the request body in octets.
+     */
     public static Integer getOctetLength(String input){
         if(input == null)
             throw new IllegalArgumentException("Invalid null argument");
@@ -282,7 +297,35 @@ public class JongoUtils {
         return result;
     }
     
+    /**
+     * The date and time that the message was sent
+     * @return The date and time that the message was sent
+     */
     public static String getDateHeader(){
         return new DateTime().toString(ISODateTimeFormat.dateTime());
+    }
+    
+    /**
+     * Generates a string like {call stmt(?,?,?)} to be used by a CallableStatement to execute a function
+     * or a procedure.
+     * @param queryName the name of the function or procedure
+     * @param paramsSize the amount of parameters to be passed to the function/procedure
+     * @return a string ready to be fed to a CallableStatement
+     */
+    public static String getCallableStatementCallString(final String queryName, final Integer paramsSize){
+        if(StringUtils.isBlank(queryName))
+            throw new IllegalArgumentException("The name can't be null, empty or blank" );
+        
+        StringBuilder b = new StringBuilder("{CALL ");
+        b.append(queryName);
+        b.append("(");
+        for(int i = 0; i < paramsSize; i++){
+            b.append("?,");
+        }
+        if(b.charAt(b.length() - 1) == ','){
+            b.deleteCharAt(b.length() - 1);
+        }
+        b.append(")}");
+        return b.toString();
     }
 }
