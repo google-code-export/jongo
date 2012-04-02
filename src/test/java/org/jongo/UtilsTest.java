@@ -227,4 +227,23 @@ public class UtilsTest {
         conf = JongoUtils.loadConfiguration();
         assertTrue(conf.isDemoModeActive());
     }
+
+    @Test
+    public void testGetCallableStatementCallString(){
+        String k = JongoUtils.getCallableStatementCallString("test", 7);
+        assertEquals("{CALL test(?,?,?,?,?,?,?)}", k);
+        k = JongoUtils.getCallableStatementCallString("test", 0);
+        assertEquals("{CALL test()}", k);
+        try{
+            JongoUtils.getCallableStatementCallString("", 0);
+        }catch(IllegalArgumentException e){
+            assertNotNull(e.getMessage());
+        }
+        
+        try{
+            JongoUtils.getCallableStatementCallString(null, 0);
+        }catch(IllegalArgumentException e){
+            assertNotNull(e.getMessage());
+        }
+    }
 }
