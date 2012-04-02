@@ -24,9 +24,11 @@ import java.util.List;
 import java.util.Map;
 import org.jongo.config.JongoConfiguration;
 import org.jongo.demo.Demo;
+import org.jongo.exceptions.JongoBadRequestException;
 import org.jongo.exceptions.StartupException;
 import org.jongo.jdbc.JDBCExecutor;
 import org.jongo.jdbc.QueryParams;
+import org.jongo.jdbc.StoredProcedureParam;
 import org.jongo.mocks.DummyQueryParamsFactory;
 import org.jongo.mocks.UserMock;
 import org.jongo.rest.xstream.Row;
@@ -218,6 +220,33 @@ public class JDBCExecutorTest {
         u1.add(UserMock.getRandomInstance());
         u1.add(UserMock.getRandomInstance());
         return u1;
+    }
+            
+    @Test
+    public void testStoredProcedure() throws SQLException, JongoBadRequestException {
+        List<StoredProcedureParam> params = new ArrayList<StoredProcedureParam>();
+        List<Row> rows = JDBCExecutor.executeQuery("demo1", "simpleStoredProcedure", params);
+        assertEquals(1, rows.size());
+        
+        QueryParams q = QueryParams.valueOf("demo1", "comments");
+        List<Row> rs = JDBCExecutor.get(q);
+        assertEquals(3, rs.size());
+        
+        params.add(new StoredProcedureParam("car_id", "1", false, 1, "INTEGER"));
+        params.add(new StoredProcedureParam("comment", "grrrr asdsa  asd asd asda asdd )/(&&/($%/(&$=)/&/$·/(&", false, 2, "VARCHAR"));
+        rows = JDBCExecutor.executeQuery("demo1", "insert_comment", params);
+        assertEquals(0, rows.size());
+        
+        rs = JDBCExecutor.get(q);
+        assertEquals(4, rs.size());
+        
+        params = new ArrayList<StoredProcedureParam>();
+        params.add(new StoredProcedureParam("in_year", "2010", false, 1, "INTEGER"));
+        params.add(new StoredProcedureParam("out_total", "", true, 2, "INTEGER"));
+        rows = JDBCExecutor.executeQuery("demo1", "get_year_sales", params);
+        assertEquals(1, rows.size());
+        assertEquals(12, rows.get(0).getCells().get("out_total"));
+        
     }
     
 }
