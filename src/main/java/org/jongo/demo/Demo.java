@@ -120,6 +120,7 @@ public class Demo {
             //load the sp
             run.update("CREATE FUNCTION simpleStoredProcedure () RETURNS TINYINT RETURN 1");
             run.update("CREATE PROCEDURE insert_comment (IN car_id INTEGER, IN comment VARCHAR(255)) MODIFIES SQL DATA INSERT INTO comments VALUES (DEFAULT, car_id, comment)");
+            run.update("CREATE PROCEDURE get_year_sales (IN in_year INTEGER, OUT out_total INTEGER) READS SQL DATA SELECT COUNT(sales) INTO out_total FROM sales_stats WHERE year = in_year");
             run.update(getCreateView());
             
         } catch (SQLException ex) {
@@ -133,6 +134,7 @@ public class Demo {
         try {
             run.update("DROP FUNCTION simpleStoredProcedure");
             run.update("DROP PROCEDURE insert_comment");
+            run.update("DROP PROCEDURE get_year_sales");
             run.update("DROP VIEW MAKER_STATS_2010");
             run.update("DROP TABLE maker_stats");
             run.update("DROP TABLE sales_stats");
