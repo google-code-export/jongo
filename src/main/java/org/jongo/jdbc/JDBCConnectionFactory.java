@@ -57,7 +57,7 @@ public class JDBCConnectionFactory {
             for(String dbname : databases){
                 l.debug("Registering Connection Pool for " + dbname);
                 DatabaseConfiguration dbcfg = configuration.getDatabaseConfiguration(dbname);
-                GenericObjectPool pool = new GenericObjectPool(null, 5);
+                GenericObjectPool pool = new GenericObjectPool(null, 25);
                 ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(dbcfg.getUrl(), dbcfg.getUsername(), dbcfg.getPassword());
                 PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, pool, null, null, false, true);
                 poolableConnectionFactory.hashCode();
