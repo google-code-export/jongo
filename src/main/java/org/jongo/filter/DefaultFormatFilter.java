@@ -86,7 +86,7 @@ public class DefaultFormatFilter implements ContainerResponseFilter, JongoFormat
         try{
             mime = MediaType.valueOf(rawMime);
         }catch(IllegalArgumentException e){
-            l.warn("Failed to parse MIME in Accept header " + rawMime + ". Returning default application/json");
+            l.debug("Failed to parse MIME in Accept header " + rawMime + ". Returning default application/json");
             mime = MediaType.valueOf(MediaType.APPLICATION_JSON);
         }
         return mime;
