@@ -50,15 +50,14 @@ public class PerformanceLogger {
     public long end(){
         this.end = System.nanoTime();
         final long dur = TimeUnit.NANOSECONDS.toMillis(this.end - this.start);
-        StringBuilder b = new StringBuilder("[");
+        StringBuilder b = new StringBuilder("");
         if(msg.length() > 0){
             b.append(msg);
-            b.append(":");
+            b.append(" ");
         }
         b.append(code);
-        b.append(":");
+        b.append(" ");
         b.append(dur);
-        b.append("]");
         l.debug(b.toString());
         return dur;
     }
@@ -72,6 +71,5 @@ public class PerformanceLogger {
         CREATE,
         UPDATE,
         DELETE;
-        
     }
 }
