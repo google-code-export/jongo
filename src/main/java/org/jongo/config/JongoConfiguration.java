@@ -129,7 +129,6 @@ public class JongoConfiguration {
         
         if(in == null){
             l.error("Couldn't load configuration file jongo.properties quitting");
-//            System.exit(1);
         }
 
         try {
@@ -138,7 +137,6 @@ public class JongoConfiguration {
             }
         } catch (IOException ex) {
             l.error("Failed to load configuration", ex);
-//            System.exit(1);
         }finally{
             try {
                 if(in != null) in.close();

@@ -99,6 +99,7 @@ public class StoredProcedureParam {
     }
     
     public static synchronized Integer getSqlType(final String type) throws JongoBadRequestException{
+        l.debug("Parsing SQL Type from " + type);
         Integer ret = null;
         for(Field f : fields){
             if(f.getName().equalsIgnoreCase(type)){
@@ -113,5 +114,17 @@ public class StoredProcedureParam {
             }
         }
         return ret;    
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder("StoredProcedureParam [");
+        b.append(" value="); b.append(value);
+        b.append(" name="); b.append(name);
+        b.append(" outParameter="); b.append(outParameter);
+        b.append(" type="); b.append(type);
+        b.append(" index="); b.append(index);
+        b.append("]");
+        return b.toString();
     }
 }

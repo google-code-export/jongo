@@ -406,22 +406,22 @@ public class RestController {
             b.append("] & code [");
             b.append(ex.getErrorCode());
             b.append("]");
-            l.info(b.toString());
+            l.debug(b.toString());
             response = new JongoError(resource, ex);
         }else if(t instanceof JongoBadRequestException){
             b = new StringBuilder("Received a JongoBadRequestException ");
             b.append(t.getMessage());
-            l.info(b.toString());
+            l.debug(b.toString());
             response = new JongoError(resource, Response.Status.BAD_REQUEST, t.getMessage());
         }else if(t instanceof IllegalArgumentException){
             b = new StringBuilder("Received an IllegalArgumentException ");
             b.append(t.getMessage());
-            l.info(b.toString());
+            l.debug(b.toString());
             response = new JongoError(resource, Response.Status.BAD_REQUEST, t.getMessage());
         }else{
             b = new StringBuilder("Received an Unhandled Exception ");
             b.append(t.getMessage());
-            l.info(b.toString());
+            l.error(b.toString());
             response = new JongoError(resource, Response.Status.INTERNAL_SERVER_ERROR);
         }
         return response;
