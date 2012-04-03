@@ -46,20 +46,23 @@ public class JDBCExecutor {
     private static final JongoConfiguration conf = JongoConfiguration.instanceOf();
     
     public static int delete(final QueryParams params) throws SQLException {
-        l.debug("Deleting from " + params.getTable());
+        l.debug("Deleting " + params.toString());
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(params.getDatabase());
         QueryRunner run = JDBCConnectionFactory.getQueryRunner(params.getDatabase());
         String query = dbconf.getDeleteQuery(params.getTable(), params.getIdField());
         l.debug(query);
         
         try {
-            return run.update(query, JongoUtils.parseValue(params.getId()));
+            int deleted = run.update(query, JongoUtils.parseValue(params.getId()));
+            l.debug("Deleted " + deleted + " records.");
+            return deleted;
         } catch (SQLException ex) {
             throw ex;
         }
     }
     
     public static int insert(final QueryParams queryParams) throws SQLException {
+        l.debug("Inserting in " + queryParams.toString());
         
         if(!queryParams.isValid())
             throw new IllegalArgumentException("Invalid QueryParams");
@@ -89,18 +92,20 @@ public class JDBCExecutor {
         l.debug(query);
         
         try {
-            return run.update(query, JongoUtils.parseValues(params));
+            int inserted = run.update(query, JongoUtils.parseValues(params));
+            l.debug("Inserted " + inserted + " records.");
+            return inserted;
         } catch (SQLException ex) {
+            l.debug(ex.getMessage());
             throw ex;
         }
     }
     
     public static List<Row> update(final QueryParams queryParams) throws SQLException {
+        l.debug("Inserting " + queryParams.toString());
         
         if(!queryParams.isValid())
             throw new IllegalArgumentException("Invalid QueryParams");
-        
-        l.debug("Updating table " + queryParams.getTable());
         
         List<String> params = new ArrayList<String>(queryParams.getParams().size());
         
@@ -112,7 +117,6 @@ public class JDBCExecutor {
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(queryParams.getDatabase());
         QueryRunner run = JDBCConnectionFactory.getQueryRunner(queryParams.getDatabase());
         String query = dbconf.getUpdateQuery(queryParams.getTable(), queryParams.getIdField(), queryParams.getParams());
-        l.debug(query + " params: " + JongoUtils.varargToString(params));
         
         List<Row> results = null;
         try {
@@ -121,12 +125,17 @@ public class JDBCExecutor {
                 results = get(queryParams);
             }
         } catch (SQLException ex) {
+            l.error(ex.getMessage());
             throw ex;
         }
+        
+        l.debug("Updated " + results.size() + " records.");
         return results;
     }
     
     public static List<Row> get(final QueryParams params) throws SQLException {
+        l.debug("Read " + params.toString());
+        
         List<Row> response = null;
         
         if(params.getOrder().getColumn() == null) params.getOrder().setColumn(params.getIdField());
@@ -142,6 +151,7 @@ public class JDBCExecutor {
             try {
                 response = run.query(query, res);
             } catch (SQLException ex) {
+                l.debug(ex.getMessage());
                 throw ex;
             }
         }else{
@@ -152,47 +162,55 @@ public class JDBCExecutor {
             try {
                 response =  run.query(query, res, JongoUtils.parseValue(params.getId()));
             } catch (SQLException ex) {
+                l.debug(ex.getMessage());
                 throw ex;
             }
         }
+        l.debug("Received " + response.size() + " results.");
         return response;
         
     }
     
     public static List<Row> findByColumn(final QueryParams queryParams, Object... params) throws SQLException {
+        l.debug(queryParams.toString());
+        l.debug(JongoUtils.varargToString(params));
+        
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(queryParams.getDatabase());
         String query = dbconf.getSelectAllFromTableQuery(queryParams.getTable(), queryParams.getIdField(), queryParams.getLimit(), queryParams.getOrder());
-        l.debug(query + " params: " + JongoUtils.varargToString(params));
         
         QueryRunner run = JDBCConnectionFactory.getQueryRunner(queryParams.getDatabase());
         ResultSetHandler<List<Row>> res = new JongoResultSetHandler(true);
         try {
             List<Row> results = run.query(query, res, params);
+            l.debug("Received " + results.size() + " results.");
             return results;
         } catch (SQLException ex) {
+            l.debug(ex.getMessage());
             throw ex;
         }
     }
     
     public static List<Row> find(final String database, final DynamicFinder df, final LimitParam limit, final OrderParam order, Object... params) throws SQLException{
-        l.debug(df.getSql() + " params: " + JongoUtils.varargToString(params));
+        l.debug(df.getSql());
+        l.debug(JongoUtils.varargToString(params));
         
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(database);
         String query = dbconf.wrapDynamicFinderQuery(df, limit, order);
-        l.debug(query + " params: " + JongoUtils.varargToString(params));
         
         QueryRunner run = JDBCConnectionFactory.getQueryRunner(database);
         ResultSetHandler<List<Row>> res = new JongoResultSetHandler(true);
         try {
             List<Row> results = run.query(query, res, params);
+            l.debug("Received " + results.size() + " results.");
             return results;
         } catch (SQLException ex) {
+            l.debug(ex.getMessage());
             throw ex;
         }
     }
     
     public static List<Row> getTableMetaData(final QueryParams params) throws SQLException {
-        l.debug("Obtaining metadata from table " + params.getTable());
+        l.debug("Obtaining metadata from table " + params.toString());
         
         ResultSetHandler<List<Row>> res = new ResultSetMetaDataHandler();
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(params.getDatabase());
@@ -200,33 +218,55 @@ public class JDBCExecutor {
         QueryRunner run = JDBCConnectionFactory.getQueryRunner(params.getDatabase());
         try {
             List<Row> results = run.query(query, res);
+            l.debug("Received " + results.size() + " results.");
             return results;
         } catch (SQLException ex) {
+            l.debug(ex.getMessage());
             throw ex;
         }
     }
     
-    public static List<Row> executeQuery(final String database, final String queryName, final List<StoredProcedureParam> params) throws SQLException {
+    public static List<Row> executeQuery(final String database, final String queryName, final List<StoredProcedureParam> params) throws SQLException{
         l.debug("Executing stored procedure " + database + "." + queryName);
+        
         QueryRunner run = JDBCConnectionFactory.getQueryRunner(database);
         final String call = JongoUtils.getCallableStatementCallString(queryName, params.size());
-        Connection conn = run.getDataSource().getConnection();
-        CallableStatement cs = conn.prepareCall(call);
-        final List<StoredProcedureParam> outParams = addParameters(cs, params);
         List<Row> rows = new ArrayList<Row>();
-        if(cs.execute()){
-            l.debug("Got a result set " + queryName);
-            ResultSet rs = cs.getResultSet();
-            JongoResultSetHandler handler = new JongoResultSetHandler(true);
-            rows = handler.handle(rs);
-        }else if(!outParams.isEmpty()){
-            l.debug("No result set, but we are expecting OUT values from " + queryName);
-            Map<String, String> results = new HashMap<String, String>();
-            for(StoredProcedureParam p : outParams){
-                results.put(p.getName(), cs.getString(p.getIndex())); // thank $deity we only return strings
+        
+        Connection conn = null;
+        CallableStatement cs = null;
+        try{
+            l.debug("Obtain connection from datasource");
+            conn = run.getDataSource().getConnection();
+            
+            l.debug("Create callable statement for " + call);
+            cs = conn.prepareCall(call);
+            
+            l.debug("Add parameters to callable statement");
+            final List<StoredProcedureParam> outParams = addParameters(cs, params);
+            
+            l.debug("Execute callable statement");
+            if(cs.execute()){
+                l.debug("Got a result set " + queryName);
+                ResultSet rs = cs.getResultSet();
+                JongoResultSetHandler handler = new JongoResultSetHandler(true);
+                rows = handler.handle(rs);
+            }else if(!outParams.isEmpty()){
+                l.debug("No result set, but we are expecting OUT values from " + queryName);
+                Map<String, String> results = new HashMap<String, String>();
+                for(StoredProcedureParam p : outParams){
+                    results.put(p.getName(), cs.getString(p.getIndex())); // thank $deity we only return strings
+                }
+                rows.add(new Row(0, results));
             }
-            rows.add(new Row(0, results));
+        }catch(SQLException ex){
+            l.debug(ex.getMessage());
+            throw ex;
+        }finally{
+            try{ if(cs != null   && !cs.isClosed())   cs.close();   } catch (SQLException ex){ l.debug(ex.getMessage()); }
+            try{ if(conn != null && !conn.isClosed()) conn.close(); } catch (SQLException ex){ l.debug(ex.getMessage()); }
         }
+        l.debug("Received " + rows.size() + " results.");
         return rows;
     }
     
@@ -251,6 +291,7 @@ public class JDBCExecutor {
         QueryRunner run = JDBCConnectionFactory.getQueryRunner(database);
         try {
             List<Row> results = run.query(query, res);
+            l.debug("Received " + results.size() + " results.");
             return results;
         } catch (SQLException ex) {
             throw ex;
@@ -263,9 +304,11 @@ public class JDBCExecutor {
         for(StoredProcedureParam p : params){
             final Integer sqlType = p.getType();
             if(p.isOutParameter()){
+                l.debug("Adding OUT parameter " + p.toString());
                 cs.registerOutParameter(i++, sqlType);
                 outParams.add(p);
             }else{
+                l.debug("Adding IN parameter " + p.toString());
                 switch(sqlType){
                     case Types.BIGINT:
                     case Types.INTEGER:
