@@ -122,15 +122,15 @@ public class UtilsTest {
     @Test(expected=IllegalArgumentException.class)
     public void testOrderParam(){
         MultivaluedMap<String, String> formParams = new MultivaluedMapImpl();
-        assertEquals(OrderParam.valueOf(formParams).toString(), "{OrderParam:{column:\"id\", direction:\"ASC\"}}");
+        assertEquals(OrderParam.valueOf(formParams).toString(), " id ASC ");
         formParams.add("dir", "KKK");
         OrderParam.valueOf(formParams).toString(); // throw Exception!
         formParams.add("dir", "DESC");
-        assertEquals(OrderParam.valueOf(formParams).toString(), "{OrderParam:{column:\"id\", direction:\"ASC\"}}");
+        assertEquals(OrderParam.valueOf(formParams).toString(), " id ASC ");
         formParams.add("sort", "kkk");
-        assertEquals(OrderParam.valueOf(formParams).toString(), "{OrderParam:{column:\"kkk\", direction:\"DESC\"}}");
+        assertEquals(OrderParam.valueOf(formParams).toString(), " kkk DESC ");
         formParams.remove("dir");
-        assertEquals(OrderParam.valueOf(formParams).toString(), "{OrderParam:{column:\"kkk\", direction:\"ASC\"}}");
+        assertEquals(OrderParam.valueOf(formParams).toString(), " kkk ASC ");
     }
     
     @Test
