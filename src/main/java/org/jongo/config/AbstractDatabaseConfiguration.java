@@ -19,9 +19,7 @@ package org.jongo.config;
 
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
-import org.jongo.config.impl.HSQLDBConfiguration;
-import org.jongo.config.impl.MySQLConfiguration;
-import org.jongo.config.impl.OracleConfiguration;
+import org.jongo.config.impl.*;
 import org.jongo.enums.JDBCDriver;
 import org.jongo.jdbc.DynamicFinder;
 import org.jongo.jdbc.LimitParam;
@@ -46,6 +44,8 @@ public abstract class AbstractDatabaseConfiguration {
     protected String password;
     protected String url;
 
+    private static boolean loaded = false;
+    
     public static DatabaseConfiguration instanceOf(String name, JDBCDriver driver, String user, String password, String url){
         DatabaseConfiguration c = null;
         
@@ -59,11 +59,29 @@ public abstract class AbstractDatabaseConfiguration {
             case ORACLE:
                 c = new OracleConfiguration(name, user, password, url);
                 break;
+            case PostgreSQL:
+                c = new PostgreSQLConfiguration(name, user, password, url);
+                break;
+            case MSSQL:
+                c = new MSSQLConfiguration(name, user, password, url);
+                break;
             default:
                 throw new IllegalArgumentException("Not implemented yet");
         }
         c.loadDriver();
         return c;
+    }
+    
+    public void loadDriver() {
+        if(!loaded){
+            l.debug("Loading Driver " + this.driver.getName());
+            try {
+                Class.forName(this.driver.getName());
+                loaded = true;
+            } catch (ClassNotFoundException ex) {
+                l.error("Unable to load driver. Add the JDBC Connector jar to the lib folder");
+            }
+        }
     }
     
     public String getSelectAllFromTableQuery(final String table, LimitParam limit, OrderParam order){
