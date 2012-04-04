@@ -100,11 +100,11 @@ public class OrderParam {
     
     @Override
     public String toString(){
-        StringBuilder b = new StringBuilder("{OrderParam:{column:\"");
+        StringBuilder b = new StringBuilder(" ");
         b.append(getColumn());
-        b.append("\", direction:\"");
+        b.append(" ");
         b.append(direction);
-        b.append("\"}}");
+        b.append(" ");
         return b.toString();
     }
 }
