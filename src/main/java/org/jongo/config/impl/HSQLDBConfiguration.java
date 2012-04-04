@@ -33,27 +33,12 @@ public class HSQLDBConfiguration extends AbstractDatabaseConfiguration implement
     
     private static final Logger l = LoggerFactory.getLogger(HSQLDBConfiguration.class);
     
-    private static boolean loaded = false;
-    
     public HSQLDBConfiguration(String name, String user, String password, String url){
         this.name = name;
         this.driver = JDBCDriver.HSQLDB;
         this.username = user;
         this.password = password;
         this.url = url;
-    }
-
-    @Override
-    public void loadDriver() {
-        if(!loaded){
-            l.debug("Loading HSQLDB Driver " + this.driver.getName());
-            try {
-                Class.forName(this.driver.getName());
-                loaded = true;
-            } catch (ClassNotFoundException ex) {
-                l.error("Unable to load driver. Add the HSQLDB Connector jar to the lib folder");
-            }
-        }
     }
     
     /**
