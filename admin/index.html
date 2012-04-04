@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Jongo Administration Console</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="js/jongo.js"></script>
+        <script type="text/javascript" src="js/jongo-table.js"></script>
+        <script type="text/javascript" src="js/jongo-query.js"></script>
+        <script type="text/javascript" src="js/jongo-stats.js"></script>
+        <link type="text/css" rel="stylesheet" href="css/Aristo.css"/>
+        <link type="text/css" rel="stylesheet" href="css/jongo.css"/>
+
+        <script>
+            $(document).ready(function(){
+                $( "#tabs" ).tabs();
+                $("#loading-bar-container").dialog({
+                    height: 100,
+                    width:500,
+                    modal: true,
+                    title: 'loading',
+                    autoOpen:true
+                });
+                $("#myProgressBar").progressbar({value:0});
+                var tables = getJongoTables();
+                $("#myProgressBar").progressbar({value:30});
+                var queries = getJongoQueries();
+                $("#myProgressBar").progressbar({value:60});
+                drawJongoTables('#jtables', tables);
+                drawJongoQueries('#jqueries', queries);
+                drawJongoStats('#jongo-stats');
+                $("#myProgressBar").progressbar({value:90});
+                $( '.jquery-button' ).button();
+                $("#myProgressBar").progressbar({value:100});
+                $("#loading-bar-container").dialog( "close" );
+            });
+        </script>
+
+    </head>
+    <body>
+        <div class="jongoTabs">
+            <div id="tabs">
+                <ul>
+                    <li><a href="#tabs-1">Jongo Tables</a></li>
+                    <li><a href="#tabs-2">Jongo Complex Queries</a></li>
+                    <li><a href="#tabs-3">Jongo Stats</a></li>
+                </ul>
+                <div id="tabs-1">
+                    <div class="tableContainer">
+                        <div id="jtables" class="jongo"></div>
+                    </div>
+                    <input type="submit" class="jquery-button" value="Add" onclick="addTableDialog('#add-table-dialog'); return false;"/>
+                </div>
+                <div id="tabs-2">
+                    <div id="jqueries" style="margin-bottom: 10px"></div>
+                    <input type="submit" class="jquery-button" value="Add" onclick="addQueryDialog('#add-table-dialog'); return false;"/>
+                </div>
+                <div id="tabs-3">
+                    <div id="jongo-stats"></div>
+                </div>
+            </div>
+        </div>
+        <div id="errorDialog">
+            <span id="errorDialogMessage"></span>
+        </div>
+        <div id="confirmDialog">
+            <span id="confirmDialogMessage"></span>
+        </div>
+        <div id="loading-bar-container">
+            <div id='myProgressBar'></div>
+        </div>
+        <div id="add-table-dialog">
+<!--            <form>
+                <p>
+                    <input class="jongo-field" id="tableName" value="" type="text"/>
+                    <label class="low-contrast-label" for="tableName">Name</label>
+                </p>
+                <p>
+                    <input class="jongo-field" id="tableCustomId" value="id" type="text"/>
+                    <label class="low-contrast-label" for="tableCustomId">Custom ID</label>
+                </p>
+                <span id="jongoPermissions">
+                    <input type="checkbox" id="read" name="radio" /><label for="read">Read</label>
+                    <input type="checkbox" id="write" name="radio" /><label for="write">Write</label>
+                </span>
+            </form>-->
+        </div>
+    </body>
+</html>

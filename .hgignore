@@ -1,0 +1,9 @@
+glob:target/*
+glob:apps/cidb/extjs/*
+glob:logs/*
+glob:nb*
+\.orig\..*$
+\.orig$
+\.chg\..*$
+\.rej$
+\.conflict\~$
