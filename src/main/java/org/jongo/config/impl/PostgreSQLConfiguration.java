@@ -31,27 +31,12 @@ public class PostgreSQLConfiguration extends AbstractDatabaseConfiguration imple
 
     private static final Logger l = LoggerFactory.getLogger(PostgreSQLConfiguration.class);
     
-    private static boolean loaded = false;
-    
     public PostgreSQLConfiguration(String name, String user, String password, String url){
         this.name = name;
         this.driver = JDBCDriver.PostgreSQL;
         this.username = user;
         this.password = password;
         this.url = url;
-    }
-    
-    @Override
-    public void loadDriver() {
-        if(!loaded){
-            l.debug("Loading PostgreSQL Driver " + this.driver.getName());
-            try {
-                Class.forName(this.driver.getName());
-                loaded = true;
-            } catch (ClassNotFoundException ex) {
-                l.error("Unable to load driver. Add the PostgreSQL Connector jar to the lib folder");
-            }
-        }
     }
 
     @Override

@@ -35,8 +35,6 @@ public class OracleConfiguration extends AbstractDatabaseConfiguration implement
     
     private static final Logger l = LoggerFactory.getLogger(OracleConfiguration.class);
     
-    private static boolean loaded = false;
-    
     public OracleConfiguration(String name, String user, String password, String url){
         this.name = name;
         this.driver = JDBCDriver.ORACLE;
@@ -45,19 +43,6 @@ public class OracleConfiguration extends AbstractDatabaseConfiguration implement
         this.url = url;
     }
     
-    @Override
-    public void loadDriver() {
-        if(!loaded){
-            l.debug("Loading Oracle Driver " + this.driver.getName());
-            try {
-                Class.forName(this.driver.getName());
-                loaded = true;
-            } catch (ClassNotFoundException ex) {
-                l.error("Unable to load driver. Add the Oracle JDBC Connector jar to the lib folder");
-            }
-        }
-    }
-
     @Override
     public String getFirstRowQuery(String table) {
         if(StringUtils.isBlank(table))

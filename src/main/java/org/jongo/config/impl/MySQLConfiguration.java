@@ -32,27 +32,12 @@ public class MySQLConfiguration extends AbstractDatabaseConfiguration implements
     
     private static final Logger l = LoggerFactory.getLogger(MySQLConfiguration.class);
     
-    private static boolean loaded = false;
-    
     public MySQLConfiguration(String name, String user, String password, String url){
         this.name = name;
         this.driver = JDBCDriver.MySQL;
         this.username = user;
         this.password = password;
         this.url = url;
-    }
-    
-    @Override
-    public void loadDriver() {
-        if(!loaded){
-            l.debug("Loading MySQL Driver " + this.driver.getName());
-            try {
-                Class.forName(this.driver.getName());
-                loaded = true;
-            } catch (ClassNotFoundException ex) {
-                l.error("Unable to load driver. Add the MySQL Connector jar to the lib folder");
-            }
-        }
     }
     
     /**
