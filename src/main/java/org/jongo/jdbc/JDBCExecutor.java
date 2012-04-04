@@ -102,7 +102,7 @@ public class JDBCExecutor {
     }
     
     public static List<Row> update(final QueryParams queryParams) throws SQLException {
-        l.debug("Inserting " + queryParams.toString());
+        l.debug("Updating " + queryParams.toString());
         
         if(!queryParams.isValid())
             throw new IllegalArgumentException("Invalid QueryParams");
@@ -118,7 +118,7 @@ public class JDBCExecutor {
         QueryRunner run = JDBCConnectionFactory.getQueryRunner(queryParams.getDatabase());
         String query = dbconf.getUpdateQuery(queryParams.getTable(), queryParams.getIdField(), queryParams.getParams());
         
-        List<Row> results = null;
+        List<Row> results = new ArrayList<Row>();
         try {
             int ret = run.update(query, JongoUtils.parseValues(params));
             if(ret != 0){
