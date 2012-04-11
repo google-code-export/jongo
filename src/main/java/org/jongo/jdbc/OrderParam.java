@@ -20,6 +20,7 @@ package org.jongo.jdbc;
 
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang.StringUtils;
+import org.jongo.sql.Table;
 
 /**
  *
@@ -34,6 +35,11 @@ public class OrderParam {
     
     public OrderParam(){
         this.column = "id";
+        this.direction = ASC;
+    }
+    
+    public OrderParam(final Table table){
+        this.column = table.getName() + "." + table.getPrimaryKey();
         this.direction = ASC;
     }
     
@@ -100,11 +106,9 @@ public class OrderParam {
     
     @Override
     public String toString(){
-        StringBuilder b = new StringBuilder(" ");
-        b.append(getColumn());
+        StringBuilder b = new StringBuilder(getColumn());
         b.append(" ");
         b.append(direction);
-        b.append(" ");
         return b.toString();
     }
 }
