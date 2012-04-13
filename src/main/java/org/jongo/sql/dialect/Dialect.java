@@ -15,34 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with Jongo.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jongo;
+package org.jongo.sql.dialect;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.jongo.jdbc.DynamicFinder;
+import org.jongo.jdbc.LimitParam;
+import org.jongo.jdbc.OrderParam;
+import org.jongo.sql.Delete;
+import org.jongo.sql.Insert;
+import org.jongo.sql.Select;
+import org.jongo.sql.Update;
 
 /**
- *
+ * 
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    org.jongo.UtilsTest.class, 
-    org.jongo.RestControllerTest.class, 
-    org.jongo.JDBCExecutorTest.class, 
-    org.jongo.XmlXstreamTest.class, 
-    org.jongo.DynamicFinderTest.class,
-    org.jongo.jdbc.OrderParamTest.class
-})
-public class JongoOfflineTestSuite {
-
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
+public interface Dialect {
     
+    public String toStatementString(final Insert insert); // C
+    
+    public String toStatementString(final Select select); // R
+    
+    public String toStatementString(final Update update); // U
+    
+    public String toStatementString(final Delete delete); // D
+    
+    public String toStatementString(final DynamicFinder finder, final LimitParam limit, final OrderParam order);
+    
+    public String listOfTablesStatement();
 }

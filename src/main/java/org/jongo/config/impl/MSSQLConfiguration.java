@@ -18,28 +18,13 @@
 package org.jongo.config.impl;
 
 import org.apache.commons.lang.StringUtils;
-import org.jongo.config.AbstractDatabaseConfiguration;
-import org.jongo.config.DatabaseConfiguration;
-import org.jongo.enums.JDBCDriver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * MSSQL DatabaseConfiguration implementation. Needs to be implemented. Volunteers?
  */
-public class MSSQLConfiguration  extends AbstractDatabaseConfiguration implements DatabaseConfiguration  {
-
-    private static final Logger l = LoggerFactory.getLogger(MSSQLConfiguration.class);
+@Deprecated
+public class MSSQLConfiguration {
     
-    public MSSQLConfiguration(String name, String user, String password, String url){
-        this.name = name;
-        this.driver = JDBCDriver.MSSQL;
-        this.username = user;
-        this.password = password;
-        this.url = url;
-    }
-    
-    @Override
     public String getListOfTablesQuery() {
         return "select * from information_schema.tables where Table_Type = 'BASE TABLE'";
     }
@@ -49,7 +34,6 @@ public class MSSQLConfiguration  extends AbstractDatabaseConfiguration implement
      * @param table
      * @return a MSSQL query that when executed should only return the first row of a table.
      */
-    @Override
     public String getFirstRowQuery(final String table) {
         if(StringUtils.isBlank(table))
             throw new IllegalArgumentException("Table name can't be blank, empty or null");
