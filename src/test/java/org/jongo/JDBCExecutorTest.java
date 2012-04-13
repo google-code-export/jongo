@@ -27,11 +27,10 @@ import org.jongo.demo.Demo;
 import org.jongo.exceptions.JongoBadRequestException;
 import org.jongo.exceptions.StartupException;
 import org.jongo.jdbc.JDBCExecutor;
-import org.jongo.jdbc.QueryParams;
 import org.jongo.jdbc.StoredProcedureParam;
-import org.jongo.mocks.DummyQueryParamsFactory;
 import org.jongo.mocks.UserMock;
 import org.jongo.rest.xstream.Row;
+import org.jongo.sql.*;
 import org.junit.AfterClass;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
@@ -59,159 +58,130 @@ public class JDBCExecutorTest {
     
     @Test
     public void testGet() throws SQLException{
-        QueryParams q = DummyQueryParamsFactory.getUser();
-        q.setId("0");
-        List<Row> rs = JDBCExecutor.get(q);
-        Row r = rs.get(0);
-        assertEquals("30", r.getCells().get("AGE"));
-        q.setId("1");
-        rs = JDBCExecutor.get(q);
-        r = rs.get(0);
-        assertEquals("33", r.getCells().get("AGE"));
-        q.setId("");
-        rs = JDBCExecutor.get(q);
+        Table t = new Table("demo1", "user");
+        
+        // select * from user
+        List<Row> rs = JDBCExecutor.get(new Select(t), true);
         assertEquals(2, rs.size());
+        
+        // select * from car
+        rs = JDBCExecutor.get(new Select(new Table("demo1", "car", "cid")), true);
+        assertEquals(3, rs.size());
+        
+        // select * from car where cid = 0
+        rs = JDBCExecutor.get(new Select(new Table("demo1", "car", "cid")).setValue("0"), false);
+        assertEquals(1, rs.size());
+        
+        // select * from user where id = 0
+        rs = JDBCExecutor.get(new Select(t).setValue("0"), false);
+        assertEquals(1, rs.size());
+        
+        // select * from user where name = bar
+        rs = JDBCExecutor.get(new Select(t).setValue("bar").setColumn("name"), true);
+        assertEquals(1, rs.size());
+        
+        // select birthday from user where name = bar
+        rs = JDBCExecutor.get(new Select(t).setValue("bar").setColumn("name").addColumn("birthday"), true);
+        assertEquals(1, rs.size());
+        assertFalse(rs.get(0).getCells().containsKey("credit"));
+        assertTrue(rs.get(0).getCells().containsKey("birthday"));
+        
+        // select birthday from user where id = 1
+        rs = JDBCExecutor.get(new Select(t).setValue("0").addColumn("birthday"), true);
+        assertEquals(1, rs.size());
+        assertFalse(rs.get(0).getCells().containsKey("credit"));
+        assertTrue(rs.get(0).getCells().containsKey("birthday"));
+        
+        // select birthday from user
+        rs = JDBCExecutor.get(new Select(t).addColumn("birthday"), true);
+        assertEquals(2, rs.size());
+        assertFalse(rs.get(0).getCells().containsKey("credit"));
+        assertTrue(rs.get(0).getCells().containsKey("birthday"));
     }
     
     @Test
     public void testAll() throws SQLException{
-        QueryParams q = DummyQueryParamsFactory.getUser();
+        Table t = new Table("demo1", "user");
         List<UserMock> users = getTestValues();
         List<UserMock> createdusers = new ArrayList<UserMock>();
-        
         for(UserMock u : users){
-            q.setParams(u.toMap());
-            int r = JDBCExecutor.insert(q);
+            Insert i = new Insert(t).setColumns(u.toMap());
+            int r = JDBCExecutor.insert(i);
             assertEquals(1, r);
             createdusers.add(u);
-            q = DummyQueryParamsFactory.getUser();
-            q.setIdField("name");
-            List<Row> rs = JDBCExecutor.findByColumn(q, u.name);
+            
+            Select s = new Select(t);
+            s.setColumn("name").setValue(u.name);
+            
+            List<Row> rs = JDBCExecutor.get(s, true);
             Row row = rs.get(0);
-            assertEquals(String.valueOf(u.age), row.getCells().get("AGE"));
-            q = DummyQueryParamsFactory.getUser();
-            q.setId(row.getCells().get("ID"));
-            q.setParam("age", "99");
-            q.setParam("credit", "1.99");
-            rs = JDBCExecutor.update(q);
+            assertEquals(String.valueOf(u.age), row.getCells().get("age"));
+            
+            Update up = new Update(t);
+            up.addColumn("name", "foo1").setId(row.getCells().get("id"));
+            
+            rs = JDBCExecutor.update(up);
             row = rs.get(0);
-            assertEquals("99", row.getCells().get("AGE"));
-            assertEquals(u.name, row.getCells().get("NAME"));
-            q = DummyQueryParamsFactory.getUser();
-            q.setId(row.getCells().get("ID"));
-            r = JDBCExecutor.delete(q);
+            assertEquals(String.valueOf(u.age), row.getCells().get("age"));
+            
+            Delete d = new Delete(t).setId(row.getCells().get("id"));
+            r = JDBCExecutor.delete(d);
             assertEquals(1, r);
         }
-        
     }
     
     @Test
     public void testInsert() throws SQLException{
-        //test for empty QueryParams
-        QueryParams q = new QueryParams();
-        try{
-            JDBCExecutor.insert(q);
-        }catch (IllegalArgumentException e){
-            assertNotNull(e.getMessage());
-        }
+        Table t = new Table("demo1", "user");
+        try { JDBCExecutor.insert(new Insert(t)); }catch(IllegalArgumentException e){ assertNotNull(e); }
         
-        //test for empty parameters
-        q = DummyQueryParamsFactory.getUser();
-        try{
-            JDBCExecutor.insert(q);
-        }catch (IllegalArgumentException e){
-            assertNotNull(e.getMessage());
-        }
         Map<String, String> params = UserMock.getRandomInstance().toMap();
-        q.setParams(params);
-        int r = JDBCExecutor.insert(q);
-        assertEquals(1, r); //only one registry added for success
+        assertEquals(1, JDBCExecutor.insert(new Insert(t).setColumns(params)));
         
         //test if one of the params is null
-        params = UserMock.getRandomInstance().toMap();
         params.put("age", null);
-        q.setParams(params);
-        r = JDBCExecutor.insert(q);
-        assertEquals(1, r);
+        assertEquals(1, JDBCExecutor.insert(new Insert(t).setColumns(params)));
         
         //test if one of the params is empty
-        params = UserMock.getRandomInstance().toMap();
-        params.put("birthday", "");
-        q.setParams(params);
-        try{
-            JDBCExecutor.insert(q);
-        }catch (SQLException e){
-            assertNotNull(e.getMessage());
-        }
+        params.put("age", "30");
+        params.put("name", "");
+        assertEquals(1, JDBCExecutor.insert(new Insert(t).setColumns(params)));
         
         //test with a readonly table
-        q = DummyQueryParamsFactory.getMakerTable();
-        q.setParam("name", "RO");
-        q.setParam("realname", "Read Only");
-        try{
-            JDBCExecutor.insert(q);
-        }catch (SQLException e){
-            assertNotNull(e.getMessage());
-        }
+        try { JDBCExecutor.insert(new Insert(new Table("demo1", "maker")).addColumn("name", "RO")); }catch(SQLException e){ assertNotNull(e); }
     }
     
     @Test
     public void testUpdate() throws SQLException{
-        QueryParams q = DummyQueryParamsFactory.getUser();
-        q.setId("0");
-        List<Row> rs = JDBCExecutor.get(q);
-        Row row = rs.get(0);
-        assertEquals("foo", row.getCells().get("NAME"));
-        q.setParam("name", "fooer");
-        rs = JDBCExecutor.update(q);
+        Table t = new Table("demo1", "user");
+        Select s = new Select(t).setValue("0");
+        Row row = JDBCExecutor.get(s, false).get(0);
+        assertEquals("0", row.getCells().get("id"));
+        
+        List<Row> rs = JDBCExecutor.update(new Update(t).setId("0").addColumn("age", "60"));
         row = rs.get(0);
-        assertEquals("fooer", row.getCells().get("NAME"));
+        assertEquals("0", row.getCells().get("id"));
+        assertEquals("foo", row.getCells().get("name"));
+        assertEquals("60", row.getCells().get("age"));
         
-        //test for empty QueryParams
-        q = new QueryParams();
-        try{
-            JDBCExecutor.update(q);
-        }catch (IllegalArgumentException e){
-            assertNotNull(e.getMessage());
-        }
-        
-        //test for empty parameters
-        q = DummyQueryParamsFactory.getUser();
-        try{
-            JDBCExecutor.update(q);
-        }catch (IllegalArgumentException e){
-            assertNotNull(e.getMessage());
-        }
-        
-        //test for null value
-        q = DummyQueryParamsFactory.getUser();
-        q.setId("0");
-        q.setParam("age", null);
-        rs = JDBCExecutor.update(q);
+        rs = JDBCExecutor.update(new Update(t).setId("0").addColumn("age", "70").addColumn("name", "foooer"));
         row = rs.get(0);
-        assertEquals("fooer", row.getCells().get("NAME"));
-        assertEquals(null, row.getCells().get("AGE"));
+        assertEquals("0", row.getCells().get("id"));
+        assertEquals("foooer", row.getCells().get("name"));
+        assertEquals("70", row.getCells().get("age"));
         
         //test for empty value
-        q.setId("0");
-        q.setParam("age", "35");
-        q.setParam("name", "");
-        rs = JDBCExecutor.update(q);
+        rs = JDBCExecutor.update(new Update(t).setId("0").addColumn("name", ""));
         row = rs.get(0);
-        assertEquals("", row.getCells().get("NAME"));
-        assertEquals("35", row.getCells().get("AGE"));
+        assertEquals("0", row.getCells().get("id"));
+        assertEquals("", row.getCells().get("name"));
         
-        //test with a readonly table
-        q = DummyQueryParamsFactory.getMakerTable();
-        q.setId("0");
-        q.setParam("name", "RO");
-        q.setParam("realname", "Read Only");
-        try{
-            JDBCExecutor.update(q);
-        }catch (SQLException e){
-            assertNotNull(e.getMessage());
-        }
-        
+        //test for null value
+        rs = JDBCExecutor.update(new Update(t).setId("0").addColumn("age", null));
+        row = rs.get(0);
+        assertEquals("0", row.getCells().get("id"));
+        assertEquals(null, row.getCells().get("age"));
+        assertTrue(row.getCells().containsKey("age"));
     }
     
     public List<UserMock> getTestValues(){
@@ -232,8 +202,8 @@ public class JDBCExecutorTest {
     @Test
     public void testSimpleStoredProcedure() throws JongoBadRequestException, SQLException{
         List<StoredProcedureParam> params = new ArrayList<StoredProcedureParam>();
-        QueryParams q = QueryParams.valueOf("demo1", "comments");
-        List<Row> rs = JDBCExecutor.get(q);
+        Select s = new Select(new Table("demo1", "comments"));
+        List<Row> rs = JDBCExecutor.get(s, true);
         assertEquals(3, rs.size());
         
         params.add(new StoredProcedureParam("car_id", "1", false, 1, "INTEGER"));
@@ -241,18 +211,30 @@ public class JDBCExecutorTest {
         List<Row> rows = JDBCExecutor.executeQuery("demo1", "insert_comment", params);
         assertEquals(0, rows.size());
         
-        rs = JDBCExecutor.get(q);
+        rs = JDBCExecutor.get(s, true);
         assertEquals(4, rs.size());
     }
     
     @Test
     public void testComplexStoredProcedure() throws JongoBadRequestException, SQLException{
-        List<StoredProcedureParam> params = new ArrayList<StoredProcedureParam>();
+        List<StoredProcedureParam> params;
         params = new ArrayList<StoredProcedureParam>();
         params.add(new StoredProcedureParam("in_year", "2010", false, 1, "INTEGER"));
         params.add(new StoredProcedureParam("out_total", "", true, 2, "INTEGER"));
         List<Row> rows = JDBCExecutor.executeQuery("demo1", "get_year_sales", params);
         assertEquals(1, rows.size());
         assertEquals("12", rows.get(0).getCells().get("out_total"));
+    }
+    
+    @Test
+    public void testGetMetaData() throws JongoBadRequestException, SQLException{
+        Table t = new Table("demo1", "user");
+        Select s = new Select(t);
+        List<Row> rs = JDBCExecutor.getTableMetaData(s);
+        assertEquals(6, rs.size());
+        
+        rs = JDBCExecutor.getListOfTables("demo1");
+        assertEquals(8, rs.size());
+        
     }
 }
