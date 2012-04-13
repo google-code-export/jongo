@@ -27,6 +27,7 @@ import org.apache.commons.lang.StringUtils;
  * Holder for a query parameters.
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
+@Deprecated
 public class QueryParams {
     
     private String database;
