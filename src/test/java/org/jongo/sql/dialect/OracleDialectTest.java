@@ -1,0 +1,97 @@
+/**
+ * Copyright (C) 2011, 2012 Alejandro Ayuso
+ *
+ * This file is part of Jongo.
+ * Jongo is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ * 
+ * Jongo is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Jongo.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.jongo.sql.dialect;
+
+import junit.framework.Assert;
+import org.jongo.JongoUtils;
+import org.jongo.config.JongoConfiguration;
+import org.jongo.demo.Demo;
+import org.jongo.exceptions.StartupException;
+import org.jongo.jdbc.DynamicFinder;
+import org.jongo.jdbc.LimitParam;
+import org.jongo.jdbc.OrderParam;
+import org.jongo.sql.*;
+import org.junit.AfterClass;
+import org.junit.Test;
+import org.junit.BeforeClass;
+
+/**
+ *
+ * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ */
+public class OracleDialectTest {
+    
+    OracleDialect d = new OracleDialect();
+    Table table = new Table("demo1", "a_table", "tableId");
+    
+    OrderParam o = new OrderParam(table);
+    LimitParam l = new LimitParam();
+    
+    public OracleDialectTest() {
+    }
+
+    @BeforeClass
+    public static void setUp() throws StartupException{
+        System.setProperty("environment", "demo");
+        JongoConfiguration configuration = JongoUtils.loadConfiguration();
+        Demo.generateDemoDatabases(configuration.getDatabases());
+    }
+    
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+        System.setProperty("environment", "demo");
+        JongoConfiguration configuration = JongoUtils.loadConfiguration();
+        Demo.destroyDemoDatabases(configuration.getDatabases());
+    }
+
+    @Test
+    public void testSelect() {
+        doTest("SELECT a_table.* FROM demo1.a_table", new Select(table));
+        
+        doTest("SELECT a_table.* FROM demo1.a_table WHERE a_table.tableId=?", new Select(table).setValue("1"));
+        
+        doTest("SELECT a_table.* FROM demo1.a_table WHERE a_table.name=?", new Select(table).setValue("1").setColumn("name"));
+        
+        doTest("SELECT a_table.* FROM demo1.a_table WHERE a_table.tableId=? ORDER BY a_table.tableId ASC", new Select(table).setValue("1").setOrderParam(new OrderParam(table)));
+        
+        doTest("SELECT * FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY a_table.tableId ) AS ROW_NUMBER, a_table.* FROM demo1.a_table WHERE a_table.name=?) WHERE ROW_NUMBER BETWEEN 0 AND 25",
+                new Select(table).setValue("1").setColumn("name").setLimitParam(new LimitParam()));
+        
+        doTest("SELECT * FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY a_table.name DESC ) AS ROW_NUMBER, a_table.* FROM demo1.a_table WHERE a_table.tableId=?) WHERE ROW_NUMBER BETWEEN 0 AND 25",
+                new Select(table).setValue("1").setLimitParam(l).setOrderParam(new OrderParam("name", "DESC")));
+    }
+    
+    @Test
+    public void testDynamicFinders(){
+        System.out.println(d.toStatementString(new DynamicFinder("test", "findAllBy", "Name"), l,o));
+        Assert.assertEquals("SELECT * FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY test.tableId ASC ) AS ROW_NUMBER, test.* FROM test WHERE  name = ? ) WHERE ROW_NUMBER BETWEEN 0 AND 25",
+                d.toStatementString(new DynamicFinder("test", "findAllBy", "Name"), l,o));
+    }
+    
+    public void doTest(String expected, Object obj){
+        if(obj instanceof Select){
+            Assert.assertEquals(expected, d.toStatementString((Select)obj));
+        }else if(obj instanceof Delete){
+            Assert.assertEquals(expected, d.toStatementString((Delete)obj));
+        }else if(obj instanceof Insert){
+            Assert.assertEquals(expected, d.toStatementString((Insert)obj));
+        }else if(obj instanceof Update){
+            Assert.assertEquals(expected, d.toStatementString((Update)obj));
+        }
+    }
+}

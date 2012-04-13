@@ -89,7 +89,7 @@ public class JongoResultSetHandler implements ResultSetHandler<List<Row>> {
 
             ResultSetMetaData meta = resultSet.getMetaData();
             for(int i = 1; i < columnCount + 1; i++){
-                String colName = meta.getColumnName(i).toUpperCase();
+                String colName = meta.getColumnName(i).toLowerCase();
                 int colType = meta.getColumnType(i);
                 String v = resultSet.getString(i);
                 if(colType == Types.DATE){

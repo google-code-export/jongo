@@ -28,7 +28,6 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.jongo.config.AbstractDatabaseConfiguration;
 import org.jongo.config.DatabaseConfiguration;
 import org.jongo.enums.JDBCDriver;
 import org.jongo.jdbc.JDBCConnectionFactory;
@@ -226,7 +225,7 @@ public class Demo {
     
     public static Map<String, DatabaseConfiguration> getDemoDatabasesConfiguration(){
         Map<String, DatabaseConfiguration> demos = new HashMap<String, DatabaseConfiguration>();
-        demos.put("demo1", AbstractDatabaseConfiguration.instanceOf("demo1", JDBCDriver.HSQLDB, "demo", "demo", "jdbc:hsqldb:mem:demo1"));
+        demos.put("demo1", DatabaseConfiguration.instanceOf("demo1", JDBCDriver.HSQLDB, "demo", "demo", "jdbc:hsqldb:mem:demo1"));
 //        demos.put("demo2", AbstractDatabaseConfiguration.instanceOf("demo2", JDBCDriver.HSQLDB, "demo", "demo", "jdbc:hsqldb:mem:demo2"));
         return demos;
     }

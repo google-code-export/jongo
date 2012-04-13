@@ -26,13 +26,18 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.commons.lang.StringUtils;
 import org.jongo.JongoUtils;
 import org.jongo.config.DatabaseConfiguration;
 import org.jongo.config.JongoConfiguration;
 import org.jongo.handler.JongoResultSetHandler;
 import org.jongo.handler.ResultSetMetaDataHandler;
 import org.jongo.rest.xstream.Row;
+import org.jongo.sql.Delete;
+import org.jongo.sql.Insert;
+import org.jongo.sql.Select;
+import org.jongo.sql.Update;
+import org.jongo.sql.dialect.Dialect;
+import org.jongo.sql.dialect.DialectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,15 +50,14 @@ public class JDBCExecutor {
     private static final Logger l = LoggerFactory.getLogger(JDBCExecutor.class);
     private static final JongoConfiguration conf = JongoConfiguration.instanceOf();
     
-    public static int delete(final QueryParams params) throws SQLException {
-        l.debug("Deleting " + params.toString());
-        DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(params.getDatabase());
-        QueryRunner run = JDBCConnectionFactory.getQueryRunner(params.getDatabase());
-        String query = dbconf.getDeleteQuery(params.getTable(), params.getIdField());
-        l.debug(query);
+    public static int delete(final Delete delete) throws SQLException {
+        l.debug(delete.toString());
+        DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(delete.getTable().getDatabase());
+        QueryRunner run = JDBCConnectionFactory.getQueryRunner(delete.getTable().getDatabase());
+        Dialect dialect = DialectFactory.getDialect(dbconf.getDriver());
         
         try {
-            int deleted = run.update(query, JongoUtils.parseValue(params.getId()));
+            int deleted = run.update(dialect.toStatementString(delete), JongoUtils.parseValue(delete.getId()));
             l.debug("Deleted " + deleted + " records.");
             return deleted;
         } catch (SQLException ex) {
@@ -61,38 +65,20 @@ public class JDBCExecutor {
         }
     }
     
-    public static int insert(final QueryParams queryParams) throws SQLException {
-        l.debug("Inserting in " + queryParams.toString());
+    public static int insert(final Insert insert) throws SQLException {
+        l.debug(insert.toString());
         
-        if(!queryParams.isValid())
-            throw new IllegalArgumentException("Invalid QueryParams");
-        
-        List<String> params = new ArrayList<String>(queryParams.getParams().size());
-        String idToBeRemoved = null;
-        for(String k : queryParams.getParams().keySet()){
-            if(k.equalsIgnoreCase(queryParams.getIdField())){
-                if(!StringUtils.isBlank(queryParams.getParams().get(k))){
-                    params.add(queryParams.getParams().get(k));
-                }else{
-                    l.info("For some reason I'm receiving an empty " + k + ". I'm removing it from the params. Are you using ExtJS?");
-                    idToBeRemoved = k;
-                }
-            }else{
-                params.add(queryParams.getParams().get(k));
-            }
-        }
-        
-        if(idToBeRemoved != null){
-            queryParams.getParams().remove(idToBeRemoved);
-        }
-        
-        DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(queryParams.getDatabase());
-        QueryRunner run = JDBCConnectionFactory.getQueryRunner(queryParams.getDatabase());
-        String query = dbconf.getInsertQuery(queryParams.getTable(), queryParams.getParams());
-        l.debug(query);
+        DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(insert.getTable().getDatabase());
+        QueryRunner run = JDBCConnectionFactory.getQueryRunner(insert.getTable().getDatabase());
+        Dialect dialect = DialectFactory.getDialect(dbconf.getDriver());
         
         try {
-            int inserted = run.update(query, JongoUtils.parseValues(params));
+            int inserted;
+            if(insert.getColumns().isEmpty())
+                inserted = run.update(dialect.toStatementString(insert));
+            else
+                inserted = run.update(dialect.toStatementString(insert), JongoUtils.parseValues(insert.getValues()));
+            
             l.debug("Inserted " + inserted + " records.");
             return inserted;
         } catch (SQLException ex) {
@@ -101,93 +87,54 @@ public class JDBCExecutor {
         }
     }
     
-    public static List<Row> update(final QueryParams queryParams) throws SQLException {
-        l.debug("Updating " + queryParams.toString());
+    public static List<Row> update(final Update update) throws SQLException {
+        l.debug(update.toString());
         
-        if(!queryParams.isValid())
-            throw new IllegalArgumentException("Invalid QueryParams");
-        
-        List<String> params = new ArrayList<String>(queryParams.getParams().size());
-        
-        for(String k : queryParams.getParams().keySet()){
-            params.add(queryParams.getParams().get(k));
-        }
-        params.add(queryParams.getId());
-        
-        DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(queryParams.getDatabase());
-        QueryRunner run = JDBCConnectionFactory.getQueryRunner(queryParams.getDatabase());
-        String query = dbconf.getUpdateQuery(queryParams.getTable(), queryParams.getIdField(), queryParams.getParams());
+        DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(update.getTable().getDatabase());
+        QueryRunner run = JDBCConnectionFactory.getQueryRunner(update.getTable().getDatabase());
+        Dialect dialect = DialectFactory.getDialect(dbconf.getDriver());
         
         List<Row> results = new ArrayList<Row>();
         try {
-            int ret = run.update(query, JongoUtils.parseValues(params));
+            int ret = run.update(dialect.toStatementString(update), JongoUtils.parseValues(update.getParameters()));
             if(ret != 0){
-                results = get(queryParams);
+                results = get(update.getSelect(), false);
             }
         } catch (SQLException ex) {
             l.error(ex.getMessage());
             throw ex;
         }
-        
         l.debug("Updated " + results.size() + " records.");
         return results;
     }
     
-    public static List<Row> get(final QueryParams params) throws SQLException {
-        l.debug("Read " + params.toString());
-        
+    public static List<Row> get(final Select select, final boolean allRecords) throws SQLException {
+        l.debug(select.toString());
         List<Row> response = null;
         
-        if(params.getOrder().getColumn() == null) params.getOrder().setColumn(params.getIdField());
+        QueryRunner run = JDBCConnectionFactory.getQueryRunner(select.getTable().getDatabase());
+        DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(select.getTable().getDatabase());
+        Dialect dialect = DialectFactory.getDialect(dbconf.getDriver());
         
-        DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(params.getDatabase());
-        QueryRunner run = JDBCConnectionFactory.getQueryRunner(params.getDatabase());
+        ResultSetHandler<List<Row>> res = new JongoResultSetHandler(allRecords);
         
-        if(StringUtils.isBlank(params.getId())){
-            String query = dbconf.getSelectAllFromTableQuery(params.getTable(), params.getLimit(), params.getOrder());
-            l.debug(query);
-        
-            ResultSetHandler<List<Row>> res = new JongoResultSetHandler(true);
+        if(select.isAllRecords()){
             try {
-                response = run.query(query, res);
+                response = run.query(dialect.toStatementString(select), res);
             } catch (SQLException ex) {
                 l.debug(ex.getMessage());
                 throw ex;
             }
         }else{
-            String query = dbconf.getSelectAllFromTableQuery(params.getTable(), params.getIdField(), params.getLimit(), params.getOrder());
-            l.debug(query + " params: " + params.toString());
-        
-            ResultSetHandler<List<Row>> res = new JongoResultSetHandler(false);
             try {
-                response =  run.query(query, res, JongoUtils.parseValue(params.getId()));
+                response = run.query(dialect.toStatementString(select), res, JongoUtils.parseValue(select.getValue()));
             } catch (SQLException ex) {
                 l.debug(ex.getMessage());
                 throw ex;
             }
         }
-        l.debug("Received " + response.size() + " results.");
+        
         return response;
-        
-    }
-    
-    public static List<Row> findByColumn(final QueryParams queryParams, Object... params) throws SQLException {
-        l.debug(queryParams.toString());
-        l.debug(JongoUtils.varargToString(params));
-        
-        DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(queryParams.getDatabase());
-        String query = dbconf.getSelectAllFromTableQuery(queryParams.getTable(), queryParams.getIdField(), queryParams.getLimit(), queryParams.getOrder());
-        
-        QueryRunner run = JDBCConnectionFactory.getQueryRunner(queryParams.getDatabase());
-        ResultSetHandler<List<Row>> res = new JongoResultSetHandler(true);
-        try {
-            List<Row> results = run.query(query, res, params);
-            l.debug("Received " + results.size() + " results.");
-            return results;
-        } catch (SQLException ex) {
-            l.debug(ex.getMessage());
-            throw ex;
-        }
     }
     
     public static List<Row> find(final String database, final DynamicFinder df, final LimitParam limit, final OrderParam order, Object... params) throws SQLException{
@@ -195,7 +142,8 @@ public class JDBCExecutor {
         l.debug(JongoUtils.varargToString(params));
         
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(database);
-        String query = dbconf.wrapDynamicFinderQuery(df, limit, order);
+        Dialect dialect = DialectFactory.getDialect(dbconf.getDriver());
+        String query = dialect.toStatementString(df, limit, order);
         
         QueryRunner run = JDBCConnectionFactory.getQueryRunner(database);
         ResultSetHandler<List<Row>> res = new JongoResultSetHandler(true);
@@ -209,15 +157,17 @@ public class JDBCExecutor {
         }
     }
     
-    public static List<Row> getTableMetaData(final QueryParams params) throws SQLException {
-        l.debug("Obtaining metadata from table " + params.toString());
+    public static List<Row> getTableMetaData(final Select select) throws SQLException {
+        l.debug("Obtaining metadata from table " + select.toString());
         
         ResultSetHandler<List<Row>> res = new ResultSetMetaDataHandler();
-        DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(params.getDatabase());
-        String query = dbconf.getFirstRowQuery(params.getTable());
-        QueryRunner run = JDBCConnectionFactory.getQueryRunner(params.getDatabase());
+        
+        DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(select.getTable().getDatabase());
+        QueryRunner run = JDBCConnectionFactory.getQueryRunner(select.getTable().getDatabase());
+        Dialect dialect = DialectFactory.getDialect(dbconf.getDriver());
+        
         try {
-            List<Row> results = run.query(query, res);
+            List<Row> results = run.query(dialect.toStatementString(select), res);
             l.debug("Received " + results.size() + " results.");
             return results;
         } catch (SQLException ex) {
@@ -287,10 +237,11 @@ public class JDBCExecutor {
 //        }
         ResultSetHandler<List<Row>> res = new JongoResultSetHandler(true);
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(database);
-        String query = dbconf.getListOfTablesQuery();
+        Dialect dialect = DialectFactory.getDialect(dbconf.getDriver());
         QueryRunner run = JDBCConnectionFactory.getQueryRunner(database);
+        
         try {
-            List<Row> results = run.query(query, res);
+            List<Row> results = run.query(dialect.listOfTablesStatement(), res);
             l.debug("Received " + results.size() + " results.");
             return results;
         } catch (SQLException ex) {

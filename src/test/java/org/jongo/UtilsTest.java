@@ -25,7 +25,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.jongo.config.AbstractDatabaseConfiguration;
+import org.jongo.config.DatabaseConfiguration;
 import org.jongo.config.DatabaseConfiguration;
 import org.jongo.config.JongoConfiguration;
 import org.jongo.enums.JDBCDriver;
@@ -122,15 +122,15 @@ public class UtilsTest {
     @Test(expected=IllegalArgumentException.class)
     public void testOrderParam(){
         MultivaluedMap<String, String> formParams = new MultivaluedMapImpl();
-        assertEquals(OrderParam.valueOf(formParams).toString(), " id ASC ");
+        assertEquals(OrderParam.valueOf(formParams).toString(), "id ASC");
         formParams.add("dir", "KKK");
         OrderParam.valueOf(formParams).toString(); // throw Exception!
         formParams.add("dir", "DESC");
-        assertEquals(OrderParam.valueOf(formParams).toString(), " id ASC ");
+        assertEquals(OrderParam.valueOf(formParams).toString(), "id ASC");
         formParams.add("sort", "kkk");
-        assertEquals(OrderParam.valueOf(formParams).toString(), " kkk DESC ");
+        assertEquals(OrderParam.valueOf(formParams).toString(), "kkk DESC");
         formParams.remove("dir");
-        assertEquals(OrderParam.valueOf(formParams).toString(), " kkk ASC ");
+        assertEquals(OrderParam.valueOf(formParams).toString(), "kkk ASC");
     }
     
     @Test
@@ -155,17 +155,6 @@ public class UtilsTest {
         instance = LimitParam.valueOf(formParams);
         assertEquals(instance.getLimit(), new Integer(100));
         assertEquals(instance.getStart(), new Integer(0));
-    }
-    
-    @Test
-    public void testSQL() throws Exception{
-        LimitParam l = new LimitParam();
-        OrderParam o = new OrderParam();
-        DatabaseConfiguration c = AbstractDatabaseConfiguration.instanceOf("test1", JDBCDriver.HSQLDB, "k", "k", "jdbc");
-        assertEquals(c.getSelectAllFromTableQuery("table", l, o), "SELECT * FROM table ORDER BY id ASC LIMIT 25 OFFSET 0");
-        c = AbstractDatabaseConfiguration.instanceOf("test1", JDBCDriver.ORACLE, "k", "k", "jdbc");
-        assertEquals(c.getSelectAllFromTableQuery("t", l, o), "SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY id ASC )AS ROW_NUMBER, t.* FROM t ) k WHERE ROW_NUMBER BETWEEN 25 AND 0");
-        assertEquals(c.getSelectAllFromTableQuery("t", "id", l, o), "SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY id ASC )AS ROW_NUMBER, t.* FROM t WHERE id= ? ) k WHERE ROW_NUMBER BETWEEN 25 AND 0");
     }
     
     @Test

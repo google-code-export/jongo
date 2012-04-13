@@ -18,9 +18,6 @@
 package org.jongo.config.impl;
 
 import org.apache.commons.lang.StringUtils;
-import org.jongo.config.AbstractDatabaseConfiguration;
-import org.jongo.config.DatabaseConfiguration;
-import org.jongo.enums.JDBCDriver;
 import org.jongo.jdbc.DynamicFinder;
 import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
@@ -31,26 +28,17 @@ import org.slf4j.LoggerFactory;
  * Oracle 8g and later DatabaseConfiguration implementation.
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
-public class OracleConfiguration extends AbstractDatabaseConfiguration implements DatabaseConfiguration {
+@Deprecated
+public class OracleConfiguration {
     
     private static final Logger l = LoggerFactory.getLogger(OracleConfiguration.class);
     
-    public OracleConfiguration(String name, String user, String password, String url){
-        this.name = name;
-        this.driver = JDBCDriver.ORACLE;
-        this.username = user;
-        this.password = password;
-        this.url = url;
-    }
-    
-    @Override
     public String getFirstRowQuery(String table) {
         if(StringUtils.isBlank(table))
             throw new IllegalArgumentException("Table name can't be blank, empty or null");
         return "SELECT * FROM " + table + " WHERE rownum = 0";
     }
     
-    @Override
     public String getSelectAllFromTableQuery(final String table, LimitParam limit, OrderParam order){
         if(StringUtils.isBlank(table) || limit == null || order == null)
             throw new IllegalArgumentException("Invalid argument");
@@ -70,7 +58,6 @@ public class OracleConfiguration extends AbstractDatabaseConfiguration implement
         return query.toString();
     }
     
-    @Override
     public String getSelectAllFromTableQuery(final String table, final String idCol, LimitParam limit, OrderParam order){
         if(StringUtils.isBlank(table) || StringUtils.isBlank(idCol) || limit == null || order == null)
             throw new IllegalArgumentException("Invalid argument");
@@ -93,12 +80,10 @@ public class OracleConfiguration extends AbstractDatabaseConfiguration implement
         return query.toString();
     }
 
-    @Override
     public String getListOfTablesQuery() {
         return "SELECT TABLE_NAME FROM ALL_ALL_TABLES";
     }
     
-    @Override
     public String wrapDynamicFinderQuery(final DynamicFinder finder, LimitParam limit, OrderParam order){
         if(finder == null || limit == null || order == null)
             throw new IllegalArgumentException("Invalid argument");
@@ -119,19 +104,6 @@ public class OracleConfiguration extends AbstractDatabaseConfiguration implement
         query.append(" AND ");
         query.append(limit.getStart());
         return query.toString();
-    }
-    
-    @Override
-    public boolean isValid() {
-        if(super.isValid()){
-            if(!StringUtils.startsWith(url, "jdbc:oracle:thin:")){
-                l.warn("Invalid JDBC URL. Check your configuration.");
-                return false;
-            }
-            return true;
-        }else{
-            return false;
-        }
     }
     
 }

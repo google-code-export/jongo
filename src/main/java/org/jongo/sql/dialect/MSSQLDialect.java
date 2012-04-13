@@ -15,20 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Jongo.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jongo.config.impl;
-
-import org.jongo.config.DatabaseConfiguration;
-import org.jongo.enums.JDBCDriver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package org.jongo.sql.dialect;
 
 /**
- * PostgreSQL DatabaseConfiguration implementation. Needs to be tested. Volunteers?
+ *
+ * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
-@Deprecated
-public class PostgreSQLConfiguration {
-
-    public String getListOfTablesQuery() {
-        return "SELECT * FROM information_schema.tables WHERE table_schema = 'public'";
-    }
+public class MSSQLDialect extends SQLDialect {
+    
 }
