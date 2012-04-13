@@ -18,16 +18,15 @@
 
 package org.jongo;
 
-import org.jongo.exceptions.JongoBadRequestException;
-import static org.junit.Assert.*;
-
 import java.util.HashMap;
 import java.util.Map;
-import org.jongo.config.impl.MySQLConfiguration;
-import org.jongo.config.impl.OracleConfiguration;
+import org.jongo.exceptions.JongoBadRequestException;
 import org.jongo.jdbc.DynamicFinder;
 import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
+import org.jongo.sql.dialect.MySQLDialect;
+import org.jongo.sql.dialect.OracleDialect;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -225,12 +224,12 @@ public class DynamicFinderTest {
         String dynamicQuery = new Exception().getStackTrace()[0].getMethodName().split("_")[1];
         LimitParam l = new LimitParam();
         OrderParam o = new OrderParam();
-        MySQLConfiguration my = new MySQLConfiguration("a", "a", "a", "a");
-        OracleConfiguration ora = new OracleConfiguration("a", "a", "a", "a");
-        String my_result = my.wrapDynamicFinderQuery(DynamicFinder.valueOf("sometable", dynamicQuery), l, o);
-        String ora_result = ora.wrapDynamicFinderQuery(DynamicFinder.valueOf("sometable", dynamicQuery), l, o);
+        MySQLDialect my = new MySQLDialect();
+        OracleDialect ora = new OracleDialect();
+        String my_result = my.toStatementString(DynamicFinder.valueOf("sometable", dynamicQuery), l, o);
+        String ora_result = ora.toStatementString(DynamicFinder.valueOf("sometable", dynamicQuery), l, o);
         String my_query = "SELECT * FROM sometable WHERE date BETWEEN ? AND ? AND market = ? ORDER BY id ASC LIMIT 25 OFFSET 0";
-        String ora_query = "SELECT * FROM ( SELECT ROW_NUMBER() OVER (ORDER BY id ASC )AS ROW_NUMBER, sometable.* FROM sometable WHERE  date BETWEEN ? AND ? AND market = ? ) k WHERE ROW_NUMBER BETWEEN 25 AND 0";
+        String ora_query = "SELECT * FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY sometable.id ASC ) AS ROW_NUMBER, sometable.* FROM sometable WHERE  date BETWEEN ? AND ? AND market = ? ) WHERE ROW_NUMBER BETWEEN 0 AND 25";
         assertEquals(my_query, my_result);
         assertEquals(ora_query, ora_result);
     }

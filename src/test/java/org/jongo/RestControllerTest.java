@@ -133,16 +133,16 @@ public class RestControllerTest {
         testSuccessResponse(r, Response.Status.OK, 1);
         
         r = (JongoSuccess)controller.getResource("user", "id", "", limit, order);
-        testSuccessResponse(r, Response.Status.OK, 2);
+        testSuccessResponse(r, Response.Status.OK, 1);
         
         r = (JongoSuccess)controller.getResource("user", "id", null, limit, order);
-        testSuccessResponse(r, Response.Status.OK, 2);
+        testSuccessResponse(r, Response.Status.OK, 1);
         
         r = (JongoSuccess)controller.getResource("user", "", null, limit, order);
-        testSuccessResponse(r, Response.Status.OK, 2);
+        testSuccessResponse(r, Response.Status.OK, 1);
         
         r = (JongoSuccess)controller.getResource("user", null, null, limit, order);
-        testSuccessResponse(r, Response.Status.OK, 2);
+        testSuccessResponse(r, Response.Status.OK, 1);
 
         JongoError err = (JongoError)controller.getResource("", "id", "0", limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
@@ -176,6 +176,11 @@ public class RestControllerTest {
         JongoSuccess r = (JongoSuccess)controller.getAllResources("maker", limit, order);
         testSuccessResponse(r, Response.Status.OK, 25);
         
+        order.setColumn("cid");
+        r = (JongoSuccess)controller.getAllResources("car", limit, order);
+        testSuccessResponse(r, Response.Status.OK, 3);
+        
+        order.setColumn("id");
         JongoError err = (JongoError)controller.getAllResources("no_exists", limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, "42501", new Integer(-5501));
         
@@ -360,7 +365,7 @@ public class RestControllerTest {
         testErrorResponse(err, Response.Status.BAD_REQUEST, "22018", new Integer(-3438));
         
         err = (JongoError)controller.deleteResource("user", "id", null);
-        testErrorResponse(err, Response.Status.BAD_REQUEST, "22018", new Integer(-3438));
+        testErrorResponse(err, Response.Status.NO_CONTENT, null, null);
         
         err = (JongoError)controller.deleteResource("user", "", "32");
         testErrorResponse(err, Response.Status.NO_CONTENT, null, null);
@@ -370,29 +375,29 @@ public class RestControllerTest {
     }
     
     @Test
-    public void testFindByColumn(){
-        JongoSuccess r = (JongoSuccess)controller.findByColumn("comments","car_id","0", limit, order);
+    public void testFindResources(){
+        JongoSuccess r = (JongoSuccess)controller.findResources("comments","car_id","0", limit, order);
         testSuccessResponse(r, Response.Status.OK, 2);
         
-        r = (JongoSuccess)controller.findByColumn("comments","car_id","2", limit, order);
+        r = (JongoSuccess)controller.findResources("comments","car_id","2", limit, order);
         testSuccessResponse(r, Response.Status.OK, 1);
         
-        r = (JongoSuccess)controller.findByColumn("maker_stats_2010","maker","FIAT", limit, new OrderParam("month"));
+        r = (JongoSuccess)controller.findResources("maker_stats_2010","maker","FIAT", limit, new OrderParam("month"));
         testSuccessResponse(r, Response.Status.OK, 12);
         
-        JongoError err = (JongoError)controller.findByColumn("comments","car_id","1", limit, order);
+        JongoError err = (JongoError)controller.findResources("comments","car_id","1", limit, order);
         testErrorResponse(err, Response.Status.NOT_FOUND, null, null);
         
-        err = (JongoError)controller.findByColumn("comments","car_id_grrr","2", limit, order);
+        err = (JongoError)controller.findResources("comments","car_id_grrr","2", limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, "42501", new Integer(-5501));
         
-        err = (JongoError)controller.findByColumn("comments","car_id","", limit, order);
+        err = (JongoError)controller.findResources("comments","car_id","", limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
-        err = (JongoError)controller.findByColumn("comments","","0", limit, order);
+        err = (JongoError)controller.findResources("comments","","0", limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
-        err = (JongoError)controller.findByColumn("","id","0", limit, order);
+        err = (JongoError)controller.findResources("","id","0", limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
     }
     
