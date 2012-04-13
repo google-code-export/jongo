@@ -44,6 +44,9 @@ public class DynamicFinder {
     private String secondColumn;
     private Operator secondOperator;
     private final String sql;
+    
+    private OrderParam orderParam;
+    private LimitParam limitParam;
 
     public static DynamicFinder valueOf(String table, final String query, final String... values) throws JongoBadRequestException {
         l.debug("Generating dynamic finder for " + query + " with values: [ " + StringUtils.join(values, ",") + "]");
@@ -311,6 +314,24 @@ public class DynamicFinder {
 
     public boolean findAll() {
         return this.command.equalsIgnoreCase(FINDALLBY);
+    }
+    
+    public DynamicFinder setOrderParam(OrderParam param){
+        this.orderParam = param;
+        return this;
+    }
+    
+    public DynamicFinder setLimitParam(LimitParam param){
+        this.limitParam = param;
+        return this;
+    }
+    
+    public LimitParam getLimitParam() {
+        return limitParam;
+    }
+
+    public OrderParam getOrderParam() {
+        return orderParam;
     }
 
     @Override
