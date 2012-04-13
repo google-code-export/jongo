@@ -39,7 +39,7 @@ public class OrderParam {
     }
     
     public OrderParam(final Table table){
-        this.column = table.getName() + "." + table.getPrimaryKey();
+        this.column = table.getPrimaryKey();
         this.direction = ASC;
     }
     
