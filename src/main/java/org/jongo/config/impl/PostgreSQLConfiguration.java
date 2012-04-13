@@ -17,8 +17,6 @@
  */
 package org.jongo.config.impl;
 
-import org.apache.commons.lang.StringUtils;
-import org.jongo.config.AbstractDatabaseConfiguration;
 import org.jongo.config.DatabaseConfiguration;
 import org.jongo.enums.JDBCDriver;
 import org.slf4j.Logger;
@@ -27,34 +25,10 @@ import org.slf4j.LoggerFactory;
 /**
  * PostgreSQL DatabaseConfiguration implementation. Needs to be tested. Volunteers?
  */
-public class PostgreSQLConfiguration extends AbstractDatabaseConfiguration implements DatabaseConfiguration {
+@Deprecated
+public class PostgreSQLConfiguration {
 
-    private static final Logger l = LoggerFactory.getLogger(PostgreSQLConfiguration.class);
-    
-    public PostgreSQLConfiguration(String name, String user, String password, String url){
-        this.name = name;
-        this.driver = JDBCDriver.PostgreSQL;
-        this.username = user;
-        this.password = password;
-        this.url = url;
-    }
-
-    @Override
     public String getListOfTablesQuery() {
         return "SELECT * FROM information_schema.tables WHERE table_schema = 'public'";
     }
-    
-    @Override
-    public boolean isValid() {
-        if(super.isValid()){
-            if(!StringUtils.startsWith(url, " jdbc:postgresql:")){
-                l.warn("Invalid JDBC URL. Check your configuration.");
-                return false;
-            }
-            return true;
-        }else{
-            return false;
-        }
-    }
-    
 }
