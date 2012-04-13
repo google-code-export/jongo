@@ -171,7 +171,7 @@ public class JongoConfiguration {
         String username = prop.getProperty(name + p_prefix_db_username);
         String password = prop.getProperty(name + p_prefix_db_password);
         String url = prop.getProperty(name + p_prefix_db_url);
-        DatabaseConfiguration c = AbstractDatabaseConfiguration.instanceOf(name, driver, username, password, url);
+        DatabaseConfiguration c = DatabaseConfiguration.instanceOf(name, driver, username, password, url);
         return c;
     }
     
