@@ -22,5 +22,10 @@ package org.jongo.sql.dialect;
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public class MySQLDialect extends SQLDialect {
+
+    @Override
+    public String listOfTablesStatement() {
+        return "SHOW TABLES";
+    }
     
 }
