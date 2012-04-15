@@ -24,17 +24,19 @@ public class SQLDialectTest {
     
     @Test
     public void testSelect() {
-        doTest("SELECT * FROM a_table", new Select(table));
+        doTest("SELECT a_table.* FROM demo1.a_table", new Select(table));
         
-        doTest("SELECT * FROM a_table WHERE tableId=?", new Select(table).setValue("1"));
+        doTest("SELECT a_table.* FROM demo1.a_table WHERE a_table.tableId=?", new Select(table).setValue("1"));
         
-        doTest("SELECT * FROM a_table WHERE name=?", new Select(table).setValue("1").setColumn("name"));
+        doTest("SELECT a_table.* FROM demo1.a_table WHERE a_table.name=?", new Select(table).setValue("1").setColumn("name"));
         
-        doTest("SELECT * FROM a_table WHERE name=? LIMIT 25 OFFSET 0",
+        doTest("SELECT a_table.* FROM demo1.a_table WHERE a_table.tableId=? ORDER BY a_table.tableId ASC", new Select(table).setValue("1").setOrderParam(new OrderParam(table)));
+        
+        doTest("SELECT * FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY a_table.tableId ) AS ROW_NUMBER, a_table.* FROM demo1.a_table WHERE a_table.name=?) WHERE ROW_NUMBER BETWEEN 0 AND 25",
                 new Select(table).setValue("1").setColumn("name").setLimitParam(new LimitParam()));
         
-        doTest("SELECT * FROM a_table WHERE tableId=? ORDER BY tableId ASC LIMIT 25 OFFSET 0",
-                new Select(table).setValue("1").setLimitParam(l).setOrderParam(new OrderParam(table)));
+        doTest("SELECT * FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY a_table.name DESC ) AS ROW_NUMBER, a_table.* FROM demo1.a_table WHERE a_table.tableId=?) WHERE ROW_NUMBER BETWEEN 0 AND 25",
+                new Select(table).setValue("1").setLimitParam(l).setOrderParam(new OrderParam("name", "DESC")));
     }
     
     @Test
