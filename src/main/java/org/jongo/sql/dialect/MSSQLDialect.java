@@ -22,5 +22,10 @@ package org.jongo.sql.dialect;
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public class MSSQLDialect extends SQLDialect {
+
+    @Override
+    public String listOfTablesStatement() {
+        return "select * from information_schema.tables where Table_Type = 'BASE TABLE'";
+    }
     
 }
