@@ -18,48 +18,24 @@
 package org.jongo.sql.dialect;
 
 import junit.framework.Assert;
-import org.jongo.JongoUtils;
-import org.jongo.config.JongoConfiguration;
-import org.jongo.demo.Demo;
-import org.jongo.exceptions.StartupException;
 import org.jongo.jdbc.DynamicFinder;
 import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
 import org.jongo.sql.*;
-import org.junit.AfterClass;
 import org.junit.Test;
-import org.junit.BeforeClass;
 
 /**
  *
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
-public class OracleDialectTest {
-    
-    OracleDialect d = new OracleDialect();
-    Table table = new Table("demo1", "a_table", "tableId");
-    
-    OrderParam o = new OrderParam(table);
-    LimitParam l = new LimitParam();
+public class OracleDialectTest extends SQLDialectTest {
     
     public OracleDialectTest() {
-    }
-
-    @BeforeClass
-    public static void setUp() throws StartupException{
-        System.setProperty("environment", "demo");
-        JongoConfiguration configuration = JongoUtils.loadConfiguration();
-        Demo.generateDemoDatabases(configuration.getDatabases());
-    }
-    
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-        System.setProperty("environment", "demo");
-        JongoConfiguration configuration = JongoUtils.loadConfiguration();
-        Demo.destroyDemoDatabases(configuration.getDatabases());
+        d = new OracleDialect();
     }
 
     @Test
+    @Override
     public void testSelect() {
         doTest("SELECT a_table.* FROM demo1.a_table", new Select(table));
         
@@ -75,23 +51,31 @@ public class OracleDialectTest {
         doTest("SELECT * FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY a_table.name DESC ) AS ROW_NUMBER, a_table.* FROM demo1.a_table WHERE a_table.tableId=?) WHERE ROW_NUMBER BETWEEN 0 AND 25",
                 new Select(table).setValue("1").setLimitParam(l).setOrderParam(new OrderParam("name", "DESC")));
     }
+
+    @Test
+    @Override
+    public void testDelete() {
+        doTest("DELETE FROM demo1.a_table WHERE a_table.tableId=?", new Delete(table).setId("1"));
+        doTest("DELETE FROM demo1.grrr WHERE grrr.id=?", new Delete(new Table("demo1", "grrr")).setId("1"));
+    }
+
+    @Test
+    @Override
+    public void testInsert(){
+        doTest("INSERT INTO demo1.a_table (name,age) VALUES (?,?)", new Insert(table).addColumn("name", "foo bar").addColumn("age", "50"));
+    }
+    
+    @Test
+    @Override
+    public void testUpdate(){
+        doTest("UPDATE demo1.a_table SET a_table.name=?,a_table.age=? WHERE a_table.tableId=?", new Update(table).setId("1").addColumn("name", "foo bar").addColumn("age", "50"));
+        doTest("UPDATE demo1.grrr SET grrr.name=? WHERE grrr.id=?", new Update(new Table("demo1","grrr")).setId("1").addColumn("name", "foo bar"));
+    }
     
     @Test
     public void testDynamicFinders(){
         System.out.println(d.toStatementString(new DynamicFinder("test", "findAllBy", "Name"), l,o));
         Assert.assertEquals("SELECT * FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY test.tableId ASC ) AS ROW_NUMBER, test.* FROM test WHERE  name = ? ) WHERE ROW_NUMBER BETWEEN 0 AND 25",
                 d.toStatementString(new DynamicFinder("test", "findAllBy", "Name"), l,o));
-    }
-    
-    public void doTest(String expected, Object obj){
-        if(obj instanceof Select){
-            Assert.assertEquals(expected, d.toStatementString((Select)obj));
-        }else if(obj instanceof Delete){
-            Assert.assertEquals(expected, d.toStatementString((Delete)obj));
-        }else if(obj instanceof Insert){
-            Assert.assertEquals(expected, d.toStatementString((Insert)obj));
-        }else if(obj instanceof Update){
-            Assert.assertEquals(expected, d.toStatementString((Update)obj));
-        }
     }
 }
