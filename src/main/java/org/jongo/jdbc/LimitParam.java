@@ -19,25 +19,24 @@ package org.jongo.jdbc;
 
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang.StringUtils;
-import org.jongo.config.JongoConfiguration;
 
 /**
  * An object to represent the two limit parameters (limit & offset) which are then translated to
- * their correct form in SQL. If no limit parameter is given, the default is loaded from
+ * their correct form in SQL. If no limit parameter is given, the default is 25
  * the configuration. The default value for the offset or start is 0.
- * The limit value has a maximum which is set by the configuration. If the given limit value
- * is greater than this maximum, we override the given limit.
+ * The limit value has a maximum of 1000.
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public class LimitParam {
     
-    private static final JongoConfiguration configuration = JongoConfiguration.instanceOf();
-    
     private final Integer limit;
     private final Integer start;
     
+    private static final Integer default_limit = Integer.valueOf(25);
+    private static final Integer max_limit = Integer.valueOf(1000);
+    
     public LimitParam(){
-        this.limit = configuration.getLimit();
+        this.limit = default_limit;
         this.start = 0;
     }
     
@@ -60,8 +59,8 @@ public class LimitParam {
     }
     
     private Integer getMaxLimit(Integer limit){
-        if(limit >= configuration.getMaxLimit()){
-            limit = configuration.getMaxLimit();
+        if(limit >= max_limit){
+            limit = max_limit;
         }
         return limit;
     }
@@ -83,7 +82,7 @@ public class LimitParam {
             o = Integer.valueOf(pathParams.getFirst("offset"));
         }
         
-        LimitParam instance = null;
+        LimitParam instance;
         if(l == null){
             instance = new LimitParam();
         }else{
