@@ -21,7 +21,10 @@ import org.apache.commons.lang.StringUtils;
 import org.jongo.jdbc.DynamicFinder;
 import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
+import org.jongo.sql.Delete;
+import org.jongo.sql.Insert;
 import org.jongo.sql.Select;
+import org.jongo.sql.Update;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,9 +43,6 @@ public class OracleDialect extends SQLDialect {
 
     @Override
     public String toStatementString(Select select) {
-        
-        // SELECT a_table.* FROM demo1.a_table WHERE a_table.tableId=? ORDER BY a_table.tableId ASC
-        // SELECT * FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY a_table.tableId ASC ) AS ROW_NUMBER, a_table.* FROM demo1.a_table ) WHERE ROW_NUMBER BETWEEN 0 AND 25
         final StringBuilder b = new StringBuilder("SELECT ");
         
         if(select.getLimitParam() == null){
@@ -98,6 +98,60 @@ public class OracleDialect extends SQLDialect {
         l.debug(b.toString());
         return b.toString();
     }
+
+    @Override
+    public String toStatementString(Insert insert) {
+        if(insert.getColumns().isEmpty())
+            throw new IllegalArgumentException("An insert query can't be empty");
+        
+        final StringBuilder b = new StringBuilder("INSERT INTO ");
+        b.append(insert.getTable().getDatabase()).append(".");
+        b.append(insert.getTable().getName());
+        if(!insert.getColumns().isEmpty()){
+            b.append(" (");
+            b.append(StringUtils.join(insert.getColumns().keySet(), ","));
+            b.append(") VALUES (");
+            b.append(StringUtils.removeEnd(StringUtils.repeat("?,", insert.getColumns().size()), ","));
+            b.append(")");
+        }
+        l.debug(b.toString());
+        return b.toString();
+    }
+
+    @Override
+    public String toStatementString(Update update) {
+        if(update.getColumns().isEmpty())
+            throw new IllegalArgumentException("An update query can't be empty");
+        
+        final StringBuilder b = new StringBuilder("UPDATE ");
+        b.append(update.getTable().getDatabase()).append(".");
+        b.append(update.getTable().getName()).append(" SET ");
+
+        for(String k : update.getColumns().keySet()){
+            b.append(update.getTable().getName()).append(".");
+            b.append(k); b.append("=?,");
+        }
+        
+        b.deleteCharAt(b.length() - 1);
+        b.append(" WHERE ");
+        b.append(update.getTable().getName()).append(".");
+        b.append(update.getTable().getPrimaryKey()).append("=?");
+        l.debug(b.toString());
+        return b.toString();
+    }
+
+    @Override
+    public String toStatementString(Delete delete) {
+        final StringBuilder b = new StringBuilder("DELETE FROM ");
+        b.append(delete.getTable().getDatabase()).append(".");
+        b.append(delete.getTable().getName());
+        b.append(" WHERE ");
+        b.append(delete.getTable().getName()).append(".");
+        b.append(delete.getTable().getPrimaryKey()).append("=?");
+        l.debug(b.toString());
+        return b.toString();
+    }
+    
 
     @Override
     public String toStatementString(DynamicFinder finder, LimitParam limit, OrderParam order) {
