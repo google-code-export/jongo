@@ -17,6 +17,9 @@
  */
 package org.jongo.sql.dialect;
 
+import org.jongo.jdbc.LimitParam;
+import org.jongo.jdbc.OrderParam;
+import org.jongo.sql.Select;
 import org.junit.Test;
 
 public class HSQLDialectTest extends SQLDialectTest{
@@ -40,7 +43,17 @@ public class HSQLDialectTest extends SQLDialectTest{
     @Test
     @Override
     public void testSelect() {
-        // TODO Implement
+        doTest("SELECT * FROM a_table", new Select(table));
+        
+        doTest("SELECT * FROM a_table WHERE tableId=?", new Select(table).setValue("1"));
+        
+        doTest("SELECT * FROM a_table WHERE name=?", new Select(table).setValue("1").setColumn("name"));
+        
+        doTest("SELECT * FROM a_table WHERE name=? LIMIT 25 OFFSET 0",
+                new Select(table).setValue("1").setColumn("name").setLimitParam(new LimitParam()));
+        
+        doTest("SELECT * FROM a_table WHERE tableId=? ORDER BY tableId ASC LIMIT 25 OFFSET 0",
+                new Select(table).setValue("1").setLimitParam(l).setOrderParam(new OrderParam(table)));
     }
 
     @Test
