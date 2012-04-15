@@ -33,7 +33,13 @@ import org.junit.runners.Suite;
     org.jongo.JDBCExecutorTest.class, 
     org.jongo.XmlXstreamTest.class, 
     org.jongo.DynamicFinderTest.class,
-    org.jongo.jdbc.OrderParamTest.class
+    org.jongo.jdbc.OrderParamTest.class,
+    org.jongo.sql.dialect.SQLDialectTest.class,
+    org.jongo.sql.dialect.HSQLDialectTest.class,
+    org.jongo.sql.dialect.OracleDialectTest.class,
+    org.jongo.sql.dialect.MSSQLDialectTest.class,
+    org.jongo.sql.dialect.MySQLDialectTest.class,
+    org.jongo.sql.dialect.PostgreSQLDialectTest.class
 })
 public class JongoOfflineTestSuite {
 
