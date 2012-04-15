@@ -58,27 +58,56 @@ public class SQLDialect implements Dialect{
     @Override
     public String toStatementString(final Select select) {
         final StringBuilder b = new StringBuilder("SELECT ");
-        if(select.isAllColumns()){
-            b.append("*");
-        }else{
-            String cols = StringUtils.join(select.getColumns(), ",");
-            l.debug(cols);
-            b.append(cols);
-        }
-        b.append(" FROM ").append(select.getTable().getName());
-        if(!select.isAllRecords()){
-            b.append(" WHERE ");
-            if(StringUtils.isEmpty(select.getColumn())){
-                b.append(select.getTable().getPrimaryKey()).append("=?");
-            }else{
-                b.append(select.getColumn()).append("=?");
-            }
-        }
-        if(select.getOrderParam() != null)
-            b.append(" ORDER BY ").append(select.getOrderParam().toString());
         
-        if(select.getLimitParam() != null)
-            b.append(" LIMIT ").append(select.getLimitParam().getLimit()).append(" OFFSET ").append(select.getLimitParam().getStart());
+        if(select.getLimitParam() == null){
+            if(select.isAllColumns()){
+                b.append(select.getTable().getName()).append(".*");
+            }else{
+                String cols = StringUtils.join(select.getColumns(), ",");
+                b.append(cols);
+            }
+            b.append(" FROM ").append(select.getTable().toString());
+            if(!select.isAllRecords()){
+                b.append(" WHERE ");
+                if(StringUtils.isEmpty(select.getColumn())){
+                    b.append(select.getTable().getName()).append(".").append(select.getTable().getPrimaryKey()).append("=?");
+                }else{
+                    b.append(select.getTable().getName()).append(".").append(select.getColumn()).append("=?");
+                }
+            }
+            if(select.getOrderParam() != null){
+                b.append(" ORDER BY ").append(select.getTable().getName()).append(".");
+                b.append(select.getOrderParam().getColumn()).append(" ").append(select.getOrderParam().getDirection());
+            }
+        }else{
+            b.append("* FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY ");
+            
+            if(select.getOrderParam() == null){
+                b.append(select.getTable().getName()).append(".");
+                b.append(select.getTable().getPrimaryKey());
+            }else{
+                b.append(select.getTable().getName()).append(".");
+                b.append(select.getOrderParam().getColumn()).append(" ").append(select.getOrderParam().getDirection());
+            }
+            
+            b.append(" ) AS ROW_NUMBER, ");
+            if(select.isAllColumns()){
+                b.append(select.getTable().getName()).append(".*");
+            }else{
+                String cols = StringUtils.join(select.getColumns(), ",");
+                b.append(cols);
+            }
+            b.append(" FROM ").append(select.getTable().toString());
+            if(!select.isAllRecords()){
+                b.append(" WHERE ");
+                if(StringUtils.isEmpty(select.getColumn())){
+                    b.append(select.getTable().getName()).append(".").append(select.getTable().getPrimaryKey()).append("=?");
+                }else{
+                    b.append(select.getTable().getName()).append(".").append(select.getColumn()).append("=?");
+                }
+            }
+            b.append(") WHERE ROW_NUMBER BETWEEN ").append(select.getLimitParam().getStart()).append(" AND ").append(select.getLimitParam().getLimit());
+        }
         
         l.debug(b.toString());
         return b.toString();
