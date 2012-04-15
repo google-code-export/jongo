@@ -65,13 +65,13 @@ public class SQLDialect implements Dialect{
             l.debug(cols);
             b.append(cols);
         }
-        b.append(" FROM ").append(select.getTable().toString());
+        b.append(" FROM ").append(select.getTable().getName());
         if(!select.isAllRecords()){
             b.append(" WHERE ");
             if(StringUtils.isEmpty(select.getColumn())){
-                b.append(select.getTable().getName()).append(".").append(select.getTable().getPrimaryKey()).append("=?");
+                b.append(select.getTable().getPrimaryKey()).append("=?");
             }else{
-                b.append(select.getTable().getName()).append(".").append(select.getColumn()).append("=?");
+                b.append(select.getColumn()).append("=?");
             }
         }
         if(select.getOrderParam() != null)
@@ -97,7 +97,7 @@ public class SQLDialect implements Dialect{
         }
         
         b.deleteCharAt(b.length() - 1);
-        b.append(" WHERE ").append(update.getTable().getName()).append(".").append(update.getTable().getPrimaryKey()).append("=?");
+        b.append(" WHERE ").append(update.getTable().getPrimaryKey()).append("=?");
         l.debug(b.toString());
         return b.toString();
     }
@@ -105,7 +105,7 @@ public class SQLDialect implements Dialect{
     @Override
     public String toStatementString(final Delete delete) {
         final StringBuilder b = new StringBuilder("DELETE FROM ");
-        b.append(delete.getTable().toString()).append(" WHERE ").append(delete.getTable().getName()).append(".").append(delete.getTable().getPrimaryKey()).append("=?");
+        b.append(delete.getTable().getName()).append(" WHERE ").append(delete.getTable().getPrimaryKey()).append("=?");
         l.debug(b.toString());
         return b.toString();
     }
