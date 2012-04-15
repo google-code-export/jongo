@@ -22,5 +22,10 @@ package org.jongo.sql.dialect;
  * @author Alejandro Ayuso <alejandroayuso@gmail.com>
  */
 public class PostgreSQLDialect extends SQLDialect {
+
+    @Override
+    public String listOfTablesStatement() {
+        return "SELECT * FROM information_schema.tables WHERE table_schema = 'public'";
+    }
     
 }
