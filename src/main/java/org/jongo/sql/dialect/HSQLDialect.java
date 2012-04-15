@@ -18,15 +18,10 @@
 package org.jongo.sql.dialect;
 
 import org.apache.commons.lang.StringUtils;
-import org.jongo.sql.Delete;
 import org.jongo.sql.Select;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
- */
 public class HSQLDialect extends SQLDialect{
     
     private static final Logger l = LoggerFactory.getLogger(HSQLDialect.class);
@@ -44,9 +39,9 @@ public class HSQLDialect extends SQLDialect{
         if(!select.isAllRecords()){
             b.append(" WHERE ");
             if(StringUtils.isEmpty(select.getColumn())){
-                b.append(select.getTable().getName()).append(".").append(select.getTable().getPrimaryKey()).append("=?");
+                b.append(select.getTable().getPrimaryKey()).append("=?");
             }else{
-                b.append(select.getTable().getName()).append(".").append(select.getColumn()).append("=?");
+                b.append(select.getColumn()).append("=?");
             }
         }
         if(select.getOrderParam() != null)
@@ -59,14 +54,6 @@ public class HSQLDialect extends SQLDialect{
         return b.toString();
     }
 
-    @Override
-    public String toStatementString(final Delete delete) {
-        final StringBuilder b = new StringBuilder("DELETE FROM ");
-        b.append(delete.getTable().getName()).append(" WHERE ").append(delete.getTable().getName()).append(".").append(delete.getTable().getPrimaryKey()).append("=?");
-        l.debug(b.toString());
-        return b.toString();
-    }
-    
     @Override
     public String listOfTablesStatement() {
         return "SELECT * FROM INFORMATION_SCHEMA.SYSTEM_TABLES WHERE table_type = 'TABLE'";
