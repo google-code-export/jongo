@@ -42,14 +42,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * Class in charge of executing SQL statements against a given RDBMS.
+ * @author Alejandro Ayuso
  */
 public class JDBCExecutor {
 
     private static final Logger l = LoggerFactory.getLogger(JDBCExecutor.class);
     private static final JongoConfiguration conf = JongoConfiguration.instanceOf();
     
+    /**
+     * Executes the given {@link org.jongo.sql.Delete} object
+     * @param delete a {@link org.jongo.sql.Delete} instance
+     * @return number of records deleted
+     * @throws SQLException from the QueryRunner
+     * @see org.apache.commons.dbutils.QueryRunner
+     */
     public static int delete(final Delete delete) throws SQLException {
         l.debug(delete.toString());
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(delete.getTable().getDatabase());
@@ -61,10 +68,18 @@ public class JDBCExecutor {
             l.debug("Deleted " + deleted + " records.");
             return deleted;
         } catch (SQLException ex) {
+            l.debug(ex.getMessage());
             throw ex;
         }
     }
     
+    /**
+     * Executes the given {@link org.jongo.sql.Insert} object
+     * @param insert a {@link org.jongo.sql.Insert} instance
+     * @return number of records inserted
+     * @throws SQLException from the QueryRunner
+     * @see org.apache.commons.dbutils.QueryRunner
+     */
     public static int insert(final Insert insert) throws SQLException {
         l.debug(insert.toString());
         
@@ -87,6 +102,13 @@ public class JDBCExecutor {
         }
     }
     
+    /**
+     * Executes the given {@link org.jongo.sql.Update} object
+     * @param update a {@link org.jongo.sql.Update} instance
+     * @return a List of {@link org.jongo.rest.xstream.Row} with the modified records
+     * @throws SQLException from the QueryRunner
+     * @see org.apache.commons.dbutils.QueryRunner
+     */
     public static List<Row> update(final Update update) throws SQLException {
         l.debug(update.toString());
         
@@ -108,6 +130,16 @@ public class JDBCExecutor {
         return results;
     }
     
+    /**
+     * Executes the given {@link org.jongo.sql.Select} object and returns all or one record depending on the value
+     * of the allRecords variable
+     * @param select a {@link org.jongo.sql.Select} instance
+     * @param allRecords return all (true) records or one (false) record.
+     * @return a List of {@link org.jongo.rest.xstream.Row} with the records found by the statement.
+     * @throws SQLException from the QueryRunner
+     * @see org.apache.commons.dbutils.QueryRunner
+     * @see org.jongo.handler.JongoResultSetHandler
+     */
     public static List<Row> get(final Select select, final boolean allRecords) throws SQLException {
         l.debug(select.toString());
         List<Row> response = null;
@@ -137,6 +169,18 @@ public class JDBCExecutor {
         return response;
     }
     
+    /**
+     * Executes the given {@link org.jongo.jdbc.DynamicFinder} object.
+     * @param database database name or schema where to execute the {@link org.jongo.jdbc.DynamicFinder}
+     * @param df an instance of {@link org.jongo.jdbc.DynamicFinder}
+     * @param limit an instance of {@link org.jongo.jdbc.LimitParam}
+     * @param order an instance of {@link org.jongo.jdbc.OrderParam}
+     * @param params a vararg of Object instances used as parameters for the QueryRunner.
+     * @return a List of {@link org.jongo.rest.xstream.Row} with the records found by the DynamicFinder.
+     * @throws SQLException from the QueryRunner
+     * @see org.apache.commons.dbutils.QueryRunner
+     * @see org.jongo.sql.dialect.Dialect
+     */
     public static List<Row> find(final String database, final DynamicFinder df, final LimitParam limit, final OrderParam order, Object... params) throws SQLException{
         l.debug(df.getSql());
         l.debug(JongoUtils.varargToString(params));
@@ -157,6 +201,15 @@ public class JDBCExecutor {
         }
     }
     
+    /**
+     * Executes a given {@link org.jongo.sql.Select} object and returns the metadata associated to the results.
+     * @param select a {@link org.jongo.sql.Select} instance which should only retrieve one result.
+     * @return a List of {@link org.jongo.rest.xstream.Row} with the metadata obtained 
+     * with the {@link org.jongo.sql.Select} statement
+     * @throws SQLException SQLException from the QueryRunner
+     * @see org.apache.commons.dbutils.QueryRunner
+     * @see org.jongo.handler.ResultSetMetaDataHandler
+     */
     public static List<Row> getTableMetaData(final Select select) throws SQLException {
         l.debug("Obtaining metadata from table " + select.toString());
         
@@ -176,6 +229,16 @@ public class JDBCExecutor {
         }
     }
     
+    /**
+     * Executes the given stored procedure or function in the RDBMS using the given List 
+     * of {@link org.jongo.jdbc.StoredProcedureParam}.
+     * @param database database name or schema where to execute the stored procedure or function
+     * @param queryName the name of the stored procedure or function. This gets converted to a {call foo()} statement.
+     * @param params a List of {@link org.jongo.jdbc.StoredProcedureParam} used by the stored procedure or function.
+     * @return a List of {@link org.jongo.rest.xstream.Row} with the results of the stored procedure (if out parameters are given)
+     * or the results of the function.
+     * @throws SQLException
+     */
     public static List<Row> executeQuery(final String database, final String queryName, final List<StoredProcedureParam> params) throws SQLException{
         l.debug("Executing stored procedure " + database + "." + queryName);
         
@@ -220,6 +283,9 @@ public class JDBCExecutor {
         return rows;
     }
     
+    /**
+     * Close all connections to the databases
+     */
     public static void shutdown(){
         l.debug("Shutting down JDBC connections");
         try {
@@ -230,6 +296,13 @@ public class JDBCExecutor {
         }
     }
     
+    /**
+     * For a given database or schema, execute the statement returned by the {@link org.jongo.sql.dialect.Dialect} listOfTablesStatement()
+     * method and return a List of {@link org.jongo.rest.xstream.Row} with all the tables available.
+     * @param database the name of the database to query.
+     * @return a List of {@link org.jongo.rest.xstream.Row} with all the tables available.
+     * @throws SQLException 
+     */
     public static List<Row> getListOfTables(final String database) throws SQLException{
         l.debug("Obtaining the list of tables for the database " + database);
 //        if(!conf.allowListTables()){
@@ -249,6 +322,15 @@ public class JDBCExecutor {
         }
     }
     
+    /**
+     * Utility method which registers in a CallableStatement object the different {@link org.jongo.jdbc.StoredProcedureParam}
+     * instances in the given list. Returns a List of {@link org.jongo.jdbc.StoredProcedureParam} with all the OUT parameters
+     * registered in the CallableStatement
+     * @param cs the CallableStatement object where the parameters are registered.
+     * @param params a list of {@link org.jongo.jdbc.StoredProcedureParam}
+     * @return a list of OUT {@link org.jongo.jdbc.StoredProcedureParam} 
+     * @throws SQLException if we fail to register any of the parameters in the CallableStatement
+     */
     private static List<StoredProcedureParam> addParameters(final CallableStatement cs, final List<StoredProcedureParam> params) throws SQLException{
         List<StoredProcedureParam> outParams = new ArrayList<StoredProcedureParam>();
         int i = 1;
