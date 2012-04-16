@@ -17,6 +17,9 @@
  */
 package org.jongo.sql.dialect;
 
+import org.jongo.jdbc.LimitParam;
+import org.jongo.jdbc.OrderParam;
+import org.jongo.sql.Select;
 import org.junit.Test;
 
 public class MySQLDialectTest extends SQLDialectTest {
@@ -40,7 +43,26 @@ public class MySQLDialectTest extends SQLDialectTest {
     @Test
     @Override
     public void testSelect() {
-        // TODO Implement
+        String sql = "SELECT t.* FROM demo1.a_table t";
+        doTest(sql, new Select(table));
+        
+        sql = "SELECT t.name FROM demo1.a_table t";
+        doTest(sql, new Select(table).addColumn("name"));
+        
+        sql = "SELECT t.name,t.age FROM demo1.a_table t";
+        doTest(sql, new Select(table).addColumn("name").addColumn("age"));
+        
+        sql = "SELECT t.* FROM demo1.a_table t ORDER BY t.id ASC";
+        doTest(sql, new Select(table).setOrderParam(new OrderParam("id", "ASC")));
+        
+        sql = "SELECT t.name,t.age FROM demo1.a_table t ORDER BY t.id ASC";
+        doTest(sql, new Select(table).addColumn("name").addColumn("age").setOrderParam(new OrderParam("id", "ASC")));
+        
+        sql = "SELECT t.* FROM demo1.a_table t LIMIT 0,25";
+        doTest(sql, new Select(table).setLimitParam(new LimitParam(25, 0)));
+        
+        sql = "SELECT t.name,t.age FROM demo1.a_table t ORDER BY t.name DESC LIMIT 0,25";
+        doTest(sql, new Select(table).addColumn("name").addColumn("age").setLimitParam(new LimitParam(25, 0)).setOrderParam(new OrderParam("name", "DESC")));
     }
 
     @Test
