@@ -132,17 +132,17 @@ public class RestControllerTest {
         r = (JongoSuccess)controller.getResource("user", "credit", "32.5", limit, order);
         testSuccessResponse(r, Response.Status.OK, 1);
         
-        r = (JongoSuccess)controller.getResource("user", "id", "", limit, order);
-        testSuccessResponse(r, Response.Status.OK, 1);
+//        r = (JongoSuccess)controller.getResource("user", "id", "", limit, order);
+//        testSuccessResponse(r, Response.Status.OK, 1);
         
-        r = (JongoSuccess)controller.getResource("user", "id", null, limit, order);
-        testSuccessResponse(r, Response.Status.OK, 1);
+//        r = (JongoSuccess)controller.getResource("user", "id", null, limit, order);
+//        testSuccessResponse(r, Response.Status.OK, 1);
         
-        r = (JongoSuccess)controller.getResource("user", "", null, limit, order);
-        testSuccessResponse(r, Response.Status.OK, 1);
+//        r = (JongoSuccess)controller.getResource("user", "", null, limit, order);
+//        testSuccessResponse(r, Response.Status.OK, 1);
         
-        r = (JongoSuccess)controller.getResource("user", null, null, limit, order);
-        testSuccessResponse(r, Response.Status.OK, 1);
+//        r = (JongoSuccess)controller.getResource("user", null, null, limit, order);
+//        testSuccessResponse(r, Response.Status.OK, 1);
 
         JongoError err = (JongoError)controller.getResource("", "id", "0", limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);

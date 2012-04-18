@@ -1,16 +1,21 @@
 package org.jongo.sql.dialect;
 
 import junit.framework.Assert;
+import org.jongo.enums.Operator;
 import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
 import org.jongo.sql.*;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Alejandro Ayuso
  */
 public class SQLDialectTest {
+    
+    private static final Logger log = LoggerFactory.getLogger(SQLDialectTest.class);
     
     Table table = new Table("demo1", "a_table", "tableId");
     Dialect d;
@@ -26,17 +31,18 @@ public class SQLDialectTest {
     public void testSelect() {
         doTest("SELECT a_table.* FROM demo1.a_table", new Select(table));
         
-        doTest("SELECT a_table.* FROM demo1.a_table WHERE a_table.tableId=?", new Select(table).setValue("1"));
+        doTest("SELECT a_table.* FROM demo1.a_table WHERE a_table.tableId = ?", new Select(table).setParameter(new SelectParam(table.getPrimaryKey(), Operator.EQUALS, "1")));
         
-        doTest("SELECT a_table.* FROM demo1.a_table WHERE a_table.name=?", new Select(table).setValue("1").setColumn("name"));
+        doTest("SELECT a_table.* FROM demo1.a_table WHERE a_table.name = ?", new Select(table).setParameter(new SelectParam("name", Operator.EQUALS, "1")));
         
-        doTest("SELECT a_table.* FROM demo1.a_table WHERE a_table.tableId=? ORDER BY a_table.tableId ASC", new Select(table).setValue("1").setOrderParam(new OrderParam(table)));
+        doTest("SELECT a_table.* FROM demo1.a_table WHERE a_table.tableId = ? ORDER BY a_table.tableId ASC", 
+                new Select(table).setParameter(new SelectParam(table.getPrimaryKey(), Operator.EQUALS, "1")).setOrderParam(new OrderParam(table)));
         
-        doTest("SELECT * FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY a_table.tableId ) AS ROW_NUMBER, a_table.* FROM demo1.a_table WHERE a_table.name=?) WHERE ROW_NUMBER BETWEEN 0 AND 25",
-                new Select(table).setValue("1").setColumn("name").setLimitParam(new LimitParam()));
+        doTest("SELECT * FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY a_table.tableId ) AS ROW_NUMBER, a_table.* FROM demo1.a_table WHERE a_table.name = ?) WHERE ROW_NUMBER BETWEEN 0 AND 25",
+                new Select(table).setParameter(new SelectParam("name", Operator.EQUALS, "1")).setLimitParam(new LimitParam()));
         
-        doTest("SELECT * FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY a_table.name DESC ) AS ROW_NUMBER, a_table.* FROM demo1.a_table WHERE a_table.tableId=?) WHERE ROW_NUMBER BETWEEN 0 AND 25",
-                new Select(table).setValue("1").setLimitParam(l).setOrderParam(new OrderParam("name", "DESC")));
+        doTest("SELECT * FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY a_table.name DESC ) AS ROW_NUMBER, a_table.* FROM demo1.a_table WHERE a_table.tableId = ?) WHERE ROW_NUMBER BETWEEN 0 AND 25",
+                new Select(table).setParameter(new SelectParam(table.getPrimaryKey(), Operator.EQUALS, "1")).setLimitParam(l).setOrderParam(new OrderParam("name", "DESC")));
     }
     
     @Test
@@ -57,6 +63,7 @@ public class SQLDialectTest {
     }
     
     public void doTest(String expected, Object obj){
+        log.debug(expected);
         if(obj instanceof Select){
             Assert.assertEquals(expected, d.toStatementString((Select)obj));
         }else if(obj instanceof Delete){
