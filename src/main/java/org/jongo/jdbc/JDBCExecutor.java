@@ -18,6 +18,7 @@
 
 package org.jongo.jdbc;
 
+import org.jongo.sql.DynamicFinder;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;

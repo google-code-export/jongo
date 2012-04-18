@@ -17,7 +17,7 @@
  */
 package org.jongo.sql.dialect;
 
-import org.jongo.jdbc.DynamicFinder;
+import org.jongo.sql.DynamicFinder;
 import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
 import org.jongo.sql.Delete;
