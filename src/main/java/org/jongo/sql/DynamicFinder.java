@@ -16,7 +16,7 @@
  * along with Jongo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.jongo.jdbc;
+package org.jongo.sql;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +24,8 @@ import org.apache.commons.lang.StringUtils;
 import org.jongo.JongoUtils;
 import org.jongo.enums.Operator;
 import org.jongo.exceptions.JongoBadRequestException;
+import org.jongo.jdbc.LimitParam;
+import org.jongo.jdbc.OrderParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
