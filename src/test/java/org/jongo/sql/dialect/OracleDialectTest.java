@@ -25,8 +25,8 @@ import org.jongo.sql.*;
 import org.junit.Test;
 
 /**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * Tests for the OracleDialect
+ * @author Alejandro Ayuso 
  */
 public class OracleDialectTest extends SQLDialectTest {
     

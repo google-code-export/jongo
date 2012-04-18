@@ -17,11 +17,16 @@
  */
 package org.jongo.sql.dialect;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * Dialect for PostgreSQL.
+ * @author Alejandro Ayuso 
  */
 public class PostgreSQLDialect extends SQLDialect {
+    
+    private static final Logger l = LoggerFactory.getLogger(PostgreSQLDialect.class);
 
     @Override
     public String listOfTablesStatement() {

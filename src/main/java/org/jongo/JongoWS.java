@@ -25,7 +25,7 @@ import javax.ws.rs.core.UriInfo;
 
 /**
  * Public RESTful webservice which allows CRUD operations on a given resource.
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * @author Alejandro Ayuso 
  */
 public interface JongoWS {
     
@@ -46,23 +46,112 @@ public interface JongoWS {
     public Response resourceMeta(String database, String resource);
     
     /**
-     * Obtains the requested resource
+     * Obtains the requested record from the given resource
      * @param database name of the database the resource belongs to
      * @param resource name of the resource we want to access
-     * @param pk optional field which indicates the primary key column name
-     * @param id the primary key value of the resource we want to access
+     * @param pk optional field which indicates the primary key column name. Defaults to "id"
+     * @param id the primary key value of the record we want to access
      * @param ui the context of the request. Used to obtain the ordering and pagination parameters.
-     * @return the resource if it's found, or a 404 if it's not.
+     * @return the record if it's found, or a 404 if it's not.
      */
     public Response get(String database, String resource, String pk, String id, UriInfo ui);
+    
+    /**
+     * Obtain all the records from a given resource.
+     * @param database name of the database the resource belongs to
+     * @param resource name of the resource we want to access
+     * @param pk optional field which indicates the primary key column name. Defaults to "id"
+     * @param ui the context of the request. Used to obtain the ordering and pagination parameters.
+     * @return all the records if found, or a 404 if it's not.
+     */
     public Response getAll(String database, String resource, String pk, UriInfo ui);
+    
+    /**
+     * Finds a record from the given resource which matches the given argument in the given column.
+     * @param database name of the database the resource belongs to
+     * @param resource name of the resource we want to access
+     * @param col name of the column the record must match
+     * @param arg value in the column the record must match.
+     * @param ui the context of the request. Used to obtain the ordering and pagination parameters.
+     * @return the record if it's found, or a 404 if it's not.
+     */
     public Response find(String database, String resource, String col, String arg, UriInfo ui);
+    
+    /**
+     * Finds all records from the given resource which matches the given query with the given list of arguments.
+     * @param database name of the database the resource belongs to
+     * @param resource name of the resource we want to access
+     * @param query a {@link org.jongo.jdbc.DynamicFinder} query
+     * @param args a list of arguments to be given to the {@link org.jongo.jdbc.DynamicFinder}
+     * @param ui the context of the request. Used to obtain the ordering and pagination parameters.
+     * @return all the records which match the given {@link org.jongo.jdbc.DynamicFinder}
+     */
     public Response findBy(String database, String resource, String query, List<String> args, UriInfo ui);
+    
+    /**
+     * Creates a record in the given resource with values from a JSON representation.
+     * @param database name of the database the resource belongs to
+     * @param resource name of the resource we want to access
+     * @param pk optional field which indicates the primary key column name. Defaults to "id"
+     * @param jsonRequest JSON representation of the values we want to insert. For example:
+     * {"name":"foo", "age":40}
+     * @return a {@link org.jongo.rest.xstream.JongoSuccess} response with the number of records inserted and a
+     * CREATED HTTP Code.
+     */
     public Response insert(String database, String resource, String pk, String jsonRequest);
+    
+    /**
+     * Creates a record in the given resource with values from a x-www-form-urlencoded representation as given
+     * by a HTML form.
+     * @param database name of the database the resource belongs to
+     * @param resource name of the resource we want to access
+     * @param pk optional field which indicates the primary key column name. Defaults to "id"
+     * @param formParams a x-www-form-urlencoded representation of the values we want to insert.
+     * @return a {@link org.jongo.rest.xstream.JongoSuccess} response with the number of records inserted and a
+     * CREATED HTTP Code. If an error occurs a BAD REQUEST or NO CONTENT errors are returned.
+     */
     public Response insert(String database, String resource, String pk, MultivaluedMap<String, String> formParams);
+    
+    /**
+     * Updates a record in the given resource with values from a JSON representation.
+     * @param database name of the database the resource belongs to
+     * @param resource name of the resource we want to access
+     * @param pk optional field which indicates the primary key column name. Defaults to "id"
+     * @param id the primary key value of the record we want to update.
+     * @param jsonRequest JSON representation of the values we want to insert. For example:
+     * {"name":"foo", "age":40}
+     * @return a {@link org.jongo.rest.xstream.JongoSuccess} response with the updated record.
+     */
     public Response update(String database, String resource, String pk, String id, String jsonRequest);
+    
+    /**
+     * Deletes a record in the given resource with the given id.
+     * @param database name of the database the resource belongs to
+     * @param resource name of the resource we want to access
+     * @param pk optional field which indicates the primary key column name. Defaults to "id"
+     * @param id the primary key value of the record we want to delete.
+     * @return a {@link org.jongo.rest.xstream.JongoSuccess} response with the number of records deleted and a
+     * OK HTTP Code. If an error occurs a BAD REQUEST or NO CONTENT errors are returned.
+     */
     public Response delete(String database, String resource, String pk, String id);
+    
+    /**
+     * Calls the given function or stored procedure with the given JSON parameters.
+     * @param database  name of the database the function or stored procedure belongs to
+     * @param query name of the function or stored procedure
+     * @param jsonRequest IN and OUT parameters in JSON format. For example:
+     * [
+     *  {"value":2010, "name":"year", "outParameter":false, "type":"INTEGER", "index":1},
+     *  {"name":"out_total", "outParameter":true, "type":"INTEGER", "index":2}
+     * ]
+     * @return 
+     */
     public Response storedProcedure(String database, String query, String jsonRequest);
+    
+    /**
+     * Returns statistics about jongo usage. {@link org.jongo.rest.xstream.Usage}
+     * @return statistics of jongo usage.
+     */
     public Response getJongoStatistics();
     
 }

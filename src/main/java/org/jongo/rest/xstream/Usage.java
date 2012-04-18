@@ -29,27 +29,83 @@ import org.joda.time.format.PeriodFormat;
 
 /**
  * A singleton which holds usage data for the current running instance.
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * @author Alejandro Ayuso 
  */
 public class Usage {
     
+    /**
+     * Indicates when the server was started.
+     */
     private DateTime start;
+    
+    /**
+     * Total number of requests processed by Jongo.
+     */
     private BigInteger total = BigInteger.ZERO;
+    
+    /**
+     * Total number of successful requests.
+     */
     private BigInteger success = BigInteger.ZERO;
+    
+    /**
+     * Total number of failed requests.
+     */
     private BigInteger fail = BigInteger.ZERO;
     
+    /**
+     * Total number of read requests.
+     */
     private BigInteger read = BigInteger.ZERO;
+    
+    /**
+     * Total number of read all requests.
+     */
     private BigInteger readAll = BigInteger.ZERO;
+    
+    /**
+     * Total number of create requests.
+     */
     private BigInteger create = BigInteger.ZERO;
+    
+    /**
+     * Total number of update requests.
+     */
     private BigInteger update = BigInteger.ZERO;
+    
+    /**
+     * Total number of delete requests.
+     */
     private BigInteger delete = BigInteger.ZERO;
     
+    /**
+     * Value with the time it took the last read operation to complete.
+     */
     private Long readTime = Long.valueOf(0L);
+    
+    /**
+     * Value with the time it took the last create operation to complete.
+     */
     private Long createTime = Long.valueOf(0L);
+    
+    /**
+     * Value with the time it took the last update operation to complete.
+     */
     private Long updateTime = Long.valueOf(0L);
+    
+    /**
+     * Value with the time it took the last delete operation to complete.
+     */
     private Long deleteTime = Long.valueOf(0L);
     
+    /**
+     * Total number of requests made with a dynamic finder.
+     */
     private BigInteger dynamic = BigInteger.ZERO;
+    
+    /**
+     * Total number of requests to functions or stored procedures.
+     */
     private BigInteger query = BigInteger.ZERO;
     
     private Usage() {
@@ -68,6 +124,10 @@ public class Usage {
         return this.start.getMillis();
     }
     
+    /**
+     * Calculates the time Jongo has been running and returns a string representing it, i.e. 2 days 10 hours...
+     * @return a string with the uptime.
+     */
     public String getUptime(){
         Period period = new Period(this.start, new DateTime());
         return PeriodFormat.getDefault().print(period);
@@ -182,6 +242,11 @@ public class Usage {
         return updateTime;
     }
     
+    /**
+     * Generates a map with the current values of the singleton to be used in
+     * as {@link org.jongo.rest.xstream.Row} cells.
+     * @return 
+     */
     private Map<String, String> generateCells(){
         Map<String, String> map = new HashMap<String, String>();
         
@@ -204,7 +269,10 @@ public class Usage {
         return map;
     }
     
-        
+    /**
+     * Generates a {@link org.jongo.rest.xstream.JongoSuccess} with the current values of the singleton.
+     * @return a {@link org.jongo.rest.xstream.JongoSuccess} response.
+     */
     public JongoResponse getUsageData(){
         Map<String, String> cells = generateCells();
         List<Row> rows = new ArrayList<Row>();

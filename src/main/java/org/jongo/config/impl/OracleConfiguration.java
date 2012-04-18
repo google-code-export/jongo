@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Oracle 8g and later DatabaseConfiguration implementation.
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * @author Alejandro Ayuso 
  */
 @Deprecated
 public class OracleConfiguration {

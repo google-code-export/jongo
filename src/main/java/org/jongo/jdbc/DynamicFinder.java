@@ -28,8 +28,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * A DynamicFinder object which is an implementation to replicate this functionality as provided
+ * by Grails. The idea is that given a string like findAllByNameAndAge generate the appropriate
+ * DynamicFinder and use this to generate the appropriate SQL statement.
+ * A DynamicFinder  is made up of the prefix findBy or findAllBy followed by 
+ * an expression that combines one or more properties, i.e.
+ * findAllBy - FirstColumn - [FirstOperator] - [BooleanOperator] - [SecondColumn] - [SecondOperator] 
+ * Then the values for the columns are provided separately.
+ * @author Alejandro Ayuso 
  */
 public class DynamicFinder {
 
@@ -48,7 +54,15 @@ public class DynamicFinder {
     private OrderParam orderParam;
     private LimitParam limitParam;
 
-    public static DynamicFinder valueOf(String table, final String query, final String... values) throws JongoBadRequestException {
+    /**
+     * Creates a dynamic finder for the given arguments.
+     * @param resource the resource where to apply the statement
+     * @param query the query to parse
+     * @param values the values for the query
+     * @return a DynamicFinder
+     * @throws JongoBadRequestException if we're unable to parse the query or values.
+     */
+    public static DynamicFinder valueOf(String resource, final String query, final String... values) throws JongoBadRequestException {
         l.debug("Generating dynamic finder for " + query + " with values: [ " + StringUtils.join(values, ",") + "]");
         String str = query;
         String cmd = null;
@@ -59,7 +73,7 @@ public class DynamicFinder {
             str = str.substring(FINDALLBY.length());
             cmd = FINDALLBY;
         } else {
-            throw new JongoBadRequestException("Invalid Command " + str, table);
+            throw new JongoBadRequestException("Invalid Command " + str, resource);
         }
 
         String[] strs = JongoUtils.splitCamelCase(str).split("\\ ");
@@ -92,25 +106,25 @@ public class DynamicFinder {
         
         DynamicFinder finder = null;
         if (operators.isEmpty() && ops.isEmpty()) {
-            finder = new DynamicFinder(table, cmd, columns.get(0));
+            finder = new DynamicFinder(resource, cmd, columns.get(0));
         } else if (operators.isEmpty() && !ops.isEmpty()) {
-            throw new JongoBadRequestException("Invalid Operator", table);
+            throw new JongoBadRequestException("Invalid Operator", resource);
         } else {
             if (columns.size() == 1) {
-                finder = new DynamicFinder(table, cmd, columns.get(0), operators.get(0));
+                finder = new DynamicFinder(resource, cmd, columns.get(0), operators.get(0));
             } else if (columns.size() == 2) {
                 if (operators.size() == 1) {
-                    finder = new DynamicFinder(table, cmd, columns.get(0), operators.get(0), columns.get(1));
+                    finder = new DynamicFinder(resource, cmd, columns.get(0), operators.get(0), columns.get(1));
                 } else if (operators.size() == 2) {
-                    finder = new DynamicFinder(table, cmd, columns.get(0), operators.get(0), columns.get(1), operators.get(1));
+                    finder = new DynamicFinder(resource, cmd, columns.get(0), operators.get(0), columns.get(1), operators.get(1));
                 } else if (operators.size() == 3) {
-                    finder = new DynamicFinder(table, cmd, columns.get(0), operators.get(0), operators.get(1), columns.get(1), operators.get(2));
+                    finder = new DynamicFinder(resource, cmd, columns.get(0), operators.get(0), operators.get(1), columns.get(1), operators.get(2));
                 } else {
-                    throw new JongoBadRequestException("Too many operators: " + operators.size(), table);
+                    throw new JongoBadRequestException("Too many operators: " + operators.size(), resource);
                 }
 
             } else {
-                throw new JongoBadRequestException("Too many columns: " + columns.size(), table);
+                throw new JongoBadRequestException("Too many columns: " + columns.size(), resource);
             }
         }
         l.debug(finder.getSql());
@@ -119,11 +133,12 @@ public class DynamicFinder {
     
     /**
      * Creates a dynamic finder for findByName queries.
-     * @param command either findBy or findAllBy
-     * @param firstColumn the name of an existing column
+     * @param resource where to apply the statement
+     * @param command command either findBy or findAllBy
+     * @param firstColumn firstColumn the name of an existing column
      */
-    public DynamicFinder(String table, String command, String firstColumn) {
-        this.table = table;
+    public DynamicFinder(String resource, String command, String firstColumn) {
+        this.table = resource;
         this.command = command;
         this.firstColumn = firstColumn;
         this.firstOperator = Operator.EQUALS;
@@ -132,12 +147,13 @@ public class DynamicFinder {
 
     /**
      * Creates a dynamic finder for findByNameIsNotNull or findByNameIsNull queries.
+     * @param resource where to apply the statement
      * @param command either findBy or findAllBy
      * @param firstColumn  the name of an existing column
      * @param firstOperator only unary operators IsNull or IsNotNull
      */
-    public DynamicFinder(String table, String command, String firstColumn, Operator firstOperator) {
-        this.table = table;
+    public DynamicFinder(String resource, String command, String firstColumn, Operator firstOperator) {
+        this.table = resource;
         this.command = command;
         this.firstColumn = firstColumn;
         this.firstOperator = firstOperator;
@@ -152,16 +168,17 @@ public class DynamicFinder {
 
     /**
      * Creates a dynamic finder for findByNameAndAge
+     * @param resource where to apply the statement
      * @param command command either findBy or findAllBy
-     * @param firstColumn  command either findBy or findAllBy
+     * @param firstColumn the name of an existing column
      * @param booleanOperator an operator AND or OR
-     * @param secondColumn  command either findBy or findAllBy
+     * @param secondColumn  the name of an existing column
      */
-    public DynamicFinder(String table, String command, String firstColumn, Operator booleanOperator, String secondColumn) throws JongoBadRequestException {
+    public DynamicFinder(String resource, String command, String firstColumn, Operator booleanOperator, String secondColumn) throws JongoBadRequestException {
         if (!booleanOperator.isBoolean()) {
             throw new JongoBadRequestException("Invalid Operator " + booleanOperator);
         }
-        this.table = table;
+        this.table = resource;
         this.command = command;
         this.firstColumn = firstColumn;
         this.firstOperator = Operator.EQUALS;
@@ -173,17 +190,18 @@ public class DynamicFinder {
 
     /**
      * Creates a dynamic finder for findByNameAndAgeGreaterThan
+     * @param resource where to apply the statement
      * @param command command either findBy or findAllBy
-     * @param firstColumn  command either findBy or findAllBy
+     * @param firstColumnthe name of an existing column
      * @param booleanOperator an operator AND or OR
      * @param secondColumn the name of an existing column
      * @param secondOperator a binary operator for the second column
      */
-    public DynamicFinder(String table, String command, String firstColumn, Operator booleanOperator, String secondColumn, Operator secondOperator) throws JongoBadRequestException {
+    public DynamicFinder(String resource, String command, String firstColumn, Operator booleanOperator, String secondColumn, Operator secondOperator) throws JongoBadRequestException {
         if (!booleanOperator.isBoolean()) {
             throw new JongoBadRequestException("Invalid Operator");
         }
-        this.table = table;
+        this.table = resource;
         this.command = command;
         this.firstColumn = firstColumn;
         this.firstOperator = Operator.EQUALS;
@@ -199,18 +217,19 @@ public class DynamicFinder {
 
     /**
      * Creates a dynamic finder for findByNameNotEqualsAndAgeGreaterThan
+     * @param resource where to apply the statement
      * @param command command either findBy or findAllBy
-     * @param firstColumn  command either findBy or findAllBy
-     * @param firstOperator  a binary operator for the second column
+     * @param firstColumn the name of an existing column
+     * @param firstOperator operator for the first column
      * @param booleanOperator an operator AND or OR
      * @param secondColumn the name of an existing column
      * @param secondOperator a binary operator for the second column
      */
-    public DynamicFinder(String table, String command, String firstColumn, Operator firstOperator, Operator booleanOperator, String secondColumn, Operator secondOperator) throws JongoBadRequestException {
+    public DynamicFinder(String resource, String command, String firstColumn, Operator firstOperator, Operator booleanOperator, String secondColumn, Operator secondOperator) throws JongoBadRequestException {
         if (!booleanOperator.isBoolean()) {
             throw new JongoBadRequestException("Invalid Operator");
         }
-        this.table = table;
+        this.table = resource;
         this.command = command;
         this.firstColumn = firstColumn;
         this.firstOperator = firstOperator;
@@ -228,9 +247,16 @@ public class DynamicFinder {
         }
     }
 
-    private static String generateNullColumnQuery(String table, String firstColumn, Operator firstOperator) {
+    /**
+     * Generates a select query for a NULL or NOT NULL operators, i.e. SELECT * FROM resource WHERE firstColumn IS NULL
+     * @param resource where to apply the statement
+     * @param firstColumn the name of an existing column
+     * @param firstOperator operator for the first column (IS NULL or IS NOT NULL)
+     * @return an SQL select query
+     */
+    private static String generateNullColumnQuery(String resource, String firstColumn, Operator firstOperator) {
         StringBuilder sb = new StringBuilder("SELECT * FROM ");
-        sb.append(table);
+        sb.append(resource);
         sb.append(" WHERE ");
         sb.append(firstColumn);
         sb.append(" ");
@@ -238,9 +264,16 @@ public class DynamicFinder {
         return sb.toString();
     }
 
-    private static String generateOneColumnQuery(String table, String firstColumn, Operator firstOperator) {
+    /**
+     * Generates a select query for any operator, i.e SELECT * FROM resource WHERE firstColumn >= ?
+     * @param resource where to apply the statement
+     * @param firstColumn the name of an existing column
+     * @param firstOperator operator for the first column
+     * @return an SQL select query
+     */
+    private static String generateOneColumnQuery(String resource, String firstColumn, Operator firstOperator) {
         StringBuilder sb = new StringBuilder("SELECT * FROM ");
-        sb.append(table);
+        sb.append(resource);
         sb.append(" WHERE ");
         sb.append(firstColumn.toLowerCase());
         sb.append(" ");
@@ -251,9 +284,19 @@ public class DynamicFinder {
         return sb.toString();
     }
 
-    private static String generateTwoColumnQuery(String table, String firstColumn, Operator firstOperator, Operator booleanOperator, String secondColumn, Operator secondOperator) {
+    /**
+     * Generates a select query for two columns and two operators, i.e. SELECT * FROM resource WHERE col1 >= ? OR col2 IS NOT NULL
+     * @param resource where to apply the statement
+     * @param firstColumn the name of an existing column
+     * @param firstOperator operator for the first column
+     * @param booleanOperator an operator AND or OR
+     * @param secondColumn the name of an existing column
+     * @param secondOperator operator for the second Column
+     * @return an SQL select query
+     */
+    private static String generateTwoColumnQuery(String resource, String firstColumn, Operator firstOperator, Operator booleanOperator, String secondColumn, Operator secondOperator) {
         StringBuilder sb = new StringBuilder("SELECT * FROM ");
-        sb.append(table);
+        sb.append(resource);
         sb.append(" WHERE ");
         sb.append(firstColumn);
         sb.append(" ");
@@ -274,18 +317,34 @@ public class DynamicFinder {
         return sb.toString();
     }
 
-    private static String generateBetweenQuery(String table, String firstColumn) {
+    /**
+     * Generates a select query for a between operator on one column, i.e. SELECT * FROM foo WHERE col BETWEEN ? AND ?
+     * @param resource where to apply the statement
+     * @param firstColumn the name of an existing column
+     * @return an SQL select query
+     */
+    private static String generateBetweenQuery(String resource, String firstColumn) {
         StringBuilder sb = new StringBuilder("SELECT * FROM ");
-        sb.append(table);
+        sb.append(resource);
         sb.append(" WHERE ");
         sb.append(firstColumn.toLowerCase());
         sb.append(" BETWEEN ? AND ?");
         return sb.toString();
     }
     
-    private static String generateBetweenQuery(String table, String firstColumn, Operator booleanOperator, String secondColumn, Operator secondOperator) {
+    /**
+     * Generates a select query for a between operator on one column and another operator
+     * i.e. SELECT * FROM foo WHERE col1 BETWEEN ? AND ? OR col2 = ?
+     * @param resource where to apply the statement
+     * @param firstColumn the name of an existing column
+     * @param booleanOperator an operator AND or OR
+     * @param secondColumn the name of an existing column
+     * @param secondOperator operator for the second Column
+     * @return an SQL select query
+     */
+    private static String generateBetweenQuery(String resource, String firstColumn, Operator booleanOperator, String secondColumn, Operator secondOperator) {
         StringBuilder sb = new StringBuilder("SELECT * FROM ");
-        sb.append(table);
+        sb.append(resource);
         sb.append(" WHERE ");
         sb.append(firstColumn.toLowerCase());
         sb.append(" BETWEEN ? AND ? ");

@@ -24,7 +24,7 @@ import org.jongo.sql.Table;
 
 /**
  *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * @author Alejandro Ayuso 
  */
 public class OrderParam {
     public static final String ASC = "ASC";

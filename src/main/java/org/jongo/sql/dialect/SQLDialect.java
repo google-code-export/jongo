@@ -30,8 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A Dialect representation of standard SQL98 or SQL2008 operations.
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * A Dialect representation of standard SQL98 & SQL2008 operations.
+ * @author Alejandro Ayuso 
  */
 public class SQLDialect implements Dialect{
 

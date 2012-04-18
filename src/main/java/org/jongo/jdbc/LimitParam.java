@@ -25,7 +25,7 @@ import org.apache.commons.lang.StringUtils;
  * their correct form in SQL. If no limit parameter is given, the default is 25
  * the configuration. The default value for the offset or start is 0.
  * The limit value has a maximum of 1000.
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * @author Alejandro Ayuso 
  */
 public class LimitParam {
     

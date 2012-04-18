@@ -24,8 +24,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * Represents an error response object. Can be processed with JAX.
+ * @author Alejandro Ayuso 
  */
 @XmlRootElement(name="response")
 public class JongoError implements JongoResponse {
@@ -39,6 +39,11 @@ public class JongoError implements JongoResponse {
     
     public JongoError(){}
 
+    /**
+     * Instantiates a new JongoError for a given resource and HTTP code.
+     * @param resource the name of the resource being accessed
+     * @param status a HTTP code to give to the client
+     */
     public JongoError(String resource, Response.Status status) {
         this.resource = resource;
         this.status = status.getStatusCode();
@@ -47,6 +52,12 @@ public class JongoError implements JongoResponse {
         this.sqlCode = null;
     }
 
+    /**
+     * Instantiates a new JongoError for a given resource, error code and message.
+     * @param resource the name of the resource being accessed
+     * @param errorCode a HTTP code to give to the client
+     * @param message a message explaining the error
+     */
     public JongoError(String resource, Integer errorCode, String message) {
         this.resource = resource;
         this.status = errorCode;
@@ -55,6 +66,12 @@ public class JongoError implements JongoResponse {
         this.sqlCode = null;
     }
     
+    /**
+     * Instantiates a new JongoError for a given resource, error code and message.
+     * @param resource the name of the resource being accessed
+     * @param status a HTTP code to give to the client
+     * @param message a message explaining the error
+     */
     public JongoError(String resource, Response.Status status, String message) {
         this.resource = resource;
         this.status = status.getStatusCode();
@@ -63,6 +80,12 @@ public class JongoError implements JongoResponse {
         this.sqlCode = null;
     }
     
+    /**
+     * Special instance of a JongoError for SQLExceptions where we return the
+     * driver SqlState and SqlCode with a 400 HTTP code.
+     * @param resource the name of the resource being accessed
+     * @param ex the exception thrown by the driver.
+     */
     public JongoError(final String resource, final SQLException ex){
         this.resource = resource;
         this.status = 400;

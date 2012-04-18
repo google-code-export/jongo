@@ -18,10 +18,12 @@
 package org.jongo.exceptions;
 
 /**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * A fatal exception which indicates that Jongo can't bootup.
+ * @author Alejandro Ayuso 
  */
 public class StartupException extends Exception {
+    
+    private static final long serialVersionUID = 1L;
     
     private final boolean fatal;
     

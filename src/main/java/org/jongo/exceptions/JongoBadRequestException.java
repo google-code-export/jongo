@@ -22,8 +22,9 @@ import org.jongo.rest.xstream.JongoError;
 import org.jongo.rest.xstream.JongoResponse;
 
 /**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * Exception used to indicate that the client request is somehow broken. This exception produces
+ * a {@link org.jongo.rest.xstream.JongoError} with a 400 HTTP error code.
+ * @author Alejandro Ayuso 
  */
 public class JongoBadRequestException extends Exception {
     
@@ -41,6 +42,10 @@ public class JongoBadRequestException extends Exception {
         this.resource = resource;
     }
     
+    /**
+     * Generates a jersey ready response to be sent by the container. This response has a 400 HTTP error code.
+     * @return a jersey ready response to be sent by the container.
+     */
     public Response getResponse(){
         JongoResponse error = new JongoError(this.resource, Response.Status.BAD_REQUEST.getStatusCode(), this.getMessage());
         return error.getResponse();

@@ -36,13 +36,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * Singleton in charge of registering a pool of connections for each database 
+ * and provide access to this connections.
+ * @author Alejandro Ayuso 
  */
 public class JDBCConnectionFactory {
 
     private static final Logger l = LoggerFactory.getLogger(JDBCConnectionFactory.class);
     private static final JongoConfiguration configuration = JongoConfiguration.instanceOf();
+    
+    /**
+     * Maximum size the connection pool will have.
+     */
+    private static final Integer MAX_POOL_SIZE = 25;
 
     private final Map<String, GenericObjectPool> connectionPool = new HashMap<String,GenericObjectPool>();
     
@@ -50,6 +56,10 @@ public class JDBCConnectionFactory {
     
     private JDBCConnectionFactory(){}
     
+    /**
+     * Instantiates a new JDBCConnectionFactory if required and creates a connections pool for every database.
+     * @return the instance of the singleton.
+     */
     private static JDBCConnectionFactory instanceOf(){
         if(instance == null){
             instance = new JDBCConnectionFactory();
@@ -57,7 +67,7 @@ public class JDBCConnectionFactory {
             for(String dbname : databases){
                 l.debug("Registering Connection Pool for " + dbname);
                 DatabaseConfiguration dbcfg = configuration.getDatabaseConfiguration(dbname);
-                GenericObjectPool pool = new GenericObjectPool(null, 25);
+                GenericObjectPool pool = new GenericObjectPool(null, MAX_POOL_SIZE);
                 ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(dbcfg.getUrl(), dbcfg.getUsername(), dbcfg.getPassword());
                 PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, pool, null, null, false, true);
                 poolableConnectionFactory.hashCode();
@@ -67,23 +77,43 @@ public class JDBCConnectionFactory {
         return instance;
     }
 
+    /**
+     * Gives access to a {@link java.sql.Connection} for the given database.
+     * @param database the name of a registered database
+     * @return a {@link java.sql.Connection}
+     * @throws SQLException 
+     */
     public static Connection getConnection(final String database) throws SQLException {
         l.debug("Obtaining a connection from the datasource");
         DataSource ds = getDataSource(database);
         return ds.getConnection();
     }
 
+    /**
+     * Gives access to a {@link java.sql.DataSource} for the given database.
+     * @param database database the name of a registered database
+     * @return a {@link java.sql.DataSource}
+     */
     public static DataSource getDataSource(final String database) {
         JDBCConnectionFactory me = JDBCConnectionFactory.instanceOf();
         PoolingDataSource dataSource = new PoolingDataSource(me.connectionPool.get(database));
         return dataSource;
     }
 
+    /**
+     * Instantiates a new {@linkplain org.apache.commons.dbutils.QueryRunner} for the given database.
+     * @param database the name of a registered database
+     * @return a new {@linkplain org.apache.commons.dbutils.QueryRunner}
+     */
     public static QueryRunner getQueryRunner(final String database){
         DataSource ds = getDataSource(database);
         return new QueryRunner(ds);
     }
     
+    /**
+     * Close all connections in the pool.
+     * @throws SQLException 
+     */
     public static void closeConnections() throws SQLException{
         for(String dbname : configuration.getDatabases()){
             l.debug("Shutting down JDBC connection " + dbname);

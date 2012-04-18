@@ -29,8 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * Dialect for Oracle 8g+ RDBMS.
+ * @author Alejandro Ayuso 
  */
 public class OracleDialect extends SQLDialect {
     

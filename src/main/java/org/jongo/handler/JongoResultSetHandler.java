@@ -35,8 +35,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Handles a ResultSet and convert it to a List of RowResponse
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * Handles a ResultSet and converts it to a List of {@link org.jongo.rest.xstream.Row}
+ * @author Alejandro Ayuso 
  */
 public class JongoResultSetHandler implements ResultSetHandler<List<Row>> {
     
@@ -47,16 +47,22 @@ public class JongoResultSetHandler implements ResultSetHandler<List<Row>> {
     private static final DateTimeFormatter dateFTR = ISODateTimeFormat.date();
     private static final DateTimeFormatter timeFTR = ISODateTimeFormat.time();
     
+    /**
+     * Constructor of the handler.
+     * @param all if true, the handler will process all results in the {@linkplain java.sql.ResultSet}
+     * if false, it will only process the first result.
+     */
     public JongoResultSetHandler(final boolean all){
         super();
         this.all = all;
     }
 
     /**
-     * Method in charge of the conversion
-     * @param rs the ResultSet
-     * @return a List of RowResponse
-     * @throws SQLException
+     * Method in charge of the conversion. Depending on the argument given to the contructor, it
+     * will process all results or only the first one.
+     * @param rs the {@linkplain java.sql.ResultSet}
+     * @return a List of {@link org.jongo.rest.xstream.Row}
+     * @throws SQLException if we fail to handle the {@linkplain java.sql.ResultSet}
      */
     @Override
     public List<Row> handle(ResultSet rs) throws SQLException {
@@ -76,8 +82,9 @@ public class JongoResultSetHandler implements ResultSetHandler<List<Row>> {
     }
     
     /**
-     * Converts a ResultSet to a Map
-     * @param resultSet a ResultSet
+     * Converts a ResultSet to a Map. Important to note that DATE, TIMESTAMP & TIME objects generate
+     * a {@linkplain org.joda.time.DateTime} object using {@linkplain org.joda.time.format.ISODateTimeFormat}.
+     * @param resultSet a {@linkplain java.sql.ResultSet}
      * @return a Map with the column names as keys and the values. null if something goes wrong.
      */
     public static Map<String, String> resultSetToMap(ResultSet resultSet) {

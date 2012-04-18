@@ -42,7 +42,7 @@ import sun.misc.BASE64Encoder;
 
 /**
  * Collection of commonly used methods and constants.
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * @author Alejandro Ayuso 
  */
 public class JongoUtils {
     
@@ -221,6 +221,16 @@ public class JongoUtils {
         }
     }
     
+    /**
+     * From a JSON string generated a list of {@link org.jongo.jdbc.StoredProcedureParam}. The format of this JSON is:
+     * [
+     *  {"value":2010, "name":"year", "outParameter":false, "type":"INTEGER", "index":1},
+     *  {"name":"out_total", "outParameter":true, "type":"INTEGER", "index":2}
+     * ]
+     * @param json a string with the JSON representation of a {@link org.jongo.jdbc.StoredProcedureParam}
+     * @return a list of {@link org.jongo.jdbc.StoredProcedureParam}.
+     * @throws JongoBadRequestException if we fail to parse the JSON for any reason.
+     */
     public static List<StoredProcedureParam> getStoredProcedureParamsFromJSON(final String json) throws JongoBadRequestException{
         if(StringUtils.isBlank(json))
             throw new JongoBadRequestException("Invalid number of arguments for request " + json);
@@ -232,6 +242,11 @@ public class JongoUtils {
         }
     }
     
+    /**
+     * Calls the JongoConfiguration.instanceOf() method and returns the given instance of {@link org.jongo.config.JongoConfiguration}
+     * @return an instance of {@link org.jongo.config.JongoConfiguration}
+     * @throws StartupException if {@link org.jongo.config.JongoConfiguration} fails to instantiate.
+     */
     public static JongoConfiguration loadConfiguration() throws StartupException{
         JongoConfiguration configuration = null;
         try{

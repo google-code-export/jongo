@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Create the database resources for the demo
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * @author Alejandro Ayuso 
  */
 public class Demo {
     

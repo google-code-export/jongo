@@ -32,7 +32,7 @@ import org.jongo.rest.xstream.JongoResponse;
 
 /**
  *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * @author Alejandro Ayuso 
  */
 public class JongoClient {
     

@@ -24,16 +24,35 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Holder for database configuration data
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * @author Alejandro Ayuso 
  */
 public class DatabaseConfiguration {
     
     private static final Logger l = LoggerFactory.getLogger(DatabaseConfiguration.class);
     
+    /**
+     * name of the database/schema. It should be unique for the whole jongo instance.
+     */
     protected final String name;
+    
+    /**
+     * the {@link org.jongo.enums.JDBCDriver} driver
+     */
     protected final JDBCDriver driver;
+    
+    /**
+     * the username used to authenticate against the RDMBS
+     */
     protected final String username;
+    
+    /**
+     * the password for the given user used to authenticate against the RDMBS
+     */
     protected final String password;
+    
+    /**
+     * the JDBC url of the RDMBS
+     */
     protected final String url;
 
     private boolean loaded = false;
@@ -46,13 +65,25 @@ public class DatabaseConfiguration {
         this.url = url;
     }
     
+    /**
+     * Instantiates a new DatabaseConfiguration object, loads the given JDBCDriver and returns the instance.
+     * @param name name of the database/schema. It should be unique for the whole jongo instance.
+     * @param driver the {@link org.jongo.enums.JDBCDriver} driver
+     * @param user the user used used to authenticate against the RDMBS
+     * @param password the password for the given user used to authenticate against the RDMBS
+     * @param url the JDBC url of the RDMBS
+     * @return an instance of DatabaseConfiguration.
+     */
     public static DatabaseConfiguration instanceOf(String name, JDBCDriver driver, String user, String password, String url){
         DatabaseConfiguration c = new DatabaseConfiguration(name, driver, user, password, url);
         c.loadDriver();
         return c;
     }
     
-    public void loadDriver() {
+    /**
+     * Loads the driver given using Class.forName
+     */
+    private void loadDriver() {
         if(!loaded){
             l.debug("Loading Driver " + this.driver.getName());
             try {

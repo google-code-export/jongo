@@ -30,7 +30,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 /**
  *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * @author Alejandro Ayuso 
  */
 public class JongoMapConverter implements Converter {
     
