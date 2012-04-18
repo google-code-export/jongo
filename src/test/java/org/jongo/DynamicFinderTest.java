@@ -21,7 +21,7 @@ package org.jongo;
 import java.util.HashMap;
 import java.util.Map;
 import org.jongo.exceptions.JongoBadRequestException;
-import org.jongo.jdbc.DynamicFinder;
+import org.jongo.sql.DynamicFinder;
 import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
 import org.jongo.sql.dialect.MySQLDialect;
