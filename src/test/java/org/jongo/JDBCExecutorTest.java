@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import org.jongo.config.JongoConfiguration;
 import org.jongo.demo.Demo;
+import org.jongo.enums.Operator;
 import org.jongo.exceptions.JongoBadRequestException;
 import org.jongo.exceptions.StartupException;
 import org.jongo.jdbc.JDBCExecutor;
@@ -69,25 +70,25 @@ public class JDBCExecutorTest {
         assertEquals(3, rs.size());
         
         // select * from car where cid = 0
-        rs = JDBCExecutor.get(new Select(new Table("demo1", "car", "cid")).setValue("0"), false);
+        rs = JDBCExecutor.get(new Select(new Table("demo1", "car", "cid")).setParameter(new SelectParam("cid", "0")), false);
         assertEquals(1, rs.size());
         
         // select * from user where id = 0
-        rs = JDBCExecutor.get(new Select(t).setValue("0"), false);
+        rs = JDBCExecutor.get(new Select(t).setParameter(new SelectParam(t.getPrimaryKey(), "0")), false);
         assertEquals(1, rs.size());
         
         // select * from user where name = bar
-        rs = JDBCExecutor.get(new Select(t).setValue("bar").setColumn("name"), true);
+        rs = JDBCExecutor.get(new Select(t).setParameter(new SelectParam("name", "bar")), true);
         assertEquals(1, rs.size());
         
         // select birthday from user where name = bar
-        rs = JDBCExecutor.get(new Select(t).setValue("bar").setColumn("name").addColumn("birthday"), true);
+        rs = JDBCExecutor.get(new Select(t).setParameter(new SelectParam("name", "bar")).addColumn("birthday"), true);
         assertEquals(1, rs.size());
         assertFalse(rs.get(0).getCells().containsKey("credit"));
         assertTrue(rs.get(0).getCells().containsKey("birthday"));
         
         // select birthday from user where id = 1
-        rs = JDBCExecutor.get(new Select(t).setValue("0").addColumn("birthday"), true);
+        rs = JDBCExecutor.get(new Select(t).addColumn("birthday").setParameter(new SelectParam("id", "1")), true);
         assertEquals(1, rs.size());
         assertFalse(rs.get(0).getCells().containsKey("credit"));
         assertTrue(rs.get(0).getCells().containsKey("birthday"));
@@ -110,8 +111,7 @@ public class JDBCExecutorTest {
             assertEquals(1, r);
             createdusers.add(u);
             
-            Select s = new Select(t);
-            s.setColumn("name").setValue(u.name);
+            Select s = new Select(t).setParameter(new SelectParam("name", Operator.EQUALS, u.name));
             
             List<Row> rs = JDBCExecutor.get(s, true);
             Row row = rs.get(0);
@@ -154,7 +154,7 @@ public class JDBCExecutorTest {
     @Test
     public void testUpdate() throws SQLException{
         Table t = new Table("demo1", "user");
-        Select s = new Select(t).setValue("0");
+        Select s = new Select(t).setParameter(new SelectParam(t.getPrimaryKey(), Operator.EQUALS, "0"));
         Row row = JDBCExecutor.get(s, false).get(0);
         assertEquals("0", row.getCells().get("id"));
         

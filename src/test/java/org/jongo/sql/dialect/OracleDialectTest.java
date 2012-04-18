@@ -18,6 +18,7 @@
 package org.jongo.sql.dialect;
 
 import junit.framework.Assert;
+import org.jongo.enums.Operator;
 import org.jongo.sql.DynamicFinder;
 import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
@@ -39,17 +40,18 @@ public class OracleDialectTest extends SQLDialectTest {
     public void testSelect() {
         doTest("SELECT a_table.* FROM demo1.a_table", new Select(table));
         
-        doTest("SELECT a_table.* FROM demo1.a_table WHERE a_table.tableId=?", new Select(table).setValue("1"));
+        doTest("SELECT a_table.* FROM demo1.a_table WHERE a_table.tableId = ?", new Select(table).setParameter(new SelectParam(table.getPrimaryKey(), "1")));
         
-        doTest("SELECT a_table.* FROM demo1.a_table WHERE a_table.name=?", new Select(table).setValue("1").setColumn("name"));
+        doTest("SELECT a_table.* FROM demo1.a_table WHERE a_table.name = ?", new Select(table).setParameter(new SelectParam("name", "1")));
         
-        doTest("SELECT a_table.* FROM demo1.a_table WHERE a_table.tableId=? ORDER BY a_table.tableId ASC", new Select(table).setValue("1").setOrderParam(new OrderParam(table)));
+        doTest("SELECT a_table.* FROM demo1.a_table WHERE a_table.tableId = ? ORDER BY a_table.tableId ASC",
+                new Select(table).setParameter(new SelectParam(table.getPrimaryKey(), "1")).setOrderParam(new OrderParam(table)));
         
-        doTest("SELECT * FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY a_table.tableId ) AS ROW_NUMBER, a_table.* FROM demo1.a_table WHERE a_table.name=?) WHERE ROW_NUMBER BETWEEN 0 AND 25",
-                new Select(table).setValue("1").setColumn("name").setLimitParam(new LimitParam()));
+        doTest("SELECT * FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY a_table.tableId ) AS ROW_NUMBER, a_table.* FROM demo1.a_table WHERE a_table.name = ?) WHERE ROW_NUMBER BETWEEN 0 AND 25",
+                new Select(table).setParameter(new SelectParam("name", "1")).setLimitParam(new LimitParam()));
         
-        doTest("SELECT * FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY a_table.name DESC ) AS ROW_NUMBER, a_table.* FROM demo1.a_table WHERE a_table.tableId=?) WHERE ROW_NUMBER BETWEEN 0 AND 25",
-                new Select(table).setValue("1").setLimitParam(l).setOrderParam(new OrderParam("name", "DESC")));
+        doTest("SELECT * FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY a_table.name DESC ) AS ROW_NUMBER, a_table.* FROM demo1.a_table WHERE a_table.tableId = ?) WHERE ROW_NUMBER BETWEEN 0 AND 25",
+                new Select(table).setParameter(new SelectParam(table.getPrimaryKey(), "1")).setLimitParam(l).setOrderParam(new OrderParam("name", "DESC")));
     }
 
     @Test
