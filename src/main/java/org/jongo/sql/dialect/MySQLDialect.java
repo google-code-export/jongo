@@ -23,8 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * Dialect for MySQL, Nettezza or MariaDB.
+ * @author Alejandro Ayuso 
  */
 public class MySQLDialect extends SQLDialect {
     

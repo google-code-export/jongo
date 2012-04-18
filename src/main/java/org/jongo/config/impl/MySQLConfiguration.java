@@ -21,7 +21,7 @@ import org.apache.commons.lang.StringUtils;
 
 /**
  * MySQL DatabaseConfiguration implementation.
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * @author Alejandro Ayuso 
  */
 @Deprecated
 public class MySQLConfiguration {

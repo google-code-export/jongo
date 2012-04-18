@@ -11,7 +11,7 @@ import org.junit.Test;
 
 /**
  *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * @author Alejandro Ayuso 
  */
 public class PerformanceLoggerTest {
     

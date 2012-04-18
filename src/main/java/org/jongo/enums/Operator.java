@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * Enum with the different SQL operators. Used by the {@link org.jongo.jdbc.DynamicFinder}
+ * @author Alejandro Ayuso 
  */
 public enum Operator {
     AND,
@@ -43,6 +43,10 @@ public enum Operator {
     
     private static final List<String> keywords = new ArrayList<String>();
     
+    /**
+     * Returns the SQL representation of the operator.
+     * @return 
+     */
     public String sql(){
         switch(this){
             case AND:
@@ -77,6 +81,10 @@ public enum Operator {
         }
     }
     
+    /**
+     * Is the current operator an unary operation?
+     * @return true if ISNULL or ISNOTNULL.
+     */
     public boolean isUnary(){
         switch(this){
             case ISNULL:
@@ -87,10 +95,18 @@ public enum Operator {
         }
     }
     
+    /**
+     * Is the current operator a binary operation?
+     * @return 
+     */
     public boolean isBinary(){
         return !this.isUnary() && !this.isBoolean();
     }
     
+    /**
+     * Is AND or OR?
+     * @return true for AND or OR operators.
+     */
     public boolean isBoolean(){
         switch(this){
             case AND:

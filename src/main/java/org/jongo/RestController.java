@@ -32,8 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * Controller for the RESTful operations. Serves as a backend for the {@link org.jongo.JongoWS} implementations.
+ * @author Alejandro Ayuso 
  */
 public class RestController {
     
@@ -42,12 +42,22 @@ public class RestController {
     
     private final String database;
     
+    /**
+     * Instantiates a new controller for the given database/schema if this exists
+     * @param database the name of the database/schema to work with
+     * @throws IllegalArgumentException if the database/schema name is blank, empty or null
+     */
     public RestController(String database){
         if(StringUtils.isBlank(database))
             throw new IllegalArgumentException("Database name can't be blank, empty or null");
         this.database = database;
     }
     
+    /**
+     * Obtains a list of tables for the given database/schema and returns a {@link org.jongo.rest.xstream.JongoSuccess}
+     * response.
+     * @return  a {@link org.jongo.rest.xstream.JongoSuccess} or a {@link org.jongo.rest.xstream.JongoError}
+     */
     public JongoResponse getDatabaseMetadata(){
         l.debug("Obtaining metadata for " + database);
         JongoResponse response = null;
@@ -69,6 +79,12 @@ public class RestController {
         return response;
     }
     
+    /**
+     * Obtains a list of columns for the given resource and returns a {@link org.jongo.rest.xstream.JongoSuccess}
+     * response.
+     * @param table name of the resource to obtain the metadata from
+     * @return a {@link org.jongo.rest.xstream.JongoSuccess} or a {@link org.jongo.rest.xstream.JongoError}
+     */
     public JongoResponse getResourceMetadata(final String table){
         l.debug("Obtaining metadata for " + table);
         
@@ -226,32 +242,49 @@ public class RestController {
         return response;
     }
     
-    public JongoResponse insertResource(final String table, final String customId, final String jsonRequest){
-        l.debug("Insert new " + database + "." + table + " with JSON values: " + jsonRequest);
+    /**
+     * Generates an instance of {@link org.jongo.sql.Insert} for the given JSON arguments and calls the 
+     * insertResource(Insert) method.
+     * @param resource the resource or view where to insert the record.
+     * @param pk optional field which indicates the primary key column name. Defaults to "id"
+     * @param jsonRequest JSON representation of the values we want to insert. For example:
+     * {"name":"foo", "age":40}
+     * @return a {@link org.jongo.rest.xstream.JongoSuccess} or a {@link org.jongo.rest.xstream.JongoError}
+     */
+    public JongoResponse insertResource(final String resource, final String pk, final String jsonRequest){
+        l.debug("Insert new " + database + "." + resource + " with JSON values: " + jsonRequest);
         
         JongoResponse response;
         
         try {
             Map<String, String> params = JongoUtils.getParamsFromJSON(jsonRequest);
-            response = insertResource(table, customId, params);
+            response = insertResource(resource, pk, params);
         } catch (JongoBadRequestException ex){
             l.info("Failed to parse JSON arguments " + ex.getMessage());
-            response = new JongoError(table, Response.Status.BAD_REQUEST, ex.getMessage());
+            response = new JongoError(resource, Response.Status.BAD_REQUEST, ex.getMessage());
         }
         
         return response;
     }
     
-    public JongoResponse insertResource(final String table, final String customId, final Map<String, String> formParams){
-        l.debug("Insert new " + database + "." + table + " with values: " + formParams);
+    /**
+     * Generates an instance of {@link org.jongo.sql.Insert} for the given x-www-form-urlencoded arguments and calls the 
+     * insertResource(Insert) method.
+     * @param resource the resource or view where to insert the record.
+     * @param pk optional field which indicates the primary key column name. Defaults to "id"
+     * @param formParams a x-www-form-urlencoded representation of the values we want to insert.
+     * @return a {@link org.jongo.rest.xstream.JongoSuccess} or a {@link org.jongo.rest.xstream.JongoError}
+     */
+    public JongoResponse insertResource(final String resource, final String pk, final Map<String, String> formParams){
+        l.debug("Insert new " + database + "." + resource + " with values: " + formParams);
         
         JongoResponse response;
         Table t;
         try{
-            t = new Table(database, table);
+            t = new Table(database, resource);
         }catch (IllegalArgumentException e){
             l.debug("Failed to generate Insert " + e.getMessage());
-            return new JongoError(table, Response.Status.BAD_REQUEST, e.getMessage());
+            return new JongoError(resource, Response.Status.BAD_REQUEST, e.getMessage());
         }
         
         Insert insert = new Insert(t).setColumns(formParams);
@@ -260,6 +293,12 @@ public class RestController {
         return response;
     }
     
+    /**
+     * Calls the {@link org.jongo.jdbc.JDBCExecutor} insert method with the 
+     * given {@link org.jongo.sql.Insert} instance and handles errors.
+     * @param insert a {@link org.jongo.sql.Insert} instance
+     * @return a {@link org.jongo.rest.xstream.JongoSuccess} or a {@link org.jongo.rest.xstream.JongoError}
+     */
     private JongoResponse insertResource(Insert insert){
         JongoResponse response = null;
         int result = 0;
@@ -281,18 +320,27 @@ public class RestController {
         return response;
     }
     
-    public JongoResponse updateResource(final String table, final String customId, final String id, final String jsonRequest){
-        l.debug("Update record " + id + " in table " + database + "." + table + " with values: " + jsonRequest);
+    /**
+     * Creates an instance of {@link org.jongo.sql.Update}, calls 
+     * the {@link org.jongo.jdbc.JDBCExecutor} update method and handles errors
+     * @param resource the resource or view where to insert the record.
+     * @param pk optional field which indicates the primary key column name. Defaults to "id"
+     * @param jsonRequest JSON representation of the values we want to update. For example:
+     * {"name":"foo", "age":40}
+     * @return a {@link org.jongo.rest.xstream.JongoSuccess} or a {@link org.jongo.rest.xstream.JongoError}
+     */
+    public JongoResponse updateResource(final String resource, final String pk, final String id, final String jsonRequest){
+        l.debug("Update record " + id + " in table " + database + "." + resource + " with values: " + jsonRequest);
         JongoResponse response = null;
         
         List<Row> results = null;
         
         Table t;
         try{
-            t = new Table(database, table, customId);
+            t = new Table(database, resource, pk);
         }catch (IllegalArgumentException e){
             l.debug("Failed to generate update " + e.getMessage());
-            return new JongoError(table, Response.Status.BAD_REQUEST, e.getMessage());
+            return new JongoError(resource, Response.Status.BAD_REQUEST, e.getMessage());
         }
         
         Update update = new Update(t).setId(id);
@@ -300,29 +348,37 @@ public class RestController {
             update.setColumns(JongoUtils.getParamsFromJSON(jsonRequest));
             results = JDBCExecutor.update(update);
         } catch (Throwable ex){
-            response = handleException(ex, table);
+            response = handleException(ex, resource);
         }
         
         if((results == null || results.isEmpty()) && response == null){
-            response =  new JongoError(table, Response.Status.NO_CONTENT);
+            response =  new JongoError(resource, Response.Status.NO_CONTENT);
         }
 
         if(response == null){
-            response = new JongoSuccess(table, results, Response.Status.OK);
+            response = new JongoSuccess(resource, results, Response.Status.OK);
         }
         
         return response;
     }
     
-    public JongoResponse deleteResource(final String table, final String customId, final String id){
-        l.debug("Delete record " + id + " from table " + database + "." + table);
+    /**
+     * Creates an instance of {@link org.jongo.sql.Delete}, calls 
+     * the {@link org.jongo.jdbc.JDBCExecutor} delete method and handles errors
+     * @param resource the resource or view where to insert the record.
+     * @param pk optional field which indicates the primary key column name. Defaults to "id"
+     * @param id unique pk identifier of the record to delete.
+     * @return a {@link org.jongo.rest.xstream.JongoSuccess} or a {@link org.jongo.rest.xstream.JongoError}
+     */
+    public JongoResponse deleteResource(final String resource, final String pk, final String id){
+        l.debug("Delete record " + id + " from table " + database + "." + resource);
         
         Table t;
         try{
-            t = new Table(database, table, customId);
+            t = new Table(database, resource, pk);
         }catch (IllegalArgumentException e){
             l.debug("Failed to generate delete " + e.getMessage());
-            return new JongoError(table, Response.Status.BAD_REQUEST, e.getMessage());
+            return new JongoError(resource, Response.Status.BAD_REQUEST, e.getMessage());
         }
         
         Delete delete = new Delete(t).setId(id);
@@ -331,60 +387,81 @@ public class RestController {
         try {
             result = JDBCExecutor.delete(delete);
         } catch (Throwable ex){
-            response = handleException(ex, table);
+            response = handleException(ex, resource);
         }
         
         if(result == 0 && response == null){
-            response = new JongoError(table, Response.Status.NO_CONTENT);
+            response = new JongoError(resource, Response.Status.NO_CONTENT);
         }
 
         if(response == null){
             List<Row> results = new ArrayList<Row>();
             results.add(new Row(0));
-            response = new JongoSuccess(table, results, Response.Status.OK);
+            response = new JongoSuccess(resource, results, Response.Status.OK);
         }
         return response;
     }
     
-    public JongoResponse findByDynamicFinder(final String table, final String query, final List<String> values, final LimitParam limit, final OrderParam order){
-        l.debug("Find resource from " + database + "." + table + " with " + query);
+    /**
+     * Generates a {@link org.jongo.jdbc.DynamicFinder} from the given parameters and calls
+     * the {@link org.jongo.jdbc.JDBCExecutor} find method and handles errors
+     * @param resource the resource or view where to insert the record.
+     * @param query a {@link org.jongo.jdbc.DynamicFinder} query
+     * @param values a list of arguments to be given to the {@link org.jongo.jdbc.DynamicFinder}
+     * @param limit a {@link org.jongo.jdbc.LimitParam} instance.
+     * @param order a {@link org.jongo.jdbc.OrderParam} instance.
+     * @return a {@link org.jongo.rest.xstream.JongoSuccess} or a {@link org.jongo.rest.xstream.JongoError}
+     */
+    public JongoResponse findByDynamicFinder(final String resource, final String query, final List<String> values, final LimitParam limit, final OrderParam order){
+        l.debug("Find resource from " + database + "." + resource + " with " + query);
         
         if(values == null)
             throw new IllegalArgumentException("Invalid null argument");
         
         if(query == null)
-            return new JongoError(table, Response.Status.BAD_REQUEST, "Invalid query");
+            return new JongoError(resource, Response.Status.BAD_REQUEST, "Invalid query");
         
         JongoResponse response = null;
         List<Row> results = null;
         
         if(values.isEmpty()){
             try{
-                DynamicFinder df = DynamicFinder.valueOf(table, query);
+                DynamicFinder df = DynamicFinder.valueOf(resource, query);
                 results = JDBCExecutor.find(database, df, limit, order);
             } catch (Throwable ex){
-                response = handleException(ex, table);
+                response = handleException(ex, resource);
             }
         }else{
             try{
-                DynamicFinder df = DynamicFinder.valueOf(table, query, values.toArray(new String []{}));
+                DynamicFinder df = DynamicFinder.valueOf(resource, query, values.toArray(new String []{}));
                 results = JDBCExecutor.find(database, df, limit, order, JongoUtils.parseValues(values));
             } catch (Throwable ex){
-                response = handleException(ex, table);
+                response = handleException(ex, resource);
             }
         }
         
         if((results == null || results.isEmpty()) && response == null){
-            response = new JongoError(table, Response.Status.NOT_FOUND, "No results for " + query);
+            response = new JongoError(resource, Response.Status.NOT_FOUND, "No results for " + query);
         }
         
         if(response == null){
-            response =  new JongoSuccess(table, results);
+            response =  new JongoSuccess(resource, results);
         }
         
         return response;
     }
     
+    /**
+     * Generates a List of {@link org.jongo.jdbc.StoredProcedureParam} and executes
+     * the {@link org.jongo.jdbc.JDBCExecutor} executeQuery method with the given JSON parameters.
+     * @param query name of the function or stored procedure
+     * @param json IN and OUT parameters in JSON format. For example:
+     * [
+     *  {"value":2010, "name":"year", "outParameter":false, "type":"INTEGER", "index":1},
+     *  {"name":"out_total", "outParameter":true, "type":"INTEGER", "index":2}
+     * ]
+     * @return a {@link org.jongo.rest.xstream.JongoSuccess} or a {@link org.jongo.rest.xstream.JongoError}
+     */
     public JongoResponse executeStoredProcedure(final String query, final String json){
         l.debug("Executing Stored Procedure " + query);
         
@@ -409,6 +486,16 @@ public class RestController {
         return response;
     }
     
+    /**
+     * Method in charge of handling the possible exceptions thrown by the JDBCExecutor or any other
+     * operation. The current implementation handles SQLException, JongoBadRequestException &
+     * IllegalArgumentException to return different errors. For any other exception 
+     * a {@link org.jongo.rest.xstream.JongoError} with a 500 status code is returned.
+     * @param t the exception to handle.
+     * @param resource the name of the resource which is throwing the exception.
+     * @return a {@link org.jongo.rest.xstream.JongoError} with different error codes depending
+     * on the exception being handled. If we can't handle the exception, a 500 error code is used.
+     */
     private JongoResponse handleException(final Throwable t, final String resource){
         JongoResponse response;
         StringBuilder b;

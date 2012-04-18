@@ -21,11 +21,22 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * Jongo Format Filters implementations are to be used as a container filter to modify responses.
+ * The idea is that by creating your own filters, you can
+ * generate different transports. For example, someone might want to use XStream to
+ * generate the XML and JSON. Someone else might want to use Protobuf. By implementing a ProtobufFormatFilter
+ * and changing it in the web.xml file, you can use protobuf serialization.
+ * @see com.sun.jersey.api.container.filter.GZIPContentEncodingFilter
+ * @author Alejandro Ayuso 
  */
 public interface JongoFormatFilter {
     
+    /**
+     * Gives a different format to a response.
+     * @param response the Response to be modified.
+     * @param mime the mime of the response.
+     * @return a modified Response.
+     */
     public Response format(Response response, final MediaType mime);
     
 }

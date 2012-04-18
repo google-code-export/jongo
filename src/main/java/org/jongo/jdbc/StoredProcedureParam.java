@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * An object which holds data about a function/procedure parameters.
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * @author Alejandro Ayuso 
  */
 @XmlRootElement
 public class StoredProcedureParam {

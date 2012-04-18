@@ -17,11 +17,16 @@
  */
 package org.jongo.sql.dialect;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * Dialect for MS SQL server.
+ * @author Alejandro Ayuso 
  */
 public class MSSQLDialect extends SQLDialect {
+    
+    private static final Logger l = LoggerFactory.getLogger(MSSQLDialect.class);
 
     @Override
     public String listOfTablesStatement() {

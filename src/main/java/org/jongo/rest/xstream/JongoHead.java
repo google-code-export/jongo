@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Jongo Response for HTTP HEAD requests for the resources metadata. Currently it only supports tables & views.
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * @author Alejandro Ayuso 
  */
 @XmlRootElement(name="response")
 public class JongoHead implements JongoResponse {

@@ -26,20 +26,52 @@ import org.jongo.sql.Select;
 import org.jongo.sql.Update;
 
 /**
- * 
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * Interface which describes Dialect implementations.
+ * @version 1
+ * @author Alejandro Ayuso 
  */
 public interface Dialect {
     
+    /**
+     * Generate the appropriate SQL statement for a {@link org.jongo.sql.Insert} instance.
+     * @param insert a {@link org.jongo.sql.Insert} instance.
+     * @return a SQL statement representation of the {@link org.jongo.sql.Insert} instance.
+     */
     public String toStatementString(final Insert insert); // C
     
+    /**
+     * Generate the appropriate SQL statement for a {@link org.jongo.sql.Select} instance.
+     * @param select a {@link org.jongo.sql.Select} instance.
+     * @return a SQL statement representation of the {@link org.jongo.sql.Select} instance.
+     */
     public String toStatementString(final Select select); // R
     
+    /**
+     * Generate the appropriate SQL statement for a {@link org.jongo.sql.Update} instance.
+     * @param update a {@link org.jongo.sql.Update} instance.
+     * @return a SQL statement representation of the {@link org.jongo.sql.Update} instance.
+     */
     public String toStatementString(final Update update); // U
     
+    /**
+     * Generate the appropriate SQL statement for a {@link org.jongo.sql.Delete} instance.
+     * @param delete a {@link org.jongo.sql.Delete} instance.
+     * @return a SQL statement representation of the {@link org.jongo.sql.Delete} instance.
+     */
     public String toStatementString(final Delete delete); // D
     
+    /**
+     * Generate the appropriate SQL statement for a {@link org.jongo.jdbc.DynamicFinder} instance.
+     * @param finder a {@link org.jongo.jdbc.DynamicFinder} instance.
+     * @param limit a {@link org.jongo.jdbc.LimitParam} instance.
+     * @param order a {@link org.jongo.jdbc.OrderParam} instance.
+     * @return a SQL statement representation of the {@link org.jongo.jdbc.DynamicFinder} instance.
+     */
     public String toStatementString(final DynamicFinder finder, final LimitParam limit, final OrderParam order);
     
+    /**
+     * Return a SQL statement used to obtain a list of tables for a given database or schema.
+     * @return a statement used to query your RDBMS for the list of tables.
+     */
     public String listOfTablesStatement();
 }

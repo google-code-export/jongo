@@ -21,7 +21,7 @@ package org.jongo.enums;
 /**
  * Deprecated. Use instead the Response.Status enum
  * @deprecated 
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * @author Alejandro Ayuso 
  */
 public enum ErrorCode {
     E200 ("No results"),

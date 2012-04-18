@@ -23,8 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * Executes a JDBCExecutor.shutdown() in an independent thread.
+ * @author Alejandro Ayuso 
  */
 public class JongoShutdown extends Thread{
     

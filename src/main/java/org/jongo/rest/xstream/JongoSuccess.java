@@ -24,8 +24,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * Represent that an operation has succeeded. 
+ * @author Alejandro Ayuso 
  */
 @XmlRootElement(name="response")
 public class JongoSuccess implements JongoResponse{
@@ -37,12 +37,24 @@ public class JongoSuccess implements JongoResponse{
     
     public JongoSuccess(){}
     
+    /**
+     * Instantiates a new success response for the given resource and results with the
+     * given HTTP code.
+     * @param resource the name of the resource being accessed
+     * @param results a list of {@link org.jongo.rest.xstream.Row} with the results of the operation
+     * @param status a HTTP code to give to the client
+     */
     public JongoSuccess(String resource, List<Row> results, Response.Status status) {
         this.resource = resource;
         this.rows = results;
         this.status = status;
     }
     
+    /**
+     * Instantiates a new success response for the given resource and results with a 200 HTTP code.
+     * @param resource the name of the resource being accessed
+     * @param results a list of {@link org.jongo.rest.xstream.Row} with the results of the operation
+     */
     public JongoSuccess(String resource, List<Row> results) {
         this.resource = resource;
         this.rows = results;
@@ -88,6 +100,4 @@ public class JongoSuccess implements JongoResponse{
     public void setSuccess(boolean success) {
         this.success = success;
     }
-    
-    
 }

@@ -18,8 +18,8 @@
 package org.jongo.demo;
 
 /**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * An ENUM with demo data for the demo database.
+ * @author Alejandro Ayuso 
  */
 public enum CarMaker {
     ABARTH("Abarth"),

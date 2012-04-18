@@ -20,7 +20,8 @@ package org.jongo.enums;
 
 /**
  *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * @author Alejandro Ayuso
+ * @deprecated 
  */
 public enum Permission {
     NONE,

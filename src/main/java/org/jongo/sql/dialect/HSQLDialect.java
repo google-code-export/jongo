@@ -22,6 +22,10 @@ import org.jongo.sql.Select;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Dialect for HSQLDB, Hypersonic or whatever is called today.
+ * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ */
 public class HSQLDialect extends SQLDialect{
     
     private static final Logger l = LoggerFactory.getLogger(HSQLDialect.class);

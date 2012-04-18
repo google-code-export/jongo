@@ -19,8 +19,8 @@
 package org.jongo.enums;
 
 /**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * An enum with the different supported JDBC drivers and its class name used for loading.
+ * @author Alejandro Ayuso 
  */
 public enum JDBCDriver {
     HSQLDB      ("org.hsqldb.jdbcDriver"),
@@ -35,6 +35,11 @@ public enum JDBCDriver {
         this.name = driverName;
     }
     
+    /**
+     * From a given driver class name check if we currently support it.
+     * @param driverName the name of the driver class.
+     * @return true if the driver is supported.
+     */
     public static boolean supported(final String driverName){
         for(JDBCDriver driver : JDBCDriver.values()){
             if(driver.name.equals(driverName)){
@@ -44,6 +49,12 @@ public enum JDBCDriver {
         return false;
     }
     
+    /**
+     * From a given driver class name, return its JDBCDriver representation.
+     * @param driverName the name of the driver class.
+     * @return a JDBCDriver for the given drivername
+     * @throws IllegalArgumentException if the given driver name is not supported or null.
+     */
     public static JDBCDriver driverOf(final String driverName){
         if(driverName == null)
             throw new IllegalArgumentException("Provide a driver");

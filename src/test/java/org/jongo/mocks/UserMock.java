@@ -32,7 +32,7 @@ import org.joda.time.format.ISODateTimeFormat;
 
 /**
  *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * @author Alejandro Ayuso 
  */
 public class UserMock {
     public int id;

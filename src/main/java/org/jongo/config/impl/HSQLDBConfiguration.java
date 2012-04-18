@@ -22,7 +22,7 @@ import org.apache.commons.lang.StringUtils;
 /**
  * Hypersonic, HyperSQL, HSQLDB or whatever is called today DatabaseConfiguration
  * implementation.
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * @author Alejandro Ayuso 
  */
 @Deprecated
 public class HSQLDBConfiguration{

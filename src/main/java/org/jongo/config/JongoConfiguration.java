@@ -33,8 +33,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * Singleton class which loads the jongo.properties files, reads its content and provides methods to access
+ * this configuration properties.
+ * @author Alejandro Ayuso 
  */
 public class JongoConfiguration {
     
@@ -61,6 +62,11 @@ public class JongoConfiguration {
     
     private JongoConfiguration(){}
     
+    /**
+     * Loads the configuration file, registers the shutdown hook, calls the generation of 
+     * the database configurations and returns and instance of JongoConfiguration.
+     * @return an instance of the JongoConfiguration.
+     */
     public synchronized static JongoConfiguration instanceOf(){
         if(instance == null){
             instance = new JongoConfiguration();
@@ -113,6 +119,11 @@ public class JongoConfiguration {
         return prop;
     }
     
+    /**
+     * Loads the jongo.properties from different locations using different methods.
+     * @param conf a JongoConfiguration instance used to obtain a ClassLoader.
+     * @return an instance of {@link java.util.Properties} with the properties from the file.
+     */
     private static Properties loadProperties(JongoConfiguration conf){
         Properties prop = new Properties();
         InputStream in = JongoConfiguration.class.getClass().getResourceAsStream("/org/jongo/jongo.properties");
@@ -147,6 +158,13 @@ public class JongoConfiguration {
         return prop;
     }
     
+    /**
+     * From the given properties object, load the the different {@link org.jongo.config.DatabaseConfiguration}.
+     * @param prop an instance of {@link java.util.Properties} with the properties from the file.
+     * @return a map of {@link org.jongo.config.DatabaseConfiguration} as values, and the name given to the
+     * database/schema.
+     * @throws StartupException if we're unable to load a {@link org.jongo.config.DatabaseConfiguration}.
+     */
     private static Map<String, DatabaseConfiguration> getDatabaseConfigurations(final Properties prop) throws StartupException{
         Map<String, DatabaseConfiguration> databases = new HashMap<String, DatabaseConfiguration>();
         String databaseList = prop.getProperty(p_name_jongo_database_list);
@@ -165,6 +183,13 @@ public class JongoConfiguration {
         return databases;
     }
     
+    /**
+     * From the given properties object, load a {@link org.jongo.config.DatabaseConfiguration}.
+     * @param prop an instance of {@link java.util.Properties} with the properties from the file.
+     * @param name the name of the database to load.
+     * @return a {@link org.jongo.config.DatabaseConfiguration}for the name given to the
+     * database/schema.
+     */
     private static DatabaseConfiguration generateDatabaseConfiguration(final Properties prop, final String name){
         l.debug("Generating configuration options for database " + name);
         JDBCDriver driver = JDBCDriver.driverOf(prop.getProperty(name + p_prefix_db_driver));

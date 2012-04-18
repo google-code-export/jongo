@@ -21,7 +21,7 @@ import org.jongo.jdbc.QueryParams;
 
 /**
  *
- * @author Alejandro Ayuso <alejandroayuso@gmail.com>
+ * @author Alejandro Ayuso 
  */
 public class DummyQueryParamsFactory {
     
