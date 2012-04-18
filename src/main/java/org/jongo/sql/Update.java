@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.jongo.enums.Operator;
 
 /**
  * Represents a SQL UPDATE statement.
@@ -76,9 +77,7 @@ public class Update {
     }
     
     public Select getSelect(){
-        Select s = new Select(table);
-        s.setValue(id);
-        return s;
+        return new Select(table).setParameter(new SelectParam(table.getPrimaryKey(), Operator.EQUALS, id));
     }
     
     public List<String> getParameters(){

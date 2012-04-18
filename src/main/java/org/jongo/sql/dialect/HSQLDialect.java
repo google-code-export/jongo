@@ -41,12 +41,7 @@ public class HSQLDialect extends SQLDialect{
         }
         b.append(" FROM ").append(select.getTable().getName());
         if(!select.isAllRecords()){
-            b.append(" WHERE ");
-            if(StringUtils.isEmpty(select.getColumn())){
-                b.append(select.getTable().getPrimaryKey()).append("=?");
-            }else{
-                b.append(select.getColumn()).append("=?");
-            }
+            b.append(" WHERE ").append(select.getParameter().getColumnName()).append(" ").append(select.getParameter().getOperator().sql()).append(" ?");
         }
         if(select.getOrderParam() != null)
             b.append(" ORDER BY ").append(select.getOrderParam().toString());
