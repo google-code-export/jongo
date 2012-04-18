@@ -17,7 +17,6 @@
  */
 package org.jongo;
 
-import org.jongo.sql.DynamicFinder;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +25,10 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.config.JongoConfiguration;
 import org.jongo.exceptions.JongoBadRequestException;
-import org.jongo.jdbc.*;
+import org.jongo.jdbc.JDBCExecutor;
+import org.jongo.jdbc.LimitParam;
+import org.jongo.jdbc.OrderParam;
+import org.jongo.jdbc.StoredProcedureParam;
 import org.jongo.rest.xstream.*;
 import org.jongo.sql.*;
 import org.slf4j.Logger;
@@ -178,7 +180,7 @@ public class RestController {
             return new JongoError(table, Response.Status.BAD_REQUEST, e.getMessage());
         }
         
-        Select select = new Select(t).setColumn(col).setValue(arg).setLimitParam(limit).setOrderParam(order);
+        Select select = new Select(t).setParameter(new SelectParam(col, arg)).setLimitParam(limit).setOrderParam(order);
         
         JongoResponse response = null;
         List<Row> results = null;
@@ -222,7 +224,7 @@ public class RestController {
             return new JongoError(table, Response.Status.BAD_REQUEST, e.getMessage());
         }
         
-        Select select = new Select(t).setColumn(col).setValue(arg).setLimitParam(limit).setOrderParam(order);
+        Select select = new Select(t).setParameter(new SelectParam(col, arg)).setLimitParam(limit).setOrderParam(order);
         
         JongoResponse response = null;
         List<Row> results = null;

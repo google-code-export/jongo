@@ -18,13 +18,9 @@
 package org.jongo.sql.dialect;
 
 import org.apache.commons.lang.StringUtils;
-import org.jongo.sql.DynamicFinder;
 import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
-import org.jongo.sql.Delete;
-import org.jongo.sql.Insert;
-import org.jongo.sql.Select;
-import org.jongo.sql.Update;
+import org.jongo.sql.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,12 +50,7 @@ public class OracleDialect extends SQLDialect {
             }
             b.append(" FROM ").append(select.getTable().toString());
             if(!select.isAllRecords()){
-                b.append(" WHERE ");
-                if(StringUtils.isEmpty(select.getColumn())){
-                    b.append(select.getTable().getName()).append(".").append(select.getTable().getPrimaryKey()).append("=?");
-                }else{
-                    b.append(select.getTable().getName()).append(".").append(select.getColumn()).append("=?");
-                }
+                super.appendWhereClause(b, select);
             }
             if(select.getOrderParam() != null){
                 b.append(" ORDER BY ").append(select.getTable().getName()).append(".");
@@ -85,12 +76,7 @@ public class OracleDialect extends SQLDialect {
             }
             b.append(" FROM ").append(select.getTable().toString());
             if(!select.isAllRecords()){
-                b.append(" WHERE ");
-                if(StringUtils.isEmpty(select.getColumn())){
-                    b.append(select.getTable().getName()).append(".").append(select.getTable().getPrimaryKey()).append("=?");
-                }else{
-                    b.append(select.getTable().getName()).append(".").append(select.getColumn()).append("=?");
-                }
+                super.appendWhereClause(b, select);
             }
             b.append(") WHERE ROW_NUMBER BETWEEN ").append(select.getLimitParam().getStart()).append(" AND ").append(select.getLimitParam().getLimit());
         }

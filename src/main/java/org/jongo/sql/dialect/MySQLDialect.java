@@ -17,7 +17,6 @@
  */
 package org.jongo.sql.dialect;
 
-import org.apache.commons.lang.StringUtils;
 import org.jongo.sql.Select;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,12 +47,7 @@ public class MySQLDialect extends SQLDialect {
         b.append(" FROM ").append(select.getTable().getDatabase()).append(".");
         b.append(select.getTable().getName()).append(" t");
         if(!select.isAllRecords()){
-            b.append(" WHERE ");
-            if(StringUtils.isEmpty(select.getColumn())){
-                b.append("t.").append(select.getTable().getPrimaryKey()).append("=?");
-            }else{
-                b.append("t.").append(select.getColumn()).append("=?");
-            }
+            super.appendWhereClause(b, select);
         }
         if(select.getOrderParam() != null)
             b.append(" ORDER BY t.").append(select.getOrderParam().getColumn()).append(" ").append(select.getOrderParam().getDirection());

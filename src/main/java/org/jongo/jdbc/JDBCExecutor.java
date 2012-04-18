@@ -18,7 +18,6 @@
 
 package org.jongo.jdbc;
 
-import org.jongo.sql.DynamicFinder;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
@@ -33,10 +32,7 @@ import org.jongo.config.JongoConfiguration;
 import org.jongo.handler.JongoResultSetHandler;
 import org.jongo.handler.ResultSetMetaDataHandler;
 import org.jongo.rest.xstream.Row;
-import org.jongo.sql.Delete;
-import org.jongo.sql.Insert;
-import org.jongo.sql.Select;
-import org.jongo.sql.Update;
+import org.jongo.sql.*;
 import org.jongo.sql.dialect.Dialect;
 import org.jongo.sql.dialect.DialectFactory;
 import org.slf4j.Logger;
@@ -160,7 +156,7 @@ public class JDBCExecutor {
             }
         }else{
             try {
-                response = run.query(dialect.toStatementString(select), res, JongoUtils.parseValue(select.getValue()));
+                response = run.query(dialect.toStatementString(select), res, JongoUtils.parseValue(select.getParameter().getValue()));
             } catch (SQLException ex) {
                 l.debug(ex.getMessage());
                 throw ex;

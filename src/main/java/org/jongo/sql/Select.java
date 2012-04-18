@@ -20,7 +20,6 @@ package org.jongo.sql;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang.StringUtils;
 import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
 
@@ -36,14 +35,9 @@ public class Select {
     private final Table table;
     
     /**
-     * The column to query. This is the <i>WHERE column</i> part
+     * {@link org.jongo.sql.SelectParam} of the query.
      */
-    private String column;
-    
-    /**
-     * The value of the column to query. This is the <i>= value</i> part.
-     */
-    private String value;
+    private SelectParam parameter;
     
     /**
      * Generates the ORDER BY part.
@@ -59,19 +53,10 @@ public class Select {
      * List of columns to be returned. If no columns are provided, we use the * operator.
      */
     private List<String> columns = new ArrayList<String>();
+    
 
     public Select(Table table) {
         this.table = table;
-    }
-    
-    public Select setColumn(String column) {
-		this.column = column;
-		return this;
-	}
-    
-    public Select setValue(String value){
-        this.value = value;
-        return this;
     }
     
     public Select setOrderParam(OrderParam param){
@@ -111,21 +96,13 @@ public class Select {
         return table;
     }
 
-    public String getColumn() {
-        return column;
-    }
-    
-    public String getValue() {
-        return value;
-    }
-    
     /**
      * Should the SELECT statement return all records or only a subset.
      * @return true if we're looking for all records or false if we are
      * only after one record provided by the <i>value</i> property.
      */
     public boolean isAllRecords(){
-        return StringUtils.isEmpty(value);
+        return this.parameter == null;
     }
     
     /**
@@ -136,8 +113,12 @@ public class Select {
         return columns.isEmpty();
     }
 
-    @Override
-    public String toString() {
-        return "Select{" + "table=" + table + ", column=" + column + ", value=" + value + ", columns=" + columns + '}';
+    public SelectParam getParameter() {
+        return parameter;
+    }
+
+    public Select setParameter(SelectParam parameter) {
+        this.parameter = parameter;
+        return this;
     }
 }
