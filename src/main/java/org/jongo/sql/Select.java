@@ -121,4 +121,9 @@ public class Select {
         this.parameter = parameter;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "Select{" + "table=" + table + ", parameter=" + parameter + ", orderParam=" + orderParam + ", limitParam=" + limitParam + ", columns=" + columns + '}';
+    }
 }
