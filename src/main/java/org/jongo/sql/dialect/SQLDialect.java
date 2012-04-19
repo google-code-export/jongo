@@ -19,7 +19,6 @@
 package org.jongo.sql.dialect;
 
 import org.apache.commons.lang.StringUtils;
-import org.jongo.sql.DynamicFinder;
 import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
 import org.jongo.sql.*;
@@ -149,9 +148,7 @@ public class SQLDialect implements Dialect{
     }
     
     protected StringBuilder appendWhereClause(final StringBuilder b, Select select){
-        b.append(" WHERE ");
-        b.append(select.getTable().getName())
-                .append(".")
+        b.append(" WHERE t.")
                 .append(select.getParameter().getColumnName())
                 .append(" ")
                 .append(select.getParameter().getOperator().sql()).append(" ?");
