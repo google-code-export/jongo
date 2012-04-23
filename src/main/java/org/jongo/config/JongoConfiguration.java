@@ -201,11 +201,21 @@ public class JongoConfiguration {
         String password =   prop.getProperty(name + p_prefix_db_password);
         String database =   prop.getProperty(name + p_prefix_db_database);
         String host =       prop.getProperty(name + p_prefix_db_host);
-        Integer port =      Integer.valueOf(prop.getProperty(name + p_prefix_db_port));
-        Integer max =      Integer.valueOf(prop.getProperty(name + p_prefix_db_max_connections));
+        Integer port =      integerValueOf(prop, name + p_prefix_db_port, driver.getDefaultPort());
+        Integer max =       integerValueOf(prop, name + p_prefix_db_max_connections, Integer.valueOf(25));
         Boolean readOnly =  Boolean.valueOf(prop.getProperty(name + p_prefix_db_readonly));
         DatabaseConfiguration c = DatabaseConfiguration.instanceOf(name, driver, username, password, database, host, port, max, readOnly);
         return c;
+    }
+    
+    private static Integer integerValueOf(final Properties prop, final String field, final Integer valueInCaseOfFailure){
+        Integer ret;
+        try{
+            ret = Integer.valueOf(prop.getProperty(field));
+        }catch(Exception e){
+            ret = valueInCaseOfFailure;
+        }
+        return ret;
     }
     
     private boolean isValid(){
