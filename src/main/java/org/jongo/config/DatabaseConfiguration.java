@@ -31,10 +31,10 @@ public class DatabaseConfiguration {
     private static final Logger l = LoggerFactory.getLogger(DatabaseConfiguration.class);
     
     /**
-     * Name of the configuration. It should be unique for the whole jongo instance. This is the name
+     * Alias of the configuration. It should be unique for the whole jongo instance. This is the alias
      * that will be used to access this configuration.
      */
-    protected final String name;
+    protected final String alias;
     
     /**
      * the {@link org.jongo.enums.JDBCDriver} driver.
@@ -78,8 +78,8 @@ public class DatabaseConfiguration {
 
     private boolean loaded = false;
 
-    private DatabaseConfiguration(String name, JDBCDriver driver, String username, String password, String database, String host, Integer port, Integer max, boolean readOnly) {
-        this.name = name;
+    private DatabaseConfiguration(String alias, JDBCDriver driver, String username, String password, String database, String host, Integer port, Integer max, boolean readOnly) {
+        this.alias = alias;
         this.driver = driver;
         this.username = username;
         this.password = password;
@@ -92,15 +92,15 @@ public class DatabaseConfiguration {
     
     /**
      * Instantiates a new DatabaseConfiguration object, loads the given JDBCDriver and returns the instance.
-     * @param name name of the database/schema. It should be unique for the whole jongo instance.
+     * @param alias alias of the database/schema. It should be unique for the whole jongo instance.
      * @param driver the {@link org.jongo.enums.JDBCDriver} driver
      * @param user the user used used to authenticate against the RDMBS
      * @param password the password for the given user used to authenticate against the RDMBS
      * @param url the JDBC url of the RDMBS
      * @return an instance of DatabaseConfiguration.
      */
-    public static DatabaseConfiguration instanceOf(String name, JDBCDriver driver, String username, String password, String database, String host, Integer port, Integer max, boolean readOnly){
-        DatabaseConfiguration c = new DatabaseConfiguration(name, driver, username, password, database, host, port, max, readOnly);
+    public static DatabaseConfiguration instanceOf(String alias, JDBCDriver driver, String username, String password, String database, String host, Integer port, Integer max, boolean readOnly){
+        DatabaseConfiguration c = new DatabaseConfiguration(alias, driver, username, password, database, host, port, max, readOnly);
         c.loadDriver();
         return c;
     }
@@ -124,8 +124,8 @@ public class DatabaseConfiguration {
         return driver;
     }
 
-    public String getName() {
-        return name;
+    public String getAlias() {
+        return alias;
     }
 
     public String getPassword() {
@@ -190,7 +190,7 @@ public class DatabaseConfiguration {
 
     @Override
     public String toString() {
-        return "DatabaseConfiguration{" + "name=" + name + ", driver=" 
+        return "DatabaseConfiguration{" + "alias=" + alias + ", driver=" 
                 + driver + ", username=" + username + ", password=" 
                 + password + ", database=" + database + ", host=" 
                 + host + ", port=" + port + ", readOnly=" + readOnly + '}';
