@@ -48,7 +48,10 @@ public class JongoConfiguration {
     private static final String p_prefix_db_driver = ".jdbc.driver";
     private static final String p_prefix_db_username = ".jdbc.username";
     private static final String p_prefix_db_password = ".jdbc.password";
-    private static final String p_prefix_db_url = ".jdbc.url";
+    private static final String p_prefix_db_database = ".jdbc.database";
+    private static final String p_prefix_db_host = ".jdbc.host";
+    private static final String p_prefix_db_port = ".jdbc.port";
+    private static final String p_prefix_db_readonly = ".jdbc.readonly";
     
     private static JongoConfiguration instance;
     
@@ -192,11 +195,14 @@ public class JongoConfiguration {
      */
     private static DatabaseConfiguration generateDatabaseConfiguration(final Properties prop, final String name){
         l.debug("Generating configuration options for database " + name);
-        JDBCDriver driver = JDBCDriver.driverOf(prop.getProperty(name + p_prefix_db_driver));
-        String username = prop.getProperty(name + p_prefix_db_username);
-        String password = prop.getProperty(name + p_prefix_db_password);
-        String url = prop.getProperty(name + p_prefix_db_url);
-        DatabaseConfiguration c = DatabaseConfiguration.instanceOf(name, driver, username, password, url);
+        JDBCDriver driver = JDBCDriver.valueOf(prop.getProperty(name + p_prefix_db_driver));
+        String username =   prop.getProperty(name + p_prefix_db_username);
+        String password =   prop.getProperty(name + p_prefix_db_password);
+        String database =   prop.getProperty(name + p_prefix_db_database);
+        String host =       prop.getProperty(name + p_prefix_db_host);
+        Integer port =      Integer.valueOf(prop.getProperty(name + p_prefix_db_port));
+        Boolean readOnly =  Boolean.valueOf(prop.getProperty(name + p_prefix_db_readonly));
+        DatabaseConfiguration c = DatabaseConfiguration.instanceOf(name, driver, username, password, database, host, port, readOnly);
         return c;
     }
     
