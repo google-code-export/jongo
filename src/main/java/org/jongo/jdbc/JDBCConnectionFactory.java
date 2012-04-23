@@ -68,8 +68,8 @@ public class JDBCConnectionFactory {
                 l.debug("Registering Connection Pool for " + dbname);
                 DatabaseConfiguration dbcfg = configuration.getDatabaseConfiguration(dbname);
                 GenericObjectPool pool = new GenericObjectPool(null, MAX_POOL_SIZE);
-                ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(dbcfg.getUrl(), dbcfg.getUsername(), dbcfg.getPassword());
-                PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, pool, null, null, false, true);
+                ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(dbcfg.toJdbcURL(), dbcfg.getUsername(), dbcfg.getPassword());
+                PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, pool, null, null, dbcfg.isReadOnly(), true);
                 poolableConnectionFactory.hashCode();
                 instance.connectionPool.put(dbname, pool);
             }
