@@ -45,11 +45,6 @@ public class JDBCConnectionFactory {
     private static final Logger l = LoggerFactory.getLogger(JDBCConnectionFactory.class);
     private static final JongoConfiguration configuration = JongoConfiguration.instanceOf();
     
-    /**
-     * Maximum size the connection pool will have.
-     */
-    private static final Integer MAX_POOL_SIZE = 25;
-
     private final Map<String, GenericObjectPool> connectionPool = new HashMap<String,GenericObjectPool>();
     
     private static JDBCConnectionFactory instance = null;
@@ -67,7 +62,7 @@ public class JDBCConnectionFactory {
             for(String dbname : databases){
                 l.debug("Registering Connection Pool for " + dbname);
                 DatabaseConfiguration dbcfg = configuration.getDatabaseConfiguration(dbname);
-                GenericObjectPool pool = new GenericObjectPool(null, MAX_POOL_SIZE);
+                GenericObjectPool pool = new GenericObjectPool(null, dbcfg.getMaxConnections());
                 ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(dbcfg.toJdbcURL(), dbcfg.getUsername(), dbcfg.getPassword());
                 PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, pool, null, null, dbcfg.isReadOnly(), true);
                 poolableConnectionFactory.hashCode();
