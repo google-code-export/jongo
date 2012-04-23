@@ -23,11 +23,13 @@ package org.jongo.enums;
  * @author Alejandro Ayuso 
  */
 public enum JDBCDriver {
-    HSQLDB      ("org.hsqldb.jdbcDriver"),
-    MySQL       ("com.mysql.jdbc.Driver"),
-    PostgreSQL  ("org.postgresql.Driver"),
-    ORACLE      ("oracle.jdbc.driver.OracleDriver"),
-    MSSQL       ("net.sourceforge.jtds.jdbc.Driver");
+    HSQLDB_MEM      ("org.hsqldb.jdbcDriver"),
+    HSQLDB_FILE     ("org.hsqldb.jdbcDriver"),
+    MySQL           ("com.mysql.jdbc.Driver"),
+    PostgreSQL      ("org.postgresql.Driver"),
+    ORACLE          ("oracle.jdbc.driver.OracleDriver"),
+    MSSQL_JTDS      ("net.sourceforge.jtds.jdbc.Driver"),
+    MSSQL           ("com.microsoft.jdbc.sqlserver.SQLServerDriver");
     
     private final String name;
     
