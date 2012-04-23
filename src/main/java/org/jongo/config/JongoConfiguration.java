@@ -41,9 +41,6 @@ public class JongoConfiguration {
     
     private static final Logger l = LoggerFactory.getLogger(JongoConfiguration.class);
     
-    private static final String p_name_jongo_default_limit = "jongo.default.limit";
-    private static final String p_name_jongo_max_limit = "jongo.default.max.limit";
-    private static final String p_name_jongo_allow_list_tables = "jongo.allow.database.metadata";
     private static final String p_name_jongo_database_list = "jongo.database.list";
     private static final String p_prefix_db_driver = ".jdbc.driver";
     private static final String p_prefix_db_username = ".jdbc.username";
@@ -52,7 +49,7 @@ public class JongoConfiguration {
     private static final String p_prefix_db_host = ".jdbc.host";
     private static final String p_prefix_db_port = ".jdbc.port";
     private static final String p_prefix_db_readonly = ".jdbc.readonly";
-    private static final String p_prefix_db_max_connections = ".jdbc.maxconnections";
+    private static final String p_prefix_db_max_connections = ".jdbc.max.connections";
     
     private static JongoConfiguration instance;
     
@@ -75,7 +72,6 @@ public class JongoConfiguration {
         if(instance == null){
             instance = new JongoConfiguration();
             Properties prop = getProperties(instance);
-            setProperties(instance, prop);
             
             l.debug("Registering the shutdown hook");
             Runtime.getRuntime().addShutdownHook(new JongoShutdown());
@@ -99,12 +95,6 @@ public class JongoConfiguration {
         return instance;
     }
     
-    private static void setProperties(JongoConfiguration instance, Properties prop){
-        instance.limit = Integer.valueOf(prop.getProperty(p_name_jongo_default_limit));
-        instance.maxLimit = Integer.valueOf(prop.getProperty(p_name_jongo_max_limit));
-        instance.listTables = Boolean.valueOf(prop.getProperty(p_name_jongo_allow_list_tables));
-    }
-    
     private static Properties getProperties(JongoConfiguration conf){
         Properties prop;
         if(demo){
@@ -116,11 +106,7 @@ public class JongoConfiguration {
     }
     
     private static Properties loadDemoProperties(){
-        Properties prop = new Properties();
-        prop.setProperty(p_name_jongo_default_limit, "25");
-        prop.setProperty(p_name_jongo_max_limit, "1000");
-        prop.setProperty(p_name_jongo_allow_list_tables, "true");
-        return prop;
+        return new Properties();
     }
     
     /**
