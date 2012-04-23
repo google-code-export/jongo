@@ -52,6 +52,7 @@ public class JongoConfiguration {
     private static final String p_prefix_db_host = ".jdbc.host";
     private static final String p_prefix_db_port = ".jdbc.port";
     private static final String p_prefix_db_readonly = ".jdbc.readonly";
+    private static final String p_prefix_db_max_connections = ".jdbc.maxconnections";
     
     private static JongoConfiguration instance;
     
@@ -201,8 +202,9 @@ public class JongoConfiguration {
         String database =   prop.getProperty(name + p_prefix_db_database);
         String host =       prop.getProperty(name + p_prefix_db_host);
         Integer port =      Integer.valueOf(prop.getProperty(name + p_prefix_db_port));
+        Integer max =      Integer.valueOf(prop.getProperty(name + p_prefix_db_max_connections));
         Boolean readOnly =  Boolean.valueOf(prop.getProperty(name + p_prefix_db_readonly));
-        DatabaseConfiguration c = DatabaseConfiguration.instanceOf(name, driver, username, password, database, host, port, readOnly);
+        DatabaseConfiguration c = DatabaseConfiguration.instanceOf(name, driver, username, password, database, host, port, max, readOnly);
         return c;
     }
     
