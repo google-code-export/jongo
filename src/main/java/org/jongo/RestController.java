@@ -43,17 +43,23 @@ public class RestController {
     private static final Logger l = LoggerFactory.getLogger(RestController.class);
     private static final JongoConfiguration conf = JongoConfiguration.instanceOf();
     
+    private final String alias;
     private final String database;
     
     /**
      * Instantiates a new controller for the given database/schema if this exists
-     * @param database the name of the database/schema to work with
+     * @param alias the name of the database/schema to work with
      * @throws IllegalArgumentException if the database/schema name is blank, empty or null
      */
-    public RestController(String database){
-        if(StringUtils.isBlank(database))
-            throw new IllegalArgumentException("Database name can't be blank, empty or null");
-        this.database = database;
+    public RestController(String alias){
+        if(StringUtils.isBlank(alias))
+            throw new IllegalArgumentException("Alias name can't be blank, empty or null");
+        
+        if(!conf.getDatabases().contains(alias))
+            throw new IllegalArgumentException("Alias doesn't exists or is not registered in jongo");
+        
+        this.alias = alias;
+        this.database = conf.getDatabaseConfiguration(alias).getDatabase();
     }
     
     /**
@@ -62,21 +68,18 @@ public class RestController {
      * @return  a {@link org.jongo.rest.xstream.JongoSuccess} or a {@link org.jongo.rest.xstream.JongoError}
      */
     public JongoResponse getDatabaseMetadata(){
-        l.debug("Obtaining metadata for " + database);
+        l.debug("Obtaining metadata for " + alias);
         JongoResponse response = null;
-        
-        if(!conf.getDatabases().contains(database))
-            return new JongoError(database, Response.Status.NOT_FOUND, "Database doesn't exists or is not registered in jongo");
         
         List<Row> results = null;
         try {
-            results = JDBCExecutor.getListOfTables(database);
+            results = JDBCExecutor.getListOfTables(alias);
         } catch (Throwable ex){
-            response = handleException(ex, database);
+            response = handleException(ex, alias);
         }
         
         if(response == null){
-            response = new JongoSuccess(database, results);
+            response = new JongoSuccess(alias, results);
         }
         
         return response;
@@ -129,7 +132,7 @@ public class RestController {
      * if the table is empty, we return a SuccessResponse with no values.
      */
     public JongoResponse getAllResources(final String table, final LimitParam limit, final OrderParam order){
-        l.debug("Geting all resources from " + database + "." + table);
+        l.debug("Geting all resources from " + alias + "." + table);
         
         Table t;
         try{
@@ -170,7 +173,7 @@ public class RestController {
      * @return Returns a JongoResponse with the values of the resource. If the resource is not available an error is returned.
      */
     public JongoResponse getResource(final String table, final String col, final String arg, final LimitParam limit, final OrderParam order){
-        l.debug("Geting resource from " + database + "." + table + " with id " + arg);
+        l.debug("Geting resource from " + alias + "." + table + " with id " + arg);
         
         Table t;
         try{
@@ -211,7 +214,7 @@ public class RestController {
      * @return Returns a JongoResponse with the values of the resources. If the resources are not available an error is returned.
      */
     public JongoResponse findResources(final String table, final String col, final String arg, final LimitParam limit, final OrderParam order){
-        l.debug("Geting resource from " + database + "." + table + " with id " + arg);
+        l.debug("Geting resource from " + alias + "." + table + " with id " + arg);
         
         if(StringUtils.isEmpty(arg) || StringUtils.isEmpty(col))
             return new JongoError(table, Response.Status.BAD_REQUEST, "Invalid argument");
@@ -255,7 +258,7 @@ public class RestController {
      * @return a {@link org.jongo.rest.xstream.JongoSuccess} or a {@link org.jongo.rest.xstream.JongoError}
      */
     public JongoResponse insertResource(final String resource, final String pk, final String jsonRequest){
-        l.debug("Insert new " + database + "." + resource + " with JSON values: " + jsonRequest);
+        l.debug("Insert new " + alias + "." + resource + " with JSON values: " + jsonRequest);
         
         JongoResponse response;
         
@@ -279,7 +282,7 @@ public class RestController {
      * @return a {@link org.jongo.rest.xstream.JongoSuccess} or a {@link org.jongo.rest.xstream.JongoError}
      */
     public JongoResponse insertResource(final String resource, final String pk, final Map<String, String> formParams){
-        l.debug("Insert new " + database + "." + resource + " with values: " + formParams);
+        l.debug("Insert new " + alias + "." + resource + " with values: " + formParams);
         
         JongoResponse response;
         Table t;
@@ -333,7 +336,7 @@ public class RestController {
      * @return a {@link org.jongo.rest.xstream.JongoSuccess} or a {@link org.jongo.rest.xstream.JongoError}
      */
     public JongoResponse updateResource(final String resource, final String pk, final String id, final String jsonRequest){
-        l.debug("Update record " + id + " in table " + database + "." + resource + " with values: " + jsonRequest);
+        l.debug("Update record " + id + " in table " + alias + "." + resource + " with values: " + jsonRequest);
         JongoResponse response = null;
         
         List<Row> results = null;
@@ -374,7 +377,7 @@ public class RestController {
      * @return a {@link org.jongo.rest.xstream.JongoSuccess} or a {@link org.jongo.rest.xstream.JongoError}
      */
     public JongoResponse deleteResource(final String resource, final String pk, final String id){
-        l.debug("Delete record " + id + " from table " + database + "." + resource);
+        l.debug("Delete record " + id + " from table " + alias + "." + resource);
         
         Table t;
         try{
@@ -416,7 +419,7 @@ public class RestController {
      * @return a {@link org.jongo.rest.xstream.JongoSuccess} or a {@link org.jongo.rest.xstream.JongoError}
      */
     public JongoResponse findByDynamicFinder(final String resource, final String query, final List<String> values, final LimitParam limit, final OrderParam order){
-        l.debug("Find resource from " + database + "." + resource + " with " + query);
+        l.debug("Find resource from " + alias + "." + resource + " with " + query);
         
         if(values == null)
             throw new IllegalArgumentException("Invalid null argument");
