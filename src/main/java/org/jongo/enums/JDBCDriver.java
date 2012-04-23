@@ -23,18 +23,20 @@ package org.jongo.enums;
  * @author Alejandro Ayuso 
  */
 public enum JDBCDriver {
-    HSQLDB_MEM      ("org.hsqldb.jdbcDriver"),
-    HSQLDB_FILE     ("org.hsqldb.jdbcDriver"),
-    MySQL           ("com.mysql.jdbc.Driver"),
-    PostgreSQL      ("org.postgresql.Driver"),
-    ORACLE          ("oracle.jdbc.driver.OracleDriver"),
-    MSSQL_JTDS      ("net.sourceforge.jtds.jdbc.Driver"),
-    MSSQL           ("com.microsoft.jdbc.sqlserver.SQLServerDriver");
+    HSQLDB_MEM      ("org.hsqldb.jdbcDriver",                           Integer.valueOf(0)),
+    HSQLDB_FILE     ("org.hsqldb.jdbcDriver",                           Integer.valueOf(0)),
+    MySQL           ("com.mysql.jdbc.Driver",                           Integer.valueOf(3306)),
+    PostgreSQL      ("org.postgresql.Driver",                           Integer.valueOf(5432)),
+    ORACLE          ("oracle.jdbc.driver.OracleDriver",                 Integer.valueOf(1521)),
+    MSSQL_JTDS      ("net.sourceforge.jtds.jdbc.Driver",                Integer.valueOf(1433)),
+    MSSQL           ("com.microsoft.jdbc.sqlserver.SQLServerDriver",    Integer.valueOf(1433));
     
     private final String name;
+    private final Integer port;
     
-    private JDBCDriver(final String driverName){
+    private JDBCDriver(final String driverName, final Integer port){
         this.name = driverName;
+        this.port = port;
     }
     
     /**
@@ -72,5 +74,9 @@ public enum JDBCDriver {
     
     public String getName(){
         return this.name;
+    }
+
+    public Integer getDefaultPort() {
+        return port;
     }
 }
