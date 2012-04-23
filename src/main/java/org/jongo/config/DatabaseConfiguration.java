@@ -70,10 +70,15 @@ public class DatabaseConfiguration {
      * Set the connection to read-only.
      */
     protected final boolean readOnly;
+    
+    /**
+     * Maximum number of connections to the RDBMS.
+     */
+    protected final Integer maxConnections;
 
     private boolean loaded = false;
 
-    private DatabaseConfiguration(String name, JDBCDriver driver, String username, String password, String database, String host, Integer port, boolean readOnly) {
+    private DatabaseConfiguration(String name, JDBCDriver driver, String username, String password, String database, String host, Integer port, Integer max, boolean readOnly) {
         this.name = name;
         this.driver = driver;
         this.username = username;
@@ -81,6 +86,7 @@ public class DatabaseConfiguration {
         this.database = database;
         this.host = host;
         this.port = port;
+        this.maxConnections = max;
         this.readOnly = readOnly;
     }
     
@@ -93,8 +99,8 @@ public class DatabaseConfiguration {
      * @param url the JDBC url of the RDMBS
      * @return an instance of DatabaseConfiguration.
      */
-    public static DatabaseConfiguration instanceOf(String name, JDBCDriver driver, String username, String password, String database, String host, Integer port, boolean readOnly){
-        DatabaseConfiguration c = new DatabaseConfiguration(name, driver, username, password, database, host, port, readOnly);
+    public static DatabaseConfiguration instanceOf(String name, JDBCDriver driver, String username, String password, String database, String host, Integer port, Integer max, boolean readOnly){
+        DatabaseConfiguration c = new DatabaseConfiguration(name, driver, username, password, database, host, port, max, readOnly);
         c.loadDriver();
         return c;
     }
@@ -144,6 +150,10 @@ public class DatabaseConfiguration {
 
     public boolean isReadOnly() {
         return readOnly;
+    }
+
+    public Integer getMaxConnections() {
+        return maxConnections;
     }
     
     /**
