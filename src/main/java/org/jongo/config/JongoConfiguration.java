@@ -41,7 +41,7 @@ public class JongoConfiguration {
     
     private static final Logger l = LoggerFactory.getLogger(JongoConfiguration.class);
     
-    private static final String p_name_jongo_database_list = "jongo.database.list";
+    private static final String p_name_jongo_database_list = "jongo.alias.list";
     private static final String p_prefix_db_driver = ".jdbc.driver";
     private static final String p_prefix_db_username = ".jdbc.username";
     private static final String p_prefix_db_password = ".jdbc.password";
