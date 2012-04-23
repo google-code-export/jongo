@@ -146,6 +146,10 @@ public class DatabaseConfiguration {
         return readOnly;
     }
     
+    /**
+     * Generates the appropriate JDBC URL for the current {@link org.jongo.enums.JDBCDriver}
+     * @return a JDBC URL String
+     */
     public String toJdbcURL(){
         final StringBuilder b = new StringBuilder("jdbc:");
         switch(driver){
