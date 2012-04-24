@@ -20,10 +20,9 @@ package org.jongo.config;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.JongoShutdown;
 import org.jongo.demo.Demo;
@@ -57,7 +56,7 @@ public class JongoConfiguration {
     private Integer maxLimit;
     private boolean listTables;
     
-    private Map<String, DatabaseConfiguration> databases = null;
+    private List<DatabaseConfiguration> databases = null;
     
     private static final boolean demo = (System.getProperty("environment") != null && System.getProperty("environment").equalsIgnoreCase("demo")); 
     
@@ -151,21 +150,21 @@ public class JongoConfiguration {
     /**
      * From the given properties object, load the the different {@link org.jongo.config.DatabaseConfiguration}.
      * @param prop an instance of {@link java.util.Properties} with the properties from the file.
-     * @return a map of {@link org.jongo.config.DatabaseConfiguration} as values, and the name given to the
-     * database/schema.
+     * @return a list of {@link org.jongo.config.DatabaseConfiguration}
      * @throws StartupException if we're unable to load a {@link org.jongo.config.DatabaseConfiguration}.
      */
-    private static Map<String, DatabaseConfiguration> getDatabaseConfigurations(final Properties prop) throws StartupException{
-        Map<String, DatabaseConfiguration> databases = new HashMap<String, DatabaseConfiguration>();
+    private static List<DatabaseConfiguration> getDatabaseConfigurations(final Properties prop) throws StartupException{
         String databaseList = prop.getProperty(p_name_jongo_database_list);
         if(databaseList == null){
-            throw new StartupException("Failed to read list of databases " + p_name_jongo_database_list, demo);
+            throw new StartupException("Failed to read list of aliases " + p_name_jongo_database_list, demo);
         }
         final String [] names = databaseList.split(",");
+        List<DatabaseConfiguration> databases = new ArrayList<DatabaseConfiguration>(names.length);
         for(String name : names){
             name = name.trim();
             if(StringUtils.isAlphanumeric(name)){
-                databases.put(name, generateDatabaseConfiguration(prop, name));
+                DatabaseConfiguration c = generateDatabaseConfiguration(prop, name);
+                databases.add(c);
             }else{
                 l.warn("Database name " + name + " is invalid. Continuing without it.");
             }
@@ -181,7 +180,7 @@ public class JongoConfiguration {
      * database/schema.
      */
     private static DatabaseConfiguration generateDatabaseConfiguration(final Properties prop, final String name){
-        l.debug("Generating configuration options for database " + name);
+        l.debug("Obtain configuration options for alias " + name);
         JDBCDriver driver = JDBCDriver.valueOf(prop.getProperty(name + p_prefix_db_driver));
         String username =   prop.getProperty(name + p_prefix_db_username);
         String password =   prop.getProperty(name + p_prefix_db_password);
@@ -215,8 +214,12 @@ public class JongoConfiguration {
     }
 
     public JDBCDriver getDriver(final String database) {
-        DatabaseConfiguration db = this.databases.get(database);
-        return db.getDriver();
+        for(DatabaseConfiguration c : this.databases){
+            if(c.getDatabase().equalsIgnoreCase(database))
+                return c.getDriver();
+        }
+        DatabaseConfiguration c = getDatabaseConfiguration(database);
+        return c != null ? c.getDriver() : null; 
     }
 
     public boolean isDemoModeActive(){
@@ -232,11 +235,23 @@ public class JongoConfiguration {
     }
     
     public DatabaseConfiguration getDatabaseConfiguration(final String database){
-        return databases.get(database);
+        for(DatabaseConfiguration c : this.databases){
+            if(c.getDatabase().equalsIgnoreCase(database))
+                return c;
+        }
+        return null;
     }
     
-    public Set<String> getDatabases(){
-        return databases.keySet();
+    public DatabaseConfiguration getDatabaseConfigurationForAlias(final String alias){
+        for(DatabaseConfiguration c : this.databases){
+            if(c.getAlias().equalsIgnoreCase(alias))
+                return c;
+        }
+        throw new IllegalArgumentException("Alias doesn't exists or is not registered in jongo");
+    }
+    
+    public List<DatabaseConfiguration> getDatabases(){
+        return this.databases;
     }
 
     public boolean allowListTables() {
