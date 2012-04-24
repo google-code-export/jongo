@@ -57,8 +57,8 @@ public class JDBCExecutor {
     public static int delete(final Delete delete) throws SQLException {
         l.debug(delete.toString());
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(delete.getTable().getDatabase());
-        QueryRunner run = JDBCConnectionFactory.getQueryRunner(delete.getTable().getDatabase());
-        Dialect dialect = DialectFactory.getDialect(dbconf.getDriver());
+        QueryRunner run = JDBCConnectionFactory.getQueryRunner(dbconf);
+        Dialect dialect = DialectFactory.getDialect(dbconf);
         
         try {
             int deleted = run.update(dialect.toStatementString(delete), JongoUtils.parseValue(delete.getId()));
@@ -81,8 +81,8 @@ public class JDBCExecutor {
         l.debug(insert.toString());
         
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(insert.getTable().getDatabase());
-        QueryRunner run = JDBCConnectionFactory.getQueryRunner(insert.getTable().getDatabase());
-        Dialect dialect = DialectFactory.getDialect(dbconf.getDriver());
+        QueryRunner run = JDBCConnectionFactory.getQueryRunner(dbconf);
+        Dialect dialect = DialectFactory.getDialect(dbconf);
         
         try {
             int inserted;
@@ -110,8 +110,8 @@ public class JDBCExecutor {
         l.debug(update.toString());
         
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(update.getTable().getDatabase());
-        QueryRunner run = JDBCConnectionFactory.getQueryRunner(update.getTable().getDatabase());
-        Dialect dialect = DialectFactory.getDialect(dbconf.getDriver());
+        QueryRunner run = JDBCConnectionFactory.getQueryRunner(dbconf);
+        Dialect dialect = DialectFactory.getDialect(dbconf);
         
         List<Row> results = new ArrayList<Row>();
         try {
@@ -141,9 +141,9 @@ public class JDBCExecutor {
         l.debug(select.toString());
         List<Row> response = null;
         
-        QueryRunner run = JDBCConnectionFactory.getQueryRunner(select.getTable().getDatabase());
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(select.getTable().getDatabase());
-        Dialect dialect = DialectFactory.getDialect(dbconf.getDriver());
+        QueryRunner run = JDBCConnectionFactory.getQueryRunner(dbconf);
+        Dialect dialect = DialectFactory.getDialect(dbconf);
         
         ResultSetHandler<List<Row>> res = new JongoResultSetHandler(allRecords);
         
@@ -183,10 +183,10 @@ public class JDBCExecutor {
         l.debug(JongoUtils.varargToString(params));
         
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(database);
-        Dialect dialect = DialectFactory.getDialect(dbconf.getDriver());
+        Dialect dialect = DialectFactory.getDialect(dbconf);
         String query = dialect.toStatementString(df, limit, order);
         
-        QueryRunner run = JDBCConnectionFactory.getQueryRunner(database);
+        QueryRunner run = JDBCConnectionFactory.getQueryRunner(dbconf);
         ResultSetHandler<List<Row>> res = new JongoResultSetHandler(true);
         try {
             List<Row> results = run.query(query, res, params);
@@ -213,8 +213,8 @@ public class JDBCExecutor {
         ResultSetHandler<List<Row>> res = new ResultSetMetaDataHandler();
         
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(select.getTable().getDatabase());
-        QueryRunner run = JDBCConnectionFactory.getQueryRunner(select.getTable().getDatabase());
-        Dialect dialect = DialectFactory.getDialect(dbconf.getDriver());
+        QueryRunner run = JDBCConnectionFactory.getQueryRunner(dbconf);
+        Dialect dialect = DialectFactory.getDialect(dbconf);
         
         try {
             List<Row> results = run.query(dialect.toStatementString(select), res);
@@ -239,7 +239,8 @@ public class JDBCExecutor {
     public static List<Row> executeQuery(final String database, final String queryName, final List<StoredProcedureParam> params) throws SQLException{
         l.debug("Executing stored procedure " + database + "." + queryName);
         
-        QueryRunner run = JDBCConnectionFactory.getQueryRunner(database);
+        DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(database);
+        QueryRunner run = JDBCConnectionFactory.getQueryRunner(dbconf);
         final String call = JongoUtils.getCallableStatementCallString(queryName, params.size());
         List<Row> rows = new ArrayList<Row>();
         
@@ -307,8 +308,8 @@ public class JDBCExecutor {
 //        }
         ResultSetHandler<List<Row>> res = new JongoResultSetHandler(true);
         DatabaseConfiguration dbconf = conf.getDatabaseConfiguration(database);
-        Dialect dialect = DialectFactory.getDialect(dbconf.getDriver());
-        QueryRunner run = JDBCConnectionFactory.getQueryRunner(database);
+        Dialect dialect = DialectFactory.getDialect(dbconf);
+        QueryRunner run = JDBCConnectionFactory.getQueryRunner(dbconf);
         
         try {
             List<Row> results = run.query(dialect.listOfTablesStatement(), res);
