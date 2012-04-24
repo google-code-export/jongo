@@ -65,18 +65,18 @@ public class RestController {
      * @return  a {@link org.jongo.rest.xstream.JongoSuccess} or a {@link org.jongo.rest.xstream.JongoError}
      */
     public JongoResponse getDatabaseMetadata(){
-        l.debug("Obtaining metadata for " + alias);
+        l.debug("Obtaining metadata for " + database);
         JongoResponse response = null;
         
         List<Row> results = null;
         try {
-            results = JDBCExecutor.getListOfTables(alias);
+            results = JDBCExecutor.getListOfTables(database);
         } catch (Throwable ex){
-            response = handleException(ex, alias);
+            response = handleException(ex, database);
         }
         
         if(response == null){
-            response = new JongoSuccess(alias, results);
+            response = new JongoSuccess(database, results);
         }
         
         return response;
