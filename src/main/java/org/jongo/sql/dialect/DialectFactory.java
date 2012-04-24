@@ -1,5 +1,6 @@
 package org.jongo.sql.dialect;
 
+import org.jongo.config.DatabaseConfiguration;
 import org.jongo.enums.JDBCDriver;
 
 /**
@@ -7,6 +8,15 @@ import org.jongo.enums.JDBCDriver;
  * @author Alejandro Ayuso 
  */
 public class DialectFactory {
+    
+    /**
+     * Obtain a dialect for the given {@link org.jongo.config.DatabaseConfiguration}.
+     * @param dbconf a {@link org.jongo.config.DatabaseConfiguration}.
+     * @return a {@link org.jongo.sql.dialect.Dialect} for the driver.
+     */
+    public static Dialect getDialect(final DatabaseConfiguration dbconf){
+        return getDialect(dbconf.getDriver());
+    }
     
     /**
      * For a given driver, return the appropriate dialect.
