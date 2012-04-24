@@ -19,10 +19,9 @@
 package org.jongo.demo;
 
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import org.apache.commons.dbutils.QueryRunner;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -42,18 +41,19 @@ public class Demo {
     
     private static final Logger l = LoggerFactory.getLogger(Demo.class);
     
-    public static void generateDemoDatabases(final Set<String> databases){
-        for( String k : databases)
+    public static void generateDemoDatabases(final List<DatabaseConfiguration> databases){
+        for( DatabaseConfiguration k : databases)
             generateDemoDatabase(k);
     }
     
-    public static void destroyDemoDatabases(final Set<String> databases){
-        for( String k : databases)
+    public static void destroyDemoDatabases(final List<DatabaseConfiguration> databases){
+        for( DatabaseConfiguration k : databases)
             destroyDemoDatabase(k);
     }
     
-    private static void generateDemoDatabase(final String database){
-        QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource(database));
+    private static void generateDemoDatabase(final DatabaseConfiguration dbcfg){
+        final String database = dbcfg.getDatabase();
+        QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource(dbcfg));
         try {
             l.info("Generating Demo resources in database " + database);
             run.update(getCreateUserTable());
@@ -127,8 +127,9 @@ public class Demo {
         }
     }
     
-    private static void destroyDemoDatabase(final String database){
-        QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource(database));
+    private static void destroyDemoDatabase(final DatabaseConfiguration dbcfg){
+        final String database = dbcfg.getDatabase();
+        QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource(dbcfg));
         l.info("Destroying Demo Tables in database " + database);
         try {
             run.update("DROP FUNCTION simpleStoredProcedure");
@@ -223,9 +224,9 @@ public class Demo {
         return "CREATE VIEW MAKER_STATS_2010 AS SELECT month, sales, maker FROM maker_stats WHERE year = 2010";
     }
     
-    public static Map<String, DatabaseConfiguration> getDemoDatabasesConfiguration(){
-        Map<String, DatabaseConfiguration> demos = new HashMap<String, DatabaseConfiguration>();
-        demos.put("demo1", DatabaseConfiguration.instanceOf("demo1", JDBCDriver.HSQLDB, "demo", "demo", "jdbc:hsqldb:mem:demo1"));
+    public static List<DatabaseConfiguration> getDemoDatabasesConfiguration(){
+        List<DatabaseConfiguration> demos = new ArrayList<DatabaseConfiguration>();
+        demos.add(DatabaseConfiguration.instanceOf("demo1", JDBCDriver.HSQLDB_MEM, "demo", "demo", "my_demo_db", null, null, 1, false));
 //        demos.put("demo2", AbstractDatabaseConfiguration.instanceOf("demo2", JDBCDriver.HSQLDB, "demo", "demo", "jdbc:hsqldb:mem:demo2"));
         return demos;
     }
