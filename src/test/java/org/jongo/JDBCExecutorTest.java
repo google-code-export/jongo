@@ -59,18 +59,18 @@ public class JDBCExecutorTest {
     
     @Test
     public void testGet() throws SQLException{
-        Table t = new Table("demo1", "user");
+        Table t = new Table("my_demo_db", "user");
         
         // select * from user
         List<Row> rs = JDBCExecutor.get(new Select(t), true);
         assertEquals(2, rs.size());
         
         // select * from car
-        rs = JDBCExecutor.get(new Select(new Table("demo1", "car", "cid")), true);
+        rs = JDBCExecutor.get(new Select(new Table("my_demo_db", "car", "cid")), true);
         assertEquals(3, rs.size());
         
         // select * from car where cid = 0
-        rs = JDBCExecutor.get(new Select(new Table("demo1", "car", "cid")).setParameter(new SelectParam("cid", "0")), false);
+        rs = JDBCExecutor.get(new Select(new Table("my_demo_db", "car", "cid")).setParameter(new SelectParam("cid", "0")), false);
         assertEquals(1, rs.size());
         
         // select * from user where id = 0
@@ -102,7 +102,7 @@ public class JDBCExecutorTest {
     
     @Test
     public void testAll() throws SQLException{
-        Table t = new Table("demo1", "user");
+        Table t = new Table("my_demo_db", "user");
         List<UserMock> users = getTestValues();
         List<UserMock> createdusers = new ArrayList<UserMock>();
         for(UserMock u : users){
@@ -132,7 +132,7 @@ public class JDBCExecutorTest {
     
     @Test
     public void testInsert() throws SQLException{
-        Table t = new Table("demo1", "user");
+        Table t = new Table("my_demo_db", "user");
         try { JDBCExecutor.insert(new Insert(t)); }catch(IllegalArgumentException e){ assertNotNull(e); }
         
         Map<String, String> params = UserMock.getRandomInstance().toMap();
@@ -148,12 +148,12 @@ public class JDBCExecutorTest {
         assertEquals(1, JDBCExecutor.insert(new Insert(t).setColumns(params)));
         
         //test with a readonly table
-        try { JDBCExecutor.insert(new Insert(new Table("demo1", "maker")).addColumn("name", "RO")); }catch(SQLException e){ assertNotNull(e); }
+        try { JDBCExecutor.insert(new Insert(new Table("my_demo_db", "maker")).addColumn("name", "RO")); }catch(SQLException e){ assertNotNull(e); }
     }
     
     @Test
     public void testUpdate() throws SQLException{
-        Table t = new Table("demo1", "user");
+        Table t = new Table("my_demo_db", "user");
         Select s = new Select(t).setParameter(new SelectParam(t.getPrimaryKey(), Operator.EQUALS, "0"));
         Row row = JDBCExecutor.get(s, false).get(0);
         assertEquals("0", row.getCells().get("id"));
@@ -195,20 +195,20 @@ public class JDBCExecutorTest {
     @Test
     public void testSimpleFunction() throws SQLException, JongoBadRequestException {
         List<StoredProcedureParam> params = new ArrayList<StoredProcedureParam>();
-        List<Row> rows = JDBCExecutor.executeQuery("demo1", "simpleStoredProcedure", params);
+        List<Row> rows = JDBCExecutor.executeQuery("my_demo_db", "simpleStoredProcedure", params);
         assertEquals(1, rows.size());
     }
     
     @Test
     public void testSimpleStoredProcedure() throws JongoBadRequestException, SQLException{
         List<StoredProcedureParam> params = new ArrayList<StoredProcedureParam>();
-        Select s = new Select(new Table("demo1", "comments"));
+        Select s = new Select(new Table("my_demo_db", "comments"));
         List<Row> rs = JDBCExecutor.get(s, true);
         assertEquals(3, rs.size());
         
         params.add(new StoredProcedureParam("car_id", "1", false, 1, "INTEGER"));
         params.add(new StoredProcedureParam("comment", "grrrr asdsa  asd asd asda asdd )/(&&/($%/(&$=)/&/$·/(&", false, 2, "VARCHAR"));
-        List<Row> rows = JDBCExecutor.executeQuery("demo1", "insert_comment", params);
+        List<Row> rows = JDBCExecutor.executeQuery("my_demo_db", "insert_comment", params);
         assertEquals(0, rows.size());
         
         rs = JDBCExecutor.get(s, true);
@@ -221,19 +221,19 @@ public class JDBCExecutorTest {
         params = new ArrayList<StoredProcedureParam>();
         params.add(new StoredProcedureParam("in_year", "2010", false, 1, "INTEGER"));
         params.add(new StoredProcedureParam("out_total", "", true, 2, "INTEGER"));
-        List<Row> rows = JDBCExecutor.executeQuery("demo1", "get_year_sales", params);
+        List<Row> rows = JDBCExecutor.executeQuery("my_demo_db", "get_year_sales", params);
         assertEquals(1, rows.size());
         assertEquals("12", rows.get(0).getCells().get("out_total"));
     }
     
     @Test
     public void testGetMetaData() throws JongoBadRequestException, SQLException{
-        Table t = new Table("demo1", "user");
+        Table t = new Table("my_demo_db", "user");
         Select s = new Select(t);
         List<Row> rs = JDBCExecutor.getTableMetaData(s);
         assertEquals(6, rs.size());
         
-        rs = JDBCExecutor.getListOfTables("demo1");
+        rs = JDBCExecutor.getListOfTables("my_demo_db");
         assertEquals(8, rs.size());
         
     }
