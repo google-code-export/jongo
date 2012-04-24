@@ -20,9 +20,9 @@ package org.jongo.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp.ConnectionFactory;
 import org.apache.commons.dbcp.DriverManagerConnectionFactory;
@@ -45,7 +45,7 @@ public class JDBCConnectionFactory {
     private static final Logger l = LoggerFactory.getLogger(JDBCConnectionFactory.class);
     private static final JongoConfiguration configuration = JongoConfiguration.instanceOf();
     
-    private final Map<String, GenericObjectPool> connectionPool = new HashMap<String,GenericObjectPool>();
+    private final Map<String, GenericObjectPool> connectionPool = new ConcurrentHashMap<String,GenericObjectPool>();
     
     private static JDBCConnectionFactory instance = null;
     
@@ -58,15 +58,13 @@ public class JDBCConnectionFactory {
     private static JDBCConnectionFactory instanceOf(){
         if(instance == null){
             instance = new JDBCConnectionFactory();
-            Set<String> databases = configuration.getDatabases();
-            for(String dbname : databases){
-                l.debug("Registering Connection Pool for " + dbname);
-                DatabaseConfiguration dbcfg = configuration.getDatabaseConfiguration(dbname);
-                GenericObjectPool pool = new GenericObjectPool(null, dbcfg.getMaxConnections());
-                ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(dbcfg.toJdbcURL(), dbcfg.getUsername(), dbcfg.getPassword());
-                PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, pool, null, null, dbcfg.isReadOnly(), true);
+            for(DatabaseConfiguration db : configuration.getDatabases()){
+                l.debug("Registering Connection Pool for " + db.getDatabase());
+                GenericObjectPool pool = new GenericObjectPool(null, db.getMaxConnections());
+                ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(db.toJdbcURL(), db.getUsername(), db.getPassword());
+                PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, pool, null, null, db.isReadOnly(), true);
                 poolableConnectionFactory.hashCode();
-                instance.connectionPool.put(dbname, pool);
+                instance.connectionPool.put(db.getDatabase(), pool);
             }
         }
         return instance;
@@ -74,34 +72,34 @@ public class JDBCConnectionFactory {
 
     /**
      * Gives access to a {@link java.sql.Connection} for the given database.
-     * @param database the name of a registered database
+     * @param dbcfg a registered {@link org.jongo.config.DatabaseConfiguration}
      * @return a {@link java.sql.Connection}
      * @throws SQLException 
      */
-    public static Connection getConnection(final String database) throws SQLException {
+    public static Connection getConnection(final DatabaseConfiguration dbcfg) throws SQLException {
         l.debug("Obtaining a connection from the datasource");
-        DataSource ds = getDataSource(database);
+        DataSource ds = getDataSource(dbcfg);
         return ds.getConnection();
     }
 
     /**
      * Gives access to a {@link java.sql.DataSource} for the given database.
-     * @param database database the name of a registered database
+     * @param dbcfg a registered {@link org.jongo.config.DatabaseConfiguration}
      * @return a {@link java.sql.DataSource}
      */
-    public static DataSource getDataSource(final String database) {
+    public static DataSource getDataSource(final DatabaseConfiguration dbcfg) {
         JDBCConnectionFactory me = JDBCConnectionFactory.instanceOf();
-        PoolingDataSource dataSource = new PoolingDataSource(me.connectionPool.get(database));
+        PoolingDataSource dataSource = new PoolingDataSource(me.connectionPool.get(dbcfg.getDatabase()));
         return dataSource;
     }
 
     /**
      * Instantiates a new {@linkplain org.apache.commons.dbutils.QueryRunner} for the given database.
-     * @param database the name of a registered database
+     * @param dbcfg a registered {@link org.jongo.config.DatabaseConfiguration}
      * @return a new {@linkplain org.apache.commons.dbutils.QueryRunner}
      */
-    public static QueryRunner getQueryRunner(final String database){
-        DataSource ds = getDataSource(database);
+    public static QueryRunner getQueryRunner(final DatabaseConfiguration dbcfg){
+        DataSource ds = getDataSource(dbcfg);
         return new QueryRunner(ds);
     }
     
@@ -110,9 +108,9 @@ public class JDBCConnectionFactory {
      * @throws SQLException 
      */
     public static void closeConnections() throws SQLException{
-        for(String dbname : configuration.getDatabases()){
-            l.debug("Shutting down JDBC connection " + dbname);
-            getConnection(dbname).close();
+        for(DatabaseConfiguration dbcfg : configuration.getDatabases()){
+            l.debug("Shutting down JDBC connection " + dbcfg.getDatabase());
+            getConnection(dbcfg).close();
         }
     }
 }
