@@ -94,6 +94,10 @@ public class JongoConfiguration {
         return instance;
     }
     
+    public static void reset(){
+        instance = null;
+    }
+    
     private static Properties getProperties(JongoConfiguration conf){
         Properties prop;
         if(demo){
