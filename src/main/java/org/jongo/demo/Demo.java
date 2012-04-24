@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
 import org.apache.commons.dbutils.QueryRunner;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -54,77 +55,74 @@ public class Demo {
     private static void generateDemoDatabase(final DatabaseConfiguration dbcfg){
         final String database = dbcfg.getDatabase();
         QueryRunner run = new QueryRunner(JDBCConnectionFactory.getDataSource(dbcfg));
-        try {
-            l.info("Generating Demo resources in database " + database);
-            run.update(getCreateUserTable());
-            run.update(getCreateMakersTable());
-            run.update(getCreateCarsTable());
-            run.update(getCreateCommentsTable());
-            run.update(getCreatePicturesTable());
-            run.update(getCreateSalesStatsTable());
-            run.update(getCreateSalesByMakerAndModelStatsTable());
-            run.update(getCreateEmptyTable());
-            
-            l.info("Generating Demo Data in database " + database);
-            
-            final String insertUserQuery = "INSERT INTO user (name, age, birthday, credit) VALUES (?,?,?,?)";
-            run.update(insertUserQuery, "foo", 30, "1982-12-13", 32.5);
-            run.update(insertUserQuery, "bar", 33, "1992-01-15", 0);
-            
-            for(CarMaker maker: CarMaker.values()){
-                run.update("INSERT INTO maker (name, realname) VALUES (?,?)", maker.name(), maker.getRealName());
-            }
-            
-            final String insertCar = "INSERT INTO car (maker, model, year, fuel, transmission, currentMarketValue, newValue) VALUES (?,?,?,?,?,?,?)";
-            run.update(insertCar, "CITROEN", "C2", 2008, "Gasoline", "Manual", 9000, 13000);
-            run.update("INSERT INTO car (maker, model, year, transmission, currentMarketValue, newValue) VALUES (?,?,?,?,?,?)", "FIAT", "500", 2010,"Manual", 19000, 23.000);
-            run.update(insertCar, "BMW", "X5", 2011, "Diesel", "Automatic", 59000, 77000);
-            
-            final String insertComment = "INSERT INTO comments (car_id, comment) VALUES (?,?)";
-            run.update(insertComment, 0, "The Citroen C2 is a small car with a great attitude"); 
-            run.update(insertComment, 0, "I Love my C2");
-            run.update(insertComment, 2, "BMW's X5 costs too much for what it's worth. Checkout http://www.youtube.com/watch?v=Bg1TB4dRobY"); 
-            
-            final String insertPicture = "INSERT INTO pictures (car_id, picture) VALUES (?,?)";
-            run.update(insertPicture, 0, "http://www.babez.de/citroen/c2/picth01.jpg"); 
-            run.update(insertPicture, 0, "http://www.babez.de/citroen/c2/pic02.jpg"); 
-            run.update(insertPicture, 0, "http://www.babez.de/citroen/c2/picth03.jpg"); 
-            
-            run.update(insertPicture, 1, "http://www.dwsauto.com/wp-content/uploads/2008/07/fiat-500-photo.jpg"); 
-            run.update(insertPicture, 1, "http://www.cochesadictos.com/coches/fiat-500/imagenes/index1.jpg"); 
-            run.update(insertPicture, 1, "http://www.cochesadictos.com/coches/fiat-500/imagenes/index4.jpg");
-            
-            run.update(insertPicture, 2, "http://www.coches21.com/fotos/100/bmw_x5_457.jpg"); 
-            run.update(insertPicture, 2, "http://www.coches21.com/fotos/100/bmw_x5_460.jpg"); 
-            run.update(insertPicture, 2, "http://www.coches21.com/modelos/250/bmw_x5_65.jpg");
-            
-            // generate some random data for the stats page
-            DateTimeFormatter isofmt = ISODateTimeFormat.dateTime();
-            DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSSSSSSSS");
-            DateTime dt;// = isofmt.parseDateTime("2012-01-16T13:34:00.000Z");
-            for(int year = 2000; year < 2012; year++){
-                for (int month = 1; month <= 12; month++){
-                    int val = 1910 + new Random().nextInt(100);
-                    dt = isofmt.parseDateTime(year + "-" + month + "-01T01:00:00.000Z");
-                    run.update("INSERT INTO sales_stats (year, month, sales, last_update) VALUES (?,?,?,?)", year, month, val, fmt.print(dt));
-                    for(CarMaker maker: CarMaker.values()){
-                        val = new Random().nextInt(100);
-                        run.update("INSERT INTO maker_stats (year, month, sales, maker, last_update) VALUES (?,?,?,?,?)", year, month, val, maker.name(), fmt.print(dt));
-                    }
+        
+        l.info("Generating Demo resources in database " + database);
+        update(run, getCreateUserTable());
+        update(run, getCreateMakersTable());
+        update(run, getCreateCarsTable());
+        update(run, getCreateCommentsTable());
+        update(run, getCreatePicturesTable());
+        update(run, getCreateSalesStatsTable());
+        update(run, getCreateSalesByMakerAndModelStatsTable());
+        update(run, getCreateEmptyTable());
+
+        l.info("Generating Demo Data in database " + database);
+
+        final String insertUserQuery = "INSERT INTO user (name, age, birthday, credit) VALUES (?,?,?,?)";
+        update(run, insertUserQuery, "foo", 30, "1982-12-13", 32.5);
+        update(run, insertUserQuery, "bar", 33, "1992-01-15", 0);
+
+        for(CarMaker maker: CarMaker.values()){
+                update(run, "INSERT INTO maker (name, realname) VALUES (?,?)", maker.name(), maker.getRealName());
+        }
+
+        final String insertCar = "INSERT INTO car (maker, model, year, fuel, transmission, currentMarketValue, newValue) VALUES (?,?,?,?,?,?,?)";
+        update(run, insertCar, "CITROEN", "C2", 2008, "Gasoline", "Manual", 9000, 13000);
+        update(run, "INSERT INTO car (maker, model, year, transmission, currentMarketValue, newValue) VALUES (?,?,?,?,?,?)", "FIAT", "500", 2010,"Manual", 19000, 23.000);
+        update(run, insertCar, "BMW", "X5", 2011, "Diesel", "Automatic", 59000, 77000);
+
+        final String insertComment = "INSERT INTO comments (car_id, comment) VALUES (?,?)";
+        update(run, insertComment, 0, "The Citroen C2 is a small car with a great attitude"); 
+        update(run, insertComment, 0, "I Love my C2");
+        update(run, insertComment, 2, "BMW's X5 costs too much for what it's worth. Checkout http://www.youtube.com/watch?v=Bg1TB4dRobY"); 
+
+        final String insertPicture = "INSERT INTO pictures (car_id, picture) VALUES (?,?)";
+        update(run, insertPicture, 0, "http://www.babez.de/citroen/c2/picth01.jpg"); 
+        update(run, insertPicture, 0, "http://www.babez.de/citroen/c2/pic02.jpg"); 
+        update(run, insertPicture, 0, "http://www.babez.de/citroen/c2/picth03.jpg"); 
+
+        update(run, insertPicture, 1, "http://www.dwsauto.com/wp-content/uploads/2008/07/fiat-500-photo.jpg"); 
+        update(run, insertPicture, 1, "http://www.cochesadictos.com/coches/fiat-500/imagenes/index1.jpg"); 
+        update(run, insertPicture, 1, "http://www.cochesadictos.com/coches/fiat-500/imagenes/index4.jpg");
+
+        update(run, insertPicture, 2, "http://www.coches21.com/fotos/100/bmw_x5_457.jpg"); 
+        update(run, insertPicture, 2, "http://www.coches21.com/fotos/100/bmw_x5_460.jpg"); 
+        update(run, insertPicture, 2, "http://www.coches21.com/modelos/250/bmw_x5_65.jpg");
+
+        // generate some random data for the stats page
+        DateTimeFormatter isofmt = ISODateTimeFormat.dateTime();
+        DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSSSSSSSS");
+        DateTime dt;// = isofmt.parseDateTime("2012-01-16T13:34:00.000Z");
+        for(int year = 2000; year < 2012; year++){
+            for (int month = 1; month <= 12; month++){
+                int val = 1910 + new Random().nextInt(100);
+                dt = isofmt.parseDateTime(year + "-" + month + "-01T01:00:00.000Z");
+                update(run, "INSERT INTO sales_stats (year, month, sales, last_update) VALUES (?,?,?,?)", year, month, val, fmt.print(dt));
+                for(CarMaker maker: CarMaker.values()){
+                    val = new Random().nextInt(100);
+                    update(run, "INSERT INTO maker_stats (year, month, sales, maker, last_update) VALUES (?,?,?,?,?)", year, month, val, maker.name(), fmt.print(dt));
                 }
             }
-            
-            run.update("SET TABLE maker READONLY TRUE");
-            
-            //load the sp
-            run.update("CREATE FUNCTION simpleStoredProcedure () RETURNS TINYINT RETURN 1");
-            run.update("CREATE PROCEDURE insert_comment (IN car_id INTEGER, IN comment VARCHAR(255)) MODIFIES SQL DATA INSERT INTO comments VALUES (DEFAULT, car_id, comment)");
-            run.update("CREATE PROCEDURE get_year_sales (IN in_year INTEGER, OUT out_total INTEGER) READS SQL DATA SELECT COUNT(sales) INTO out_total FROM sales_stats WHERE year = in_year");
-            run.update(getCreateView());
-            
-        } catch (SQLException ex) {
-            l.error("Failed to create demo " + ex.getMessage());
         }
+
+        update(run, "SET TABLE maker READONLY TRUE");
+
+        //load the sp
+        update(run, "CREATE FUNCTION simpleStoredProcedure () RETURNS TINYINT RETURN 1");
+        update(run, "CREATE PROCEDURE insert_comment (IN car_id INTEGER, IN comment VARCHAR(255)) MODIFIES SQL DATA INSERT INTO comments VALUES (DEFAULT, car_id, comment)");
+        update(run, "CREATE PROCEDURE get_year_sales (IN in_year INTEGER, OUT out_total INTEGER) READS SQL DATA SELECT COUNT(sales) INTO out_total FROM sales_stats WHERE year = in_year");
+        update(run, getCreateView());
+
     }
     
     private static void destroyDemoDatabase(final DatabaseConfiguration dbcfg){
@@ -229,5 +227,27 @@ public class Demo {
         demos.add(DatabaseConfiguration.instanceOf("demo1", JDBCDriver.HSQLDB_MEM, "demo", "demo", "my_demo_db", null, null, 1, false));
 //        demos.put("demo2", AbstractDatabaseConfiguration.instanceOf("demo2", JDBCDriver.HSQLDB, "demo", "demo", "jdbc:hsqldb:mem:demo2"));
         return demos;
+    }
+    
+    private static void update(QueryRunner run, String stmt, Object... args){
+        if(args.length == 0){
+//            System.out.println(stmt); // uncomment to print SQL
+        }else{
+            String k = stmt;
+            for(Object o : args){
+                String p = "";
+                if(o instanceof java.lang.Number)
+                    p = String.valueOf(o);
+                else
+                    p = "'" + String.valueOf(o) + "'";
+                k = k.replaceFirst("\\?", p);
+            }
+//            System.out.println(k); // uncomment to print SQL
+        }
+        try {
+            run.update(stmt, args);
+        } catch (SQLException ex) {
+            l.error("Failed to update database", ex);
+        }
     }
 }
