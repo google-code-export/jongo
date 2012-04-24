@@ -206,7 +206,6 @@ public class DefaultFormatFilter implements ContainerResponseFilter, JongoFormat
         
         return Response.status(status)
                 .entity(res)
-                .type(mime)
                 .header("Content-Count", response.getRows().size())
                 .header(HttpHeaders.CONTENT_LOCATION, response.getResource())
                 .build();
