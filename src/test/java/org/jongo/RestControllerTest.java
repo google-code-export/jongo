@@ -80,16 +80,18 @@ public class RestControllerTest {
         }catch(Exception e){
             Assert.assertTrue(e instanceof IllegalArgumentException);
         }
+        
+        try{
+            new RestController("noway");
+        }catch(Exception e){
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+        }
     }
     
     @Test
     public void testGetDatabaseMetadata(){
         JongoSuccess r = (JongoSuccess)controller.getDatabaseMetadata();
         testSuccessResponse(r, Response.Status.OK, 8);
-        
-        RestController controller2 = new RestController("noway");
-        JongoError err = (JongoError)controller2.getDatabaseMetadata();
-        testErrorResponse(err, Response.Status.NOT_FOUND, null, null);
     }
     
     @Test
