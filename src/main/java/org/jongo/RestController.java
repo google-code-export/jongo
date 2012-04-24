@@ -55,11 +55,8 @@ public class RestController {
         if(StringUtils.isBlank(alias))
             throw new IllegalArgumentException("Alias name can't be blank, empty or null");
         
-        if(!conf.getDatabases().contains(alias))
-            throw new IllegalArgumentException("Alias doesn't exists or is not registered in jongo");
-        
         this.alias = alias;
-        this.database = conf.getDatabaseConfiguration(alias).getDatabase();
+        this.database = conf.getDatabaseConfigurationForAlias(alias).getDatabase();
     }
     
     /**
