@@ -96,7 +96,7 @@ public class RestControllerTest {
     
     @Test
     public void testGetResourceMetadata(){
-        JongoHead r = (JongoHead)controller.getResourceMetadata("user");
+        JongoHead r = (JongoHead)controller.getResourceMetadata("users");
         Assert.assertEquals(Response.Status.OK, r.getStatus());
         Assert.assertTrue(r.isSuccess());
         Assert.assertEquals(6, r.getRows().size());
@@ -119,31 +119,31 @@ public class RestControllerTest {
     @Test
     public void testReadResource(){
         
-        JongoSuccess r = (JongoSuccess)controller.getResource("user", "id", "0", limit, order);
+        JongoSuccess r = (JongoSuccess)controller.getResource("users", "id", "0", limit, order);
         testSuccessResponse(r, Response.Status.OK, 1);
         
-        r = (JongoSuccess)controller.getResource("user", "name", "foo", limit, order);
+        r = (JongoSuccess)controller.getResource("users", "name", "foo", limit, order);
         testSuccessResponse(r, Response.Status.OK, 1);
         
-        r = (JongoSuccess)controller.getResource("user", "birthday", "1992-01-15", limit, order);
+        r = (JongoSuccess)controller.getResource("users", "birthday", "1992-01-15", limit, order);
         testSuccessResponse(r, Response.Status.OK, 1);
         
-        r = (JongoSuccess)controller.getResource("user", "age", "33", limit, order);
+        r = (JongoSuccess)controller.getResource("users", "age", "33", limit, order);
         testSuccessResponse(r, Response.Status.OK, 1);
         
-        r = (JongoSuccess)controller.getResource("user", "credit", "32.5", limit, order);
+        r = (JongoSuccess)controller.getResource("users", "credit", "32.5", limit, order);
         testSuccessResponse(r, Response.Status.OK, 1);
         
-//        r = (JongoSuccess)controller.getResource("user", "id", "", limit, order);
+//        r = (JongoSuccess)controller.getResource("users", "id", "", limit, order);
 //        testSuccessResponse(r, Response.Status.OK, 1);
         
-//        r = (JongoSuccess)controller.getResource("user", "id", null, limit, order);
+//        r = (JongoSuccess)controller.getResource("users", "id", null, limit, order);
 //        testSuccessResponse(r, Response.Status.OK, 1);
         
-//        r = (JongoSuccess)controller.getResource("user", "", null, limit, order);
+//        r = (JongoSuccess)controller.getResource("users", "", null, limit, order);
 //        testSuccessResponse(r, Response.Status.OK, 1);
         
-//        r = (JongoSuccess)controller.getResource("user", null, null, limit, order);
+//        r = (JongoSuccess)controller.getResource("users", null, null, limit, order);
 //        testSuccessResponse(r, Response.Status.OK, 1);
 
         JongoError err = (JongoError)controller.getResource("", "id", "0", limit, order);
@@ -153,13 +153,13 @@ public class RestControllerTest {
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
         // fails if we try for a non-existing resource.
-        err = (JongoError)controller.getResource("user", "id", "1999", limit, order);
+        err = (JongoError)controller.getResource("users", "id", "1999", limit, order);
         testErrorResponse(err, Response.Status.NOT_FOUND, null, null);
         
-        err = (JongoError)controller.getResource("user", "id", "not an integer", limit, order);
+        err = (JongoError)controller.getResource("users", "id", "not an integer", limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, "22018", -3438);
         
-        err = (JongoError)controller.getResource("user", "name", "1999", limit, order);
+        err = (JongoError)controller.getResource("users", "name", "1999", limit, order);
         testErrorResponse(err, Response.Status.NOT_FOUND, null, null);
         
         // test a table with a custom column
@@ -202,32 +202,32 @@ public class RestControllerTest {
     
     @Test
     public void testFindByDynamicFinder(){
-        testDynamicFinder("user", "findAllByAgeBetween", 2, "18", "99");
-        testDynamicFinder("user", "findAllByBirthdayBetween", 1, "1992-01-01", "1992-12-31");
+        testDynamicFinder("users", "findAllByAgeBetween", 2, "18", "99");
+        testDynamicFinder("users", "findAllByBirthdayBetween", 1, "1992-01-01", "1992-12-31");
         
         order.setColumn("cid");
         testDynamicFinder("car", "findAllByFuelIsNull", 1);
         testDynamicFinder("car", "findAllByFuelIsNotNull", 2);
         
         order.setColumn("id");
-        testDynamicFinder("user", "findAllByCreditGreaterThan", 1, "0");
-        testDynamicFinder("user", "findAllByCreditGreaterThanEquals", 2, "0");
-        testDynamicFinder("user", "findAllByCreditLessThanEquals", 1, "0");
+        testDynamicFinder("users", "findAllByCreditGreaterThan", 1, "0");
+        testDynamicFinder("users", "findAllByCreditGreaterThanEquals", 2, "0");
+        testDynamicFinder("users", "findAllByCreditLessThanEquals", 1, "0");
         testDynamicFinder("sales_stats", "findAllByLast_updateBetween", 6, "2000-01-01T00:00:00.000Z", "2000-06-01T23:55:00.000Z");
         
-        JongoError err = (JongoError)controller.findByDynamicFinder("user","findAllByCreditLessThan", Arrays.asList(new String [] {"0"}), limit, order);
+        JongoError err = (JongoError)controller.findByDynamicFinder("users","findAllByCreditLessThan", Arrays.asList(new String [] {"0"}), limit, order);
         testErrorResponse(err, Response.Status.NOT_FOUND, null, null);
         
-        err = (JongoError)controller.findByDynamicFinder("user","findAllByCreditLessThhhhan", Arrays.asList(new String [] {"0"}), limit, order);
+        err = (JongoError)controller.findByDynamicFinder("users","findAllByCreditLessThhhhan", Arrays.asList(new String [] {"0"}), limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
-        err = (JongoError)controller.findByDynamicFinder("user","findAllByCreditLessThhhhan", Arrays.asList(new String [] {""}), limit, order);
+        err = (JongoError)controller.findByDynamicFinder("users","findAllByCreditLessThhhhan", Arrays.asList(new String [] {""}), limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
-        err = (JongoError)controller.findByDynamicFinder("user","", Arrays.asList(new String [] {"0"}), limit, order);
+        err = (JongoError)controller.findByDynamicFinder("users","", Arrays.asList(new String [] {"0"}), limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
-        err = (JongoError)controller.findByDynamicFinder("user", null, Arrays.asList(new String [] {"0"}), limit, order);
+        err = (JongoError)controller.findByDynamicFinder("users", null, Arrays.asList(new String [] {"0"}), limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
         err = (JongoError)controller.findByDynamicFinder("","", Arrays.asList(new String [] {"0"}), limit, order);
@@ -242,11 +242,11 @@ public class RestControllerTest {
         err = (JongoError)controller.findByDynamicFinder(null,null, Arrays.asList(new String [] {"0"}), limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
-        err = (JongoError)controller.findByDynamicFinder("user","findAllByCreditLessThan", new ArrayList<String>(), limit, order);
+        err = (JongoError)controller.findByDynamicFinder("users","findAllByCreditLessThan", new ArrayList<String>(), limit, order);
         testErrorResponse(err, Response.Status.BAD_REQUEST, "S1000", -424);
         
         try{
-        controller.findByDynamicFinder("user","findAllByCreditLessThan", null, limit, order);
+        controller.findByDynamicFinder("users","findAllByCreditLessThan", null, limit, order);
         }catch(Exception e){
             Assert.assertTrue(e instanceof IllegalArgumentException);
         }
@@ -258,23 +258,23 @@ public class RestControllerTest {
     @Test
     public void testCreateResource(){
         UserMock newMock = UserMock.getRandomInstance();
-        JongoSuccess r = (JongoSuccess)controller.insertResource("user", "id", newMock.toJSON());
+        JongoSuccess r = (JongoSuccess)controller.insertResource("users", "id", newMock.toJSON());
         testSuccessResponse(r, Response.Status.CREATED, 1);
         
-        r = (JongoSuccess)controller.getResource("user", "name", newMock.name, limit, order);
+        r = (JongoSuccess)controller.getResource("users", "name", newMock.name, limit, order);
         testSuccessResponse(r, Response.Status.OK, 1);
         
         newMock = UserMock.getRandomInstance();
-        r = (JongoSuccess)controller.insertResource("user", "id", newMock.toMap());
+        r = (JongoSuccess)controller.insertResource("users", "id", newMock.toMap());
         testSuccessResponse(r, Response.Status.CREATED, 1);
         
-        r = (JongoSuccess)controller.getResource("user", "name", newMock.name, limit, order);
+        r = (JongoSuccess)controller.getResource("users", "name", newMock.name, limit, order);
         testSuccessResponse(r, Response.Status.OK, 1);
         
-        JongoError err = (JongoError)controller.insertResource("user", "id", "");
+        JongoError err = (JongoError)controller.insertResource("users", "id", "");
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
-        err = (JongoError)controller.insertResource("user", "id", new HashMap<String,String>());
+        err = (JongoError)controller.insertResource("users", "id", new HashMap<String,String>());
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
         err = (JongoError)controller.insertResource("", "id", new HashMap<String,String>());
@@ -283,62 +283,62 @@ public class RestControllerTest {
         err = (JongoError)controller.insertResource(null, "id", new HashMap<String,String>());
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
-        err = (JongoError)controller.insertResource("user", "", new HashMap<String,String>());
+        err = (JongoError)controller.insertResource("users", "", new HashMap<String,String>());
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
-        err = (JongoError)controller.insertResource("user", null, new HashMap<String,String>());
+        err = (JongoError)controller.insertResource("users", null, new HashMap<String,String>());
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
         newMock = UserMock.getRandomInstance();
         Map<String, String> wrongUserParams = newMock.toMap();
         wrongUserParams.put("birthday", "0000"); // in wrong format
-        err = (JongoError)controller.insertResource("user", "id", wrongUserParams);
+        err = (JongoError)controller.insertResource("users", "id", wrongUserParams);
         testErrorResponse(err, Response.Status.BAD_REQUEST, "42561", new Integer(-5561));
         
         wrongUserParams = newMock.toMap();
         wrongUserParams.put("age", null); // age can be null
-        r = (JongoSuccess)controller.insertResource("user", "id", wrongUserParams);
+        r = (JongoSuccess)controller.insertResource("users", "id", wrongUserParams);
         testSuccessResponse(r, Response.Status.CREATED, 1);
         
         wrongUserParams = newMock.toMap();
         wrongUserParams.put("age", ""); // age can't be empty
-        err = (JongoError)controller.insertResource("user", "id", wrongUserParams);
+        err = (JongoError)controller.insertResource("users", "id", wrongUserParams);
         testErrorResponse(err, Response.Status.BAD_REQUEST, "22018", new Integer(-3438));
         
         wrongUserParams = newMock.toMap();
         wrongUserParams.put("name", null); // name can't be null
-        err = (JongoError)controller.insertResource("user", "id", wrongUserParams);
+        err = (JongoError)controller.insertResource("users", "id", wrongUserParams);
         testErrorResponse(err, Response.Status.BAD_REQUEST, "23502", new Integer(-10));
         
         wrongUserParams = newMock.toMap();
         wrongUserParams.put("name", ""); // name can be empty
-        r = (JongoSuccess)controller.insertResource("user", "id", wrongUserParams);
+        r = (JongoSuccess)controller.insertResource("users", "id", wrongUserParams);
         testSuccessResponse(r, Response.Status.CREATED, 1);
-        r = (JongoSuccess)controller.getResource("user", "name", newMock.name, limit, order);
+        r = (JongoSuccess)controller.getResource("users", "name", newMock.name, limit, order);
         testSuccessResponse(r, Response.Status.OK, 1);
     }
     
     @Test
     public void testUpdateResource(){
-        JongoSuccess r = (JongoSuccess)controller.updateResource("user", "id", "0", "{\"age\":\"90\"}");
+        JongoSuccess r = (JongoSuccess)controller.updateResource("users", "id", "0", "{\"age\":\"90\"}");
         testSuccessResponse(r, Response.Status.OK, 1);
         
-        JongoError err = (JongoError)controller.updateResource("user", "id", "0", "{\"age\":\"\"}"); // age can't be empty
+        JongoError err = (JongoError)controller.updateResource("users", "id", "0", "{\"age\":\"\"}"); // age can't be empty
         testErrorResponse(err, Response.Status.BAD_REQUEST, "22018", new Integer(-3438));
         
-        err = (JongoError)controller.updateResource("user", "id", "0", "{\"age\":}"); // invalid json
+        err = (JongoError)controller.updateResource("users", "id", "0", "{\"age\":}"); // invalid json
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
-        err = (JongoError)controller.updateResource("user", "id", "0", "{\"age\":\"90\", \"birthday\":00X0}"); // invalid date
+        err = (JongoError)controller.updateResource("users", "id", "0", "{\"age\":\"90\", \"birthday\":00X0}"); // invalid date
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
-        err = (JongoError)controller.updateResource("user", "id", "0", "{\"age\":\"90\", \"birthday\":\"00X0\"}"); // invalid date
+        err = (JongoError)controller.updateResource("users", "id", "0", "{\"age\":\"90\", \"birthday\":\"00X0\"}"); // invalid date
         testErrorResponse(err, Response.Status.BAD_REQUEST, "22007", new Integer(-3407));
         
         err = (JongoError)controller.updateResource(null, "id", "0", "{\"age\":\"90\"}");
         testErrorResponse(err, Response.Status.BAD_REQUEST, null, null);
         
-        err = (JongoError)controller.updateResource("user", "id", "9999", "{\"age\":\"90\"}");
+        err = (JongoError)controller.updateResource("users", "id", "9999", "{\"age\":\"90\"}");
         testErrorResponse(err, Response.Status.NO_CONTENT, null, null);
         
         r = (JongoSuccess)controller.updateResource("car", "cid", "0", "{\"model\":\"Test$%&·$&%·$/()=?¿Model\"}"); //custom id
@@ -351,25 +351,25 @@ public class RestControllerTest {
     @Test
     public void testRemoveResource(){
         UserMock newMock = UserMock.getRandomInstance();
-        JongoSuccess r = (JongoSuccess)controller.insertResource("user", "id", newMock.toJSON());
+        JongoSuccess r = (JongoSuccess)controller.insertResource("users", "id", newMock.toJSON());
         testSuccessResponse(r, Response.Status.CREATED, 1);
         
-        r = (JongoSuccess)controller.getResource("user", "name", newMock.name, limit, order);
+        r = (JongoSuccess)controller.getResource("users", "name", newMock.name, limit, order);
         testSuccessResponse(r, Response.Status.OK, 1);
         
         String id = getId(r, "id");
         Assert.assertNotNull(id);
         
-        r = (JongoSuccess)controller.deleteResource("user", "id", id);
+        r = (JongoSuccess)controller.deleteResource("users", "id", id);
         testSuccessResponse(r, Response.Status.OK, 1);
         
-        JongoError err = (JongoError)controller.deleteResource("user", "id", "");
+        JongoError err = (JongoError)controller.deleteResource("users", "id", "");
         testErrorResponse(err, Response.Status.BAD_REQUEST, "22018", new Integer(-3438));
         
-        err = (JongoError)controller.deleteResource("user", "id", null);
+        err = (JongoError)controller.deleteResource("users", "id", null);
         testErrorResponse(err, Response.Status.NO_CONTENT, null, null);
         
-        err = (JongoError)controller.deleteResource("user", "", "32");
+        err = (JongoError)controller.deleteResource("users", "", "32");
         testErrorResponse(err, Response.Status.NO_CONTENT, null, null);
         
         err = (JongoError)controller.deleteResource(null, "", "32");
