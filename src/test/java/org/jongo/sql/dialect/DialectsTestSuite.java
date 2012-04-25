@@ -28,12 +28,13 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+    org.jongo.sql.dialect.SQLDialectTest.class,
     org.jongo.sql.dialect.OracleDialectTest.class, 
     org.jongo.sql.dialect.PostgreSQLDialectTest.class, 
     org.jongo.sql.dialect.HSQLDialectTest.class, 
     org.jongo.sql.dialect.MSSQLDialectTest.class, 
-    org.jongo.sql.dialect.MySQLDialectTest.class, 
-    org.jongo.sql.dialect.SQLDialectTest.class})
+    org.jongo.sql.dialect.MySQLDialectTest.class
+})
 public class DialectsTestSuite {
 
     @BeforeClass
