@@ -20,7 +20,10 @@ package org.jongo.sql.dialect;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.jdbc.LimitParam;
 import org.jongo.jdbc.OrderParam;
-import org.jongo.sql.*;
+import org.jongo.sql.Delete;
+import org.jongo.sql.DynamicFinder;
+import org.jongo.sql.Insert;
+import org.jongo.sql.Update;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,54 +38,6 @@ public class OracleDialect extends SQLDialect {
     @Override
     public String listOfTablesStatement() {
         return "SELECT TABLE_NAME FROM ALL_ALL_TABLES";
-    }
-
-    @Override
-    public String toStatementString(Select select) {
-        final StringBuilder b = new StringBuilder("SELECT ");
-        
-        if(select.getLimitParam() == null){
-            if(select.isAllColumns()){
-                b.append(select.getTable().getName()).append(".*");
-            }else{
-                String cols = StringUtils.join(select.getColumns(), ",");
-                b.append(cols);
-            }
-            b.append(" FROM ").append(select.getTable().toString());
-            if(!select.isAllRecords()){
-                super.appendWhereClause(b, select);
-            }
-            if(select.getOrderParam() != null){
-                b.append(" ORDER BY ").append(select.getTable().getName()).append(".");
-                b.append(select.getOrderParam().getColumn()).append(" ").append(select.getOrderParam().getDirection());
-            }
-        }else{
-            b.append("* FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY ");
-            
-            if(select.getOrderParam() == null){
-                b.append(select.getTable().getName()).append(".");
-                b.append(select.getTable().getPrimaryKey());
-            }else{
-                b.append(select.getTable().getName()).append(".");
-                b.append(select.getOrderParam().getColumn()).append(" ").append(select.getOrderParam().getDirection());
-            }
-            
-            b.append(" ) AS ROW_NUMBER, ");
-            if(select.isAllColumns()){
-                b.append(select.getTable().getName()).append(".*");
-            }else{
-                String cols = StringUtils.join(select.getColumns(), ",");
-                b.append(cols);
-            }
-            b.append(" FROM ").append(select.getTable().toString());
-            if(!select.isAllRecords()){
-                super.appendWhereClause(b, select);
-            }
-            b.append(") WHERE ROW_NUMBER BETWEEN ").append(select.getLimitParam().getStart()).append(" AND ").append(select.getLimitParam().getLimit());
-        }
-        
-        l.debug(b.toString());
-        return b.toString();
     }
 
     @Override
