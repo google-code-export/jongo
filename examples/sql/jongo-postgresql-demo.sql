@@ -17,43 +17,48 @@
 */
 
 /**
-* MySQL Script to generate a Database with data which we can
+* PostgreSQL Script to generate a Database with data which we can
 * use to test Jongo.
 * Must be executed as super user (root)
 * Remember to drop the database and user when done.
+* NOTE: This haven't been tested!!!
 */
 
 DROP DATABASE IF EXISTS jongo_demo_db;
 
 CREATE DATABASE jongo_demo_db;
 
-USE jongo_demo_db;
+CREATE USER 'jongo_demo' WITH PASSWORD '123456';
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA jongo_demo_db to 'jongo_demo';
 
-CREATE USER 'jongo_demo'@'%' IDENTIFIED BY '123456';
-CREATE USER 'jongo_demo'@'localhost' IDENTIFIED BY '123456';
-GRANT ALL PRIVILEGES ON jongo_demo_db.* to 'jongo_demo'@'%';
-GRANT ALL PRIVILEGES ON jongo_demo_db.* to 'jongo_demo'@'localhost';
+CREATE SEQUENCE jongo_demo_db.users_id_sequence MINVALUE 1;
+CREATE SEQUENCE jongo_demo_db.maker_id_sequence MINVALUE 1;
+CREATE SEQUENCE jongo_demo_db.car_id_sequence MINVALUE 1;
+CREATE SEQUENCE jongo_demo_db.comments_id_sequence MINVALUE 1;
+CREATE SEQUENCE jongo_demo_db.pictures_id_sequence MINVALUE 1;
+CREATE SEQUENCE jongo_demo_db.sales_stats_id_sequence MINVALUE 1;
+CREATE SEQUENCE jongo_demo_db.maker_stats_id_sequence MINVALUE 1;
 
 CREATE TABLE jongo_demo_db.users (
-    id INTEGER NOT NULL AUTO_INCREMENT, 
-    name VARCHAR(25) NOT NULL, 
-    age INTEGER, 
-    birthday DATE, 
-    lastupdate TIMESTAMP, 
+    id INTEGER NOT NULL UNIQUE DEFAULT NEXTVAL('jongo_demo_db.users_id_sequence'),
+    name VARCHAR(25) NOT NULL,
+    age INTEGER,
+    birthday DATE,
+    lastupdate TIMESTAMP,
     credit DECIMAL(6,2),
     PRIMARY KEY (id)
 );
 
 CREATE TABLE jongo_demo_db.maker (
-    id INTEGER NOT NULL AUTO_INCREMENT, 
-    name VARCHAR(50), 
+    id INTEGER NOT NULL UNIQUE DEFAULT NEXTVAL('jongo_demo_db.maker_id_sequence'),
+    name VARCHAR(50),
     realname VARCHAR(50),
     PRIMARY KEY (id)
 );
 
 CREATE TABLE jongo_demo_db.car (
-    cid INTEGER NOT NULL AUTO_INCREMENT, 
-    maker VARCHAR(50), 
+    cid INTEGER NOT NULL UNIQUE DEFAULT NEXTVAL('jongo_demo_db.car_id_sequence'),
+    maker VARCHAR(50),
     model VARCHAR(25), 
     year INTEGER, 
     fuel VARCHAR(25), 
@@ -66,21 +71,21 @@ CREATE TABLE jongo_demo_db.car (
 );
 
 CREATE TABLE jongo_demo_db.comments (
-    id INTEGER NOT NULL AUTO_INCREMENT, 
+    id INTEGER NOT NULL UNIQUE DEFAULT NEXTVAL('jongo_demo_db.comments_id_sequence'),
     car_id INTEGER, 
     car_comment VARCHAR(255),
     PRIMARY KEY (id)
 );
 
 CREATE TABLE jongo_demo_db.pictures (
-    id INTEGER NOT NULL AUTO_INCREMENT, 
+    id INTEGER NOT NULL UNIQUE DEFAULT NEXTVAL('jongo_demo_db.pictures_id_sequence'),
     car_id INTEGER, 
     picture VARCHAR(255),
     PRIMARY KEY (id)
 );
 
 CREATE TABLE jongo_demo_db.sales_stats (
-    id INTEGER NOT NULL AUTO_INCREMENT, 
+    id INTEGER NOT NULL UNIQUE DEFAULT NEXTVAL('jongo_demo_db.sales_stats_id_sequence'),
     year INTEGER, 
     month INTEGER, 
     sales INTEGER, 
@@ -89,7 +94,7 @@ CREATE TABLE jongo_demo_db.sales_stats (
 );
 
 CREATE TABLE jongo_demo_db.maker_stats (
-    id INTEGER NOT NULL AUTO_INCREMENT, 
+    id INTEGER NOT NULL UNIQUE DEFAULT NEXTVAL('jongo_demo_db.maker_stats_id_sequence'),
     year INTEGER, 
     month INTEGER, 
     maker VARCHAR(50), 
@@ -99,7 +104,7 @@ CREATE TABLE jongo_demo_db.maker_stats (
 );
 
 CREATE TABLE jongo_demo_db.empty (
-    id INTEGER NOT NULL AUTO_INCREMENT, 
+    id INTEGER NOT NULL, 
     name VARCHAR(50), 
     realname VARCHAR(50),
     PRIMARY KEY (id)
