@@ -57,38 +57,38 @@ public class SQLDialect implements Dialect{
         
         if(select.getLimitParam() == null){
             if(select.isAllColumns()){
-                b.append(select.getTable().getName()).append(".*");
+                b.append("t.*");
             }else{
                 String cols = StringUtils.join(select.getColumns(), ",");
-                b.append(cols);
+                b.append("t.").append(cols);
             }
-            b.append(" FROM ").append(select.getTable().toString());
+            b.append(" FROM ").append(select.getTable().toString()).append(" t");
             if(!select.isAllRecords()){
                 appendWhereClause(b,select);
             }
             if(select.getOrderParam() != null){
-                b.append(" ORDER BY ").append(select.getTable().getName()).append(".");
+                b.append(" ORDER BY t.");
                 b.append(select.getOrderParam().getColumn()).append(" ").append(select.getOrderParam().getDirection());
             }
         }else{
             b.append("* FROM ( SELECT ROW_NUMBER() OVER ( ORDER BY ");
             
             if(select.getOrderParam() == null){
-                b.append(select.getTable().getName()).append(".");
+                b.append("t.");
                 b.append(select.getTable().getPrimaryKey());
             }else{
-                b.append(select.getTable().getName()).append(".");
+                b.append("t.");
                 b.append(select.getOrderParam().getColumn()).append(" ").append(select.getOrderParam().getDirection());
             }
             
             b.append(" ) AS ROW_NUMBER, ");
             if(select.isAllColumns()){
-                b.append(select.getTable().getName()).append(".*");
+                b.append("t.*");
             }else{
                 String cols = StringUtils.join(select.getColumns(), ",");
-                b.append(cols);
+                b.append("t.").append(cols);
             }
-            b.append(" FROM ").append(select.getTable().toString());
+            b.append(" FROM ").append(select.getTable().toString()).append(" t");
             if(!select.isAllRecords()){
                 appendWhereClause(b,select);
             }
