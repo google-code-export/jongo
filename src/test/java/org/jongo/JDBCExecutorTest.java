@@ -59,9 +59,9 @@ public class JDBCExecutorTest {
     
     @Test
     public void testGet() throws SQLException{
-        Table t = new Table("my_demo_db", "user");
+        Table t = new Table("my_demo_db", "users");
         
-        // select * from user
+        // select * from users
         List<Row> rs = JDBCExecutor.get(new Select(t), true);
         assertEquals(2, rs.size());
         
@@ -73,27 +73,27 @@ public class JDBCExecutorTest {
         rs = JDBCExecutor.get(new Select(new Table("my_demo_db", "car", "cid")).setParameter(new SelectParam("cid", "0")), false);
         assertEquals(1, rs.size());
         
-        // select * from user where id = 0
+        // select * from users where id = 0
         rs = JDBCExecutor.get(new Select(t).setParameter(new SelectParam(t.getPrimaryKey(), "0")), false);
         assertEquals(1, rs.size());
         
-        // select * from user where name = bar
+        // select * from users where name = bar
         rs = JDBCExecutor.get(new Select(t).setParameter(new SelectParam("name", "bar")), true);
         assertEquals(1, rs.size());
         
-        // select birthday from user where name = bar
+        // select birthday from users where name = bar
         rs = JDBCExecutor.get(new Select(t).setParameter(new SelectParam("name", "bar")).addColumn("birthday"), true);
         assertEquals(1, rs.size());
         assertFalse(rs.get(0).getCells().containsKey("credit"));
         assertTrue(rs.get(0).getCells().containsKey("birthday"));
         
-        // select birthday from user where id = 1
+        // select birthday from users where id = 1
         rs = JDBCExecutor.get(new Select(t).addColumn("birthday").setParameter(new SelectParam("id", "1")), true);
         assertEquals(1, rs.size());
         assertFalse(rs.get(0).getCells().containsKey("credit"));
         assertTrue(rs.get(0).getCells().containsKey("birthday"));
         
-        // select birthday from user
+        // select birthday from users
         rs = JDBCExecutor.get(new Select(t).addColumn("birthday"), true);
         assertEquals(2, rs.size());
         assertFalse(rs.get(0).getCells().containsKey("credit"));
@@ -102,7 +102,7 @@ public class JDBCExecutorTest {
     
     @Test
     public void testAll() throws SQLException{
-        Table t = new Table("my_demo_db", "user");
+        Table t = new Table("my_demo_db", "users");
         List<UserMock> users = getTestValues();
         List<UserMock> createdusers = new ArrayList<UserMock>();
         for(UserMock u : users){
@@ -132,7 +132,7 @@ public class JDBCExecutorTest {
     
     @Test
     public void testInsert() throws SQLException{
-        Table t = new Table("my_demo_db", "user");
+        Table t = new Table("my_demo_db", "users");
         try { JDBCExecutor.insert(new Insert(t)); }catch(IllegalArgumentException e){ assertNotNull(e); }
         
         Map<String, String> params = UserMock.getRandomInstance().toMap();
@@ -153,7 +153,7 @@ public class JDBCExecutorTest {
     
     @Test
     public void testUpdate() throws SQLException{
-        Table t = new Table("my_demo_db", "user");
+        Table t = new Table("my_demo_db", "users");
         Select s = new Select(t).setParameter(new SelectParam(t.getPrimaryKey(), Operator.EQUALS, "0"));
         Row row = JDBCExecutor.get(s, false).get(0);
         assertEquals("0", row.getCells().get("id"));
@@ -228,7 +228,7 @@ public class JDBCExecutorTest {
     
     @Test
     public void testGetMetaData() throws JongoBadRequestException, SQLException{
-        Table t = new Table("my_demo_db", "user");
+        Table t = new Table("my_demo_db", "users");
         Select s = new Select(t);
         List<Row> rs = JDBCExecutor.getTableMetaData(s);
         assertEquals(6, rs.size());
