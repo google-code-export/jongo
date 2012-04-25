@@ -51,8 +51,8 @@ public class AppOnlineTests {
         List<UserMock> users = getTestValues();
         List<UserMock> createdusers = new ArrayList<UserMock>();
         for(UserMock user : users){
-            doTestResponse(client.doPOST("user", user.toNameValuePair()), Response.Status.CREATED, 1);
-            createdusers.addAll(doTestResponse(client.doGET("user/name/" + user.name), Response.Status.OK, 1));
+            doTestResponse(client.doPOST("users", user.toNameValuePair()), Response.Status.CREATED, 1);
+            createdusers.addAll(doTestResponse(client.doGET("users/name/" + user.name), Response.Status.OK, 1));
         }
         
         assertEquals(createdusers.size(), 3);
@@ -60,18 +60,18 @@ public class AppOnlineTests {
         for(UserMock user : createdusers){
             //generate a new user to update all the values on an existing user
             UserMock newMock = UserMock.getRandomInstance();
-            doTestResponse(client.doPUT("user/" + user.id, newMock.toJSON()), Response.Status.OK, 1);
+            doTestResponse(client.doPUT("users/" + user.id, newMock.toJSON()), Response.Status.OK, 1);
             UserMock comingUser = doTestResponse(client.doGET("user/" + user.id), Response.Status.OK, 1).get(0);
             assertEquals(newMock.name, comingUser.name);
             // now delete them
-            doTestResponse(client.doDELETE("user/" + user.id), Response.Status.OK, 1);
+            doTestResponse(client.doDELETE("users/" + user.id), Response.Status.OK, 1);
         }
     }
     
     public void testErrors(){
         doTestResponse(client.doGET("user/999"), Response.Status.NOT_FOUND, 0);
         // let's try an update/insert with invalid data
-        doTestResponse(client.doPUT("comments/0", "{\"comment\":\"this should fail!\""), Response.Status.BAD_REQUEST, 0);
+        doTestResponse(client.doPUT("comments/0", "{\"car_comment\":\"this should fail!\""), Response.Status.BAD_REQUEST, 0);
         doTestResponse(client.doPUT("pictures/0", "{}"), Response.Status.BAD_REQUEST, 0);
         doTestResponse(client.doPUT("pictures/0", ""), Response.Status.BAD_REQUEST, 0);
         doTestResponse(client.doPOST("pictures", "{}"), Response.Status.BAD_REQUEST, 0);
@@ -86,14 +86,14 @@ public class AppOnlineTests {
     }
     
     public void testDynamicFinders(){
-        doTestResponse(client.doGET("user/dynamic/findAllByAgeBetween?args=18&args=99"), Response.Status.OK, 2);
-        doTestResponse(client.doGET("user/dynamic/findAllByBirthdayBetween?args=1992-01-01&args=1992-12-31"), Response.Status.OK, 1);
+        doTestResponse(client.doGET("users/dynamic/findAllByAgeBetween?args=18&args=99"), Response.Status.OK, 2);
+        doTestResponse(client.doGET("users/dynamic/findAllByBirthdayBetween?args=1992-01-01&args=1992-12-31"), Response.Status.OK, 1);
         doTestResponse(client.doGET("car/dynamic/findAllByFuelIsNull?sort=cid"), Response.Status.OK, 1);
         doTestResponse(client.doGET("car/dynamic/findAllByFuelIsNotNull?sort=cid"), Response.Status.OK, 2);
-        doTestResponse(client.doGET("user/dynamic/findAllByCreditGreaterThan?args=0"), Response.Status.OK, 1);
-        doTestResponse(client.doGET("user/dynamic/findAllByCreditGreaterThanEquals?args=0"), Response.Status.OK, 2);
-        doTestResponse(client.doGET("user/dynamic/findAllByCreditLessThan?args=0"), Response.Status.NOT_FOUND, 0);
-        doTestResponse(client.doGET("user/dynamic/findAllByCreditLessThanEquals?args=0"), Response.Status.OK, 1);
+        doTestResponse(client.doGET("users/dynamic/findAllByCreditGreaterThan?args=0"), Response.Status.OK, 1);
+        doTestResponse(client.doGET("users/dynamic/findAllByCreditGreaterThanEquals?args=0"), Response.Status.OK, 2);
+        doTestResponse(client.doGET("users/dynamic/findAllByCreditLessThan?args=0"), Response.Status.NOT_FOUND, 0);
+        doTestResponse(client.doGET("users/dynamic/findAllByCreditLessThanEquals?args=0"), Response.Status.OK, 1);
         doTestResponse(client.doGET("sales_stats/dynamic/findAllByLast_updateBetween?args=2000-01-01T00:00:00.000Z&args=2000-06-01T23:55:00.000Z"), Response.Status.OK, 6);
     }
     
@@ -121,9 +121,9 @@ public class AppOnlineTests {
     }
     
     public void testSQLInject(){
-        doTestResponse(client.doPUT("user/0", "{\"name\":\"anything' OR 'x'='x'\"}"), Response.Status.OK, 1);
-        doTestResponse(client.doGET("user/name/bar%20AND%20age%3D30"), Response.Status.NOT_FOUND, 0);
-        doTestResponse(client.doGET("user/name/bar%3B%20DROP%20TABLE%20user%3B%20--"), Response.Status.NOT_FOUND, 0);
+        doTestResponse(client.doPUT("users/0", "{\"name\":\"anything' OR 'x'='x'\"}"), Response.Status.OK, 1);
+        doTestResponse(client.doGET("users/name/bar%20AND%20age%3D30"), Response.Status.NOT_FOUND, 0);
+        doTestResponse(client.doGET("users/name/bar%3B%20DROP%20TABLE%20user%3B%20--"), Response.Status.NOT_FOUND, 0);
     }
     
     public List<UserMock> getTestValues(){
