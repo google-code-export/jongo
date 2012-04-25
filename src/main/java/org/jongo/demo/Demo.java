@@ -81,7 +81,7 @@ public class Demo {
         update(run, "INSERT INTO car (maker, model, year, transmission, currentMarketValue, newValue) VALUES (?,?,?,?,?,?)", "FIAT", "500", 2010,"Manual", 19000, 23.000);
         update(run, insertCar, "BMW", "X5", 2011, "Diesel", "Automatic", 59000, 77000);
 
-        final String insertComment = "INSERT INTO comments (car_id, comment) VALUES (?,?)";
+        final String insertComment = "INSERT INTO comments (car_id, car_comment) VALUES (?,?)";
         update(run, insertComment, 0, "The Citroen C2 is a small car with a great attitude"); 
         update(run, insertComment, 0, "I Love my C2");
         update(run, insertComment, 2, "BMW's X5 costs too much for what it's worth. Checkout http://www.youtube.com/watch?v=Bg1TB4dRobY"); 
@@ -119,7 +119,7 @@ public class Demo {
 
         //load the sp
         update(run, "CREATE FUNCTION simpleStoredProcedure () RETURNS TINYINT RETURN 1");
-        update(run, "CREATE PROCEDURE insert_comment (IN car_id INTEGER, IN comment VARCHAR(255)) MODIFIES SQL DATA INSERT INTO comments VALUES (DEFAULT, car_id, comment)");
+        update(run, "CREATE PROCEDURE insert_comment (IN car_id INTEGER, IN car_comment VARCHAR(255)) MODIFIES SQL DATA INSERT INTO comments VALUES (DEFAULT, car_id, car_comment)");
         update(run, "CREATE PROCEDURE get_year_sales (IN in_year INTEGER, OUT out_total INTEGER) READS SQL DATA SELECT COUNT(sales) INTO out_total FROM sales_stats WHERE year = in_year");
         update(run, getCreateView());
 
