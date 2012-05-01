@@ -147,6 +147,11 @@ public class JDBCExecutorTest {
         params.put("name", "");
         assertEquals(1, JDBCExecutor.insert(new Insert(t).setColumns(params)));
         
+        // clean up
+        JDBCExecutor.delete(new Delete(t).setId("2"));
+        JDBCExecutor.delete(new Delete(t).setId("3"));
+        JDBCExecutor.delete(new Delete(t).setId("4"));
+        
         //test with a readonly table
         try { JDBCExecutor.insert(new Insert(new Table("my_demo_db", "maker")).addColumn("name", "RO")); }catch(SQLException e){ assertNotNull(e); }
     }
