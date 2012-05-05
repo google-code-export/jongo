@@ -21,7 +21,6 @@ package org.jongo.jdbc;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp.ConnectionFactory;
