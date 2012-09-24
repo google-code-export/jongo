@@ -241,10 +241,9 @@ public class DefaultFormatFilter implements ContainerResponseFilter, JongoFormat
                 .append("\"success\":")
                 .append(response.isSuccess())
                 .append(",\"message\":\"")
-                .append(response.getMessage())
-                .append("\"");
+                .append(response.getMessage());
             if( response.getSqlCode() != null && response.getSqlState() != null){
-                b.append(",\"SQLState\":\"").append(response.getSqlState());
+                b.append("\",\"SQLState\":\"").append(response.getSqlState());
                 b.append("\",\"SQLCode\":\"").append(response.getSqlCode());
             }
             b.append("\"}");
