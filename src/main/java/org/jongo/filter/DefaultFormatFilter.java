@@ -225,22 +225,27 @@ public class DefaultFormatFilter implements ContainerResponseFilter, JongoFormat
         String res;
         l.debug("Formatting Error Response");
         if(isXMLCompatible(mime)){
-            StringBuilder b = new StringBuilder("<response><success>");
-            b.append(response.isSuccess());b.append("</success><message>");
-            b.append(response.getMessage());b.append("</message>");
+            StringBuilder b = new StringBuilder("<response><success>")
+                .append(response.isSuccess())
+                .append("</success><message>")
+                .append(response.getMessage())
+                .append("</message>");
             if( response.getSqlCode() != null && response.getSqlState() != null){
-                b.append("<sqlState>");b.append(response.getSqlState());b.append("</sqlState>");
-                b.append("<sqlCode>");b.append(response.getSqlCode());b.append("</sqlCode>");
+                b.append("<sqlState>").append(response.getSqlState()).append("</sqlState>");
+                b.append("<sqlCode>").append(response.getSqlCode()).append("</sqlCode>");
             }
             b.append("</response>");
             res = b.toString();
         }else{
-            StringBuilder b = new StringBuilder("{");
-            b.append("\"success\":");b.append(response.isSuccess());
-            b.append(",\"message\":\"");b.append(response.getMessage());
+            StringBuilder b = new StringBuilder("{")
+                .append("\"success\":")
+                .append(response.isSuccess())
+                .append(",\"message\":\"")
+                .append(response.getMessage())
+                .append("\"");
             if( response.getSqlCode() != null && response.getSqlState() != null){
-                b.append(",\"SQLState\":\"");b.append(response.getSqlState());
-                b.append("\",\"SQLCode\":\"");b.append(response.getSqlCode());
+                b.append(",\"SQLState\":\"").append(response.getSqlState());
+                b.append("\",\"SQLCode\":\"").append(response.getSqlCode());
             }
             b.append("\"}");
             res = b.toString();
@@ -267,12 +272,12 @@ public class DefaultFormatFilter implements ContainerResponseFilter, JongoFormat
             final String columnname = row.getCells().get("columnName");
             final String columntype = row.getCells().get("columnType");
             final String columnsize = row.getCells().get("columnSize");
-            StringBuilder b = new StringBuilder(columnname);
-            b.append("=");
-            b.append(columntype);
-            b.append("(");
-            b.append(columnsize);
-            b.append(")");
+            StringBuilder b = new StringBuilder(columnname)
+                .append("=")
+                .append(columntype)
+                .append("(")
+                .append(columnsize)
+                .append(")");
             args.add(b.toString());
         }
         String res = StringUtils.join(args, ";");
