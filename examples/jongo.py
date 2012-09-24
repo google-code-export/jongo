@@ -66,29 +66,28 @@ class Response(object):
         self.count = 0
         self.code = 0 
         self.data = []
-        self.error = ""
         self.message = ""
 
     def __str__(self):
         return '{response}'
 
-    def callback(self, buf):
-        self.raw = json.loads(buf)
-        self.code = self.raw['code']
+    def callback(self, response):
+        self.code = response.status
         if self.code == 200 or self.code == 201:
-            self.process_success()
+            self.process_success(response)
         else:
-            self.process_failure()
+            self.process_failure(response)
 
-    def process_success(self):
+    def process_success(self, response):
         self.success = True
-        self.count = self.raw['count']
-        for i in self.raw['response']:
+        self.raw = json.loads(response.read())
+        self.count = response.getheader('Content-Count')
+        for i in self.raw['cells']:
             self.data.append(i)
 
-    def process_failure(self):
+    def process_failure(self, response):
         self.success = False
-        self.error = self.raw['error']
+        self.raw = json.loads(response.read())
         self.message = self.raw['message']
 
 class Request(object):
@@ -96,7 +95,7 @@ class Request(object):
         self.url = url
         self.path = path
         self.method = method
-        self.headers = {"Content-type": "application/json"}
+        self.headers = {"Content-type": "application/json", "Accept": "application/json"}
         self.response = Response()
         if type(params) is str:
             self.params = params
@@ -107,7 +106,7 @@ class Request(object):
         conn = httplib.HTTPConnection(self.url)
         # print "%s\t%s\t\t\t\t %s" % (self.method, self.path, self.params)
         conn.request(self.method, self.path, self.params, self.headers)
-        self.response.callback(conn.getresponse().read())
+        self.response.callback(conn.getresponse())
 
 class Page(object):
     def __init__(self, size=25):
@@ -127,6 +126,17 @@ class Sort(object):
         me = { "sort":self.column, "dir":self.direction }
         return urllib.urlencode(me)
 
+class DynamicFinder(object):
+    def __init__(self, finder=None, *args):
+        self.finder = finder
+        self.args = args
+
+    def get_path_params(self):
+        params = "/dynamic/%s?" % self.finder
+        for arg in self.args:
+            params += "args=%s&" % arg
+        return params
+
 class ProxyError(Exception):
     def __init__(self, message, error):
         self.message = "%s: %s" % (message, error)
@@ -139,7 +149,7 @@ class Proxy(object):
         self.url = url
         self.database = database
         self.table = table
-        self.path = "/%s/%s" % (database, table)
+        self.path = "/jongo/%s/%s" % (database, table)
         self.model = model
         self.page = Page(pageSize)
         self.sort = None
@@ -148,13 +158,15 @@ class Proxy(object):
         request = Request(self.url, self.path, 'POST', model_instance.toJSON())
         request.perform()
         if not request.response.success:
-            raise ProxyError(request.response.message, request.response.error)
+            raise ProxyError(request.response.message, request.response.code)
 
-    def read_all(self):
+    def read_all(self, dynamicFinder=None):
         data = []
         path = "%s?%s" % (self.path, self.page.get_path_params())
         if self.sort:
             path = "%s?%s&%s" % (self.path, self.page.get_path_params(), self.sort.get_path_params())
+        if dynamicFinder:
+            path = "%s%s" % (self.path, dynamicFinder.get_path_params())
         request = Request(self.url, path)
         request.perform()
         if request.response.success:
@@ -163,7 +175,7 @@ class Proxy(object):
                 model_instance.map_response_data(response)
                 data.append(model_instance)
         else:
-            raise ProxyError(request.response.message, request.response.error)
+            raise ProxyError(request.response.message, request.response.code)
         return data
 
     def read(self, id):
@@ -181,14 +193,14 @@ class Proxy(object):
         request = Request(self.url, instance_path, 'PUT', instance.toJSON())
         request.perform()
         if not request.response.success:
-            raise ProxyError(request.response.message, request.response.error)
+            raise ProxyError(request.response.message, request.response.code)
 
     def delete(self, instance):
         instance_path = "%s/%d" % (self.path, instance.id)
         request = Request(self.url, instance_path, 'DELETE')
         request.perform()
         if not request.response.success:
-            raise ProxyError(request.response.message, request.response.error)
+            raise ProxyError(request.response.message, request.response.code)
 
     def query(self, query_name, *args):
         data = []
@@ -274,8 +286,8 @@ class JongoStore(object):
     def filter(self, f):
         return filter(f, self.data)
 
-    def load(self):
-        self.data = self.proxy.read_all()
+    def load(self, dynamicFinder=None):
+        self.data = self.proxy.read_all(dynamicFinder)
 
     def sync(self):
         for instance in self.data:
